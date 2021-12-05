@@ -1,4 +1,11 @@
 <template>
+  <common-research-widget
+    :scenario-a="scenarioA"
+    :scenario-b="scenarioB"
+    :farm-a="scenarioA.farms[0]"
+    :farm-b="scenarioB.farms[0]"
+    @update-list-by-id="onUpdateListByID"
+  />
   <epic-research-widget
     :scenario-a="scenarioA"
     :scenario-b="scenarioB"
@@ -12,10 +19,12 @@ import { defineComponent, PropType } from 'vue';
 //
 import { Backup } from 'lib'
 import EpicResearchWidget from '@/components/EpicResearchWidget.vue';
+import CommonResearchWidget from '@/components/CommonResearchWidget.vue';
 
 export default defineComponent({
   components: {
     EpicResearchWidget,
+    CommonResearchWidget,
   },
 
   props: {

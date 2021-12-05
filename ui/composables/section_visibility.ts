@@ -11,8 +11,13 @@ export function useSectionVisibility(): {
   toggleSectionVisibility: (section: string) => void;
 } {
   const sectionVisibility = ref(loadSectionVisibilityFromLocalStorage());
-  const isVisibleSection = (section: string) => {
-    return sectionVisibility.value[section] !== false;
+  const isVisibleSection = (section: string, initial) => {
+    const val = sectionVisibility.value[section]
+    if (val === undefined) {
+      sectionVisibility.value[section] = (initial !== false)
+      return (initial !== false)
+    }
+    return val !== false;
   };
   const toggleSectionVisibility = (section: string) => {
     const current = sectionVisibility.value[section] !== false;
@@ -30,9 +35,9 @@ function loadSectionVisibilityFromLocalStorage(): SectionVisibility {
   try {
     const visibility: SectionVisibility = {};
     for (const [key, val] of Object.entries(JSON.parse(encoded))) {
-      if (val === false) {
-        visibility[key] = val;
-      }
+      // if (val === false) {
+      visibility[key] = val;
+      // }
     }
     return visibility;
   } catch (e) {
