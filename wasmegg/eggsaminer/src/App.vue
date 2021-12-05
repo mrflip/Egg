@@ -1,7 +1,7 @@
 <template>
   <the-nav-bar active-entry-id="eggsaminer" />
 
-  <div class="max-w-5xl w-full px-4 pb-4 xl:px-0 mx-auto">
+  <div class="w-full px-4 pb-4 mx-auto items-center">
     <h1 class="mx-4 mt-4 mb-2 text-center text-lg leading-6 font-medium text-gray-900">
       Stats Eggsaminer
     </h1>

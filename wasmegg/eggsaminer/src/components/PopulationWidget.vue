@@ -1,22 +1,16 @@
 <template>
-
   <collapsible-section
-    section-title="Epic Research"
-    :visible="isVisibleSection('epic_research')"
+    section-title="Common Research"
+    :visible="isVisibleSection('common_research', false)"
     class="my-2 text-sm"
-    @toggle="toggleSectionVisibility('epic_research')"
+    @toggle="toggleSectionVisibility('common_research')"
     >
-    <stats-matrix
-      :rows="rows"
-      :data-headers="dataHeaders"
-      class="my-2"
-      @update-rowval="updateLevel"
-      />
+    {{ scenarioA.farms[0] }}
     <p>Note that amount paid may not reflect discounts or any changes to the game</p>
   </collapsible-section>
 
   <!-- <collapsible-section section-title="Raw Data" :visible="isVisibleSection('raw_data')" class="my-2 text-sm" @toggle="toggleSectionVisibility('raw_data')"> -->
-  <!--   {{ scenarioA.game.epicResearch }} -->
+  <!--   {{ scenarioA.farms[0].commonResearch }} -->
   <!-- </collapsible-section> -->
 </template>
 
@@ -53,7 +47,7 @@ export default defineComponent({
     const { isVisibleSection, toggleSectionVisibility } = useSectionVisibility(false);
 
     const dataHeaders = _.map([
-      'Level A', 'Level B', 'Max Levels', 'Effect?', 'Action', 'Stacks', 'Next Price', 'Paid', 'Remaining',
+      'Level A', 'Level B', 'Max Levels', 'Effect', 'Stacks?', 'Next Price', 'Paid', 'Remaining', 'Action',
     ], (text) => ({ text }))
 
     return {
@@ -66,44 +60,44 @@ export default defineComponent({
 
   computed: {
     rows() {
-      const { epicResearch } = this.scenarioA.game
-      console.warn('regenerating EpicResearchWidget', epicResearch)
-      return _.compact(_.map(epicResearch, ({ id, level }) => {
+      const { commonResearch } = this.scenarioA.farms[0]
 
-        if (/^(epic_silo_quality|warp_shift)$/.test(id)) { return null }
+      console.warn('regenerating CommonResearchWidget', commonResearch)
+      return _.compact(_.map(commonResearch, ({ id, level }) => {
 
-        const alt = this.scenarioB.game.epicResearch.find(({ id:elID }) => (elID === id))?.level
+        const alt = this.scenarioB.farms[0].commonResearch.find(({ id:elID }) => (elID === id))?.level
 
         const info = researches[id]
         if (! info) { return { title: _.startCase(id), values: [level, alt, id, '(Problem understanding this research)'] } }
         const {
-          name:title, levels, categories, description, effect_type, per_level, levels_compound, prices, // serial_id, type, id,
+          name:title, levels, categories, description, effect_type, per_level, levels_compound, prices,
+          // serial_id, type, id,
         } = info
 
         const paidPriceTot = sum(prices.slice(0, level))
         const leftPriceTot = sum(prices.slice(level))
 
-        const nextPrice = numOrQuiet(prices[level], '--',   level < levels)
-        const paidPrice = numOrQuiet(paidPriceTot,  '0',    paidPriceTot > 0)
-        const leftPrice = numOrQuiet(leftPriceTot,  'done', leftPriceTot > 0)
+        const nextPrice = numOrQuiet(prices[level], '-',   level < levels,  { basey: true })
+        const paidPrice = numOrQuiet(paidPriceTot,  0,    paidPriceTot > 0, { basey: true })
+        const leftPrice = numOrQuiet(leftPriceTot,  0, leftPriceTot > 0,    { basey: true })
 
         const symbol = effectSymbols[effect_type] || effect_type
         const effect = `${symbol} ${per_level}`
 
         const stacks = isStacking(levels_compound)
 
-        const action = categories ? _.startCase(categories) : epicResearchActions[id]
+        const action = 'hi' // categories ? _.startCase(categories) : commonResearchActions[id]
 
         const cells = [
           // { val: level },
           { val: alt,     class: ['text-center'] },
           { val: levels,  class: ['text-center'] },
           { val: effect },
-          { val: action },
           { val: stacks },
           nextPrice,
           paidPrice,
           leftPrice,
+          { val: action },
           // { val: id },
           // { val: sum(prices) },
           // { val: description },
@@ -116,42 +110,17 @@ export default defineComponent({
   },
 
   methods: {
-    updateLevel({ row, val }) {
+    updateCommonResearchLevel({ row, val }) {
       const max = row.info.levels
       const level = _.clamp(val, 0, max)
-      // console.warn('updateLevel', row, max, level)
-      this.$emit('update-list-by-id', { path: 'scenarioA.game.epicResearch', id: row.id, updates: { level } })
+      console.warn('updateCommonResearchLevel', row, max, level)
+      this.$emit('update-list-by-id', { path: 'scenarioA.farms[0].commonResearch', id: row.id, updates: { level } })
     },
   },
 
 });
 
 const researches = _.mapKeys(researchesData, 'id')
-
-const epicResearchActions = {
-  hold_to_hatch:           	"Hold to Hatch Rate",
-  epic_hatchery:           	"Hatchery Refill Rate",
-  epic_internal_incubators:	"Internal Hatchery Rate",
-  video_doubler_time:      	"Duration of Video 2x Bonus",
-  epic_clucking:           	"Running Chicken Bonus",
-  epic_multiplier:         	"Running Chicken Bonus",
-  cheaper_contractors:     	"Housing Cost Reduction",
-  bust_unions:             	"Vehicle Cost Reduction",
-  cheaper_research:        	"Research Cost Reduction",
-  silo_capacity:           	"Silo Away Time",
-  int_hatch_sharing:       	"Internal Hatchery Sharing",
-  int_hatch_calm:          	"Internal Hatchery Rate",
-  accounting_tricks:       	"Farm Valuation",
-  soul_eggs:               	"Soul Egg Bonus",
-  prestige_bonus:          	"Prestige Reward",
-  drone_rewards:           	"Drone Rewards",
-  epic_egg_laying:         	"Egg Laying Rate",
-  transportation_lobbyist: 	"Shipping Capacity",
-  prophecy_bonus:          	"Prophecy Egg Bonus",
-  hold_to_research:        	"Hold to Research Rate",
-  afx_mission_time:        	"FTL Mission Time",
-  afx_mission_capacity:    	"Mission Capacity",
-};
 
 const effectSymbols = { additive: '+', multiplicative: '×' }
 
@@ -169,7 +138,7 @@ function numOrQuiet(val, replacement, test, attrs) {
   if (test) {
     return { val, class: ['text-right'], ...attrs }
   }
-  return { val: replacement, class: quietClass, ...attrs }
+  return { val: replacement, class: quietClass }
 }
 
 </script>

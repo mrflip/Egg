@@ -28,10 +28,10 @@
               <tr
                 v-for="row in rows"
                 :key="row.id"
-                v-tippy="{ content: row.tip }"
                 class="bg-white"
               >
                 <td
+                  v-tippy="{ content: row.tip }"
                   class="px-2 py-1 whitespace-nowrap text-sm font-medium text-gray-600"
                 >
                   {{ row.title }}
@@ -43,15 +43,16 @@
                     @input="$emit('update-rowval', { row, val: $event.target?.value, ev: $event })"
                     type="number"
                     class="w-28 text-right"
-                    >
+                    />
                 </td>
                 <td
                   v-for="(cell, idx) in row.cells"
                   :key="`cell-${idx}`"
                   :class="cell.class"
                   class="px-8 py-1 whitespace-nowrap text-sm font-medium text-gray-900"
-                >
-                  {{ cell.val }}
+                  >
+                  <base-e-i-value v-if="cell.basey" :value="cell.val" />
+                  <span v-else>{{ cell.val }}</span>
                 </td>
                 <td class="px-2 py-1 whitespace-nowrap text-sm font-medium text-gray-900">&nbsp;</td>
                 <td class="px-2 py-1 whitespace-nowrap text-sm font-medium text-gray-900">&nbsp;</td>
@@ -69,6 +70,9 @@
 <script lang="ts">
 // import _ from "lodash";
 import { defineComponent, PropType } from 'vue';
+import BaseEIValue      from '@/components/BaseEIValue.vue';
+import BaseEIValueInput from 'ui/components/BaseEIValueInput.vue';
+
 
 type Header = {
   text: string;
@@ -85,11 +89,11 @@ type Row = {
   cells: Cell[];
 };
 
-type Input = {
-
-}
-
 export default defineComponent({
+  components: {
+    BaseEIValue,
+    BaseEIValueInput,
+  },
   props: {
     titleHeader: {
       type: Object as PropType<Header>,
