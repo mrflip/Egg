@@ -24,7 +24,6 @@
           <table class="min-w divide-y divide-gray-200 tabular-nums">
             <tbody>
 
-
               <scenario-input-row
                 :row="rows.population"
                 @update-rowval="updatePopulation"
@@ -51,8 +50,7 @@
   </collapsible-section>
 
   <collapsible-section section-title="Raw Data" :visible="isVisibleSection('raw_data')" class="my-2 text-sm" @toggle="toggleSectionVisibility('raw_data')">
-    {{ farmA.activeBoosts }}
-    {{ Object.keys(farmA) }}
+    {{ scenarioA.farms[0] }}
   </collapsible-section>
 </template>
 
@@ -123,7 +121,7 @@ export default defineComponent({
 
   computed: {
     rows() {
-      const { numChickens, habPopulation } = this.farmA
+      const { numChickens } = this.farmA
       const { numChickens:populationB } = this.farmB
       console.warn('regenerating Population')
       const population = numChickens
@@ -132,11 +130,7 @@ export default defineComponent({
         populationInput: String(this.farmA.lastStepTime),
         population: {
           id: 'population', title: 'Population', basey: true, val: population,
-          cells: [
-            // { id: 'a', val: population, basey: true },
-            { id: 'b', val: populationB, basey: true },
-            { val: habPopulation.join(' / ') },
-          ] },
+          cells: [{ id: 'a', val: population, basey: true }, { id: 'b', val: populationB, basey: true }] },
       }
     },
   },

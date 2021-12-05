@@ -1,7 +1,13 @@
 <template>
-  <common-research-widget
+  <population-widget
     :scenario-a="scenarioA"
     :scenario-b="scenarioB"
+    :farm-a="scenarioA.farms[0]"
+    :farm-b="scenarioB.farms[0]"
+    @update-list-by-id="onUpdateListByID"
+    @update-value="onUpdateValue"
+  />
+  <common-research-widget
     :farm-a="scenarioA.farms[0]"
     :farm-b="scenarioB.farms[0]"
     @update-list-by-id="onUpdateListByID"
@@ -20,11 +26,13 @@ import { defineComponent, PropType } from 'vue';
 import { Backup } from 'lib'
 import EpicResearchWidget from '@/components/EpicResearchWidget.vue';
 import CommonResearchWidget from '@/components/CommonResearchWidget.vue';
+import PopulationWidget from '@/components/PopulationWidget.vue';
 
 export default defineComponent({
   components: {
     EpicResearchWidget,
     CommonResearchWidget,
+    PopulationWidget,
   },
 
   props: {
@@ -54,6 +62,10 @@ export default defineComponent({
       console.warn('onUpdateListByID', path, id, updates, list)
       const idx = list.findIndex(({ id:elID }) => (elID === id))
       list[idx] = _.merge({}, list[idx], updates)
+    },
+
+    onUpdateValue({ path, val }) {
+      _.set(this, path, val)
     },
   },
 });
