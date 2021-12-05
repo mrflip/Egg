@@ -1,4 +1,3 @@
-<!-- This example requires Tailwind CSS v2.0+ -->
 <template>
   <div class="flex flex-col">
     <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -54,9 +53,6 @@
                   <base-e-i-value v-if="cell.basey" :value="cell.val" />
                   <span v-else>{{ cell.val }}</span>
                 </td>
-                <td class="px-2 py-1 whitespace-nowrap text-sm font-medium text-gray-900">&nbsp;</td>
-                <td class="px-2 py-1 whitespace-nowrap text-sm font-medium text-gray-900">&nbsp;</td>
-                <td class="px-2 py-1 whitespace-nowrap text-sm font-medium text-gray-900">&nbsp;</td>
               </tr>
 
             </tbody>
@@ -72,7 +68,6 @@
 import { defineComponent, PropType } from 'vue';
 import BaseEIValue      from '@/components/BaseEIValue.vue';
 import BaseEIValueInput from 'ui/components/BaseEIValueInput.vue';
-
 
 type Header = {
   text: string;
@@ -94,6 +89,7 @@ export default defineComponent({
     BaseEIValue,
     BaseEIValueInput,
   },
+
   props: {
     titleHeader: {
       type: Object as PropType<Header>,
@@ -108,5 +104,8 @@ export default defineComponent({
       required: true,
     },
   },
+
+  emits: ['update-rowval'],
+
 });
 </script>
