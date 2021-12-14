@@ -30,8 +30,8 @@
 <script lang="ts">
 import { computed, defineComponent, PropType, toRefs } from 'vue';
 
-import { Builds } from '@/lib';
-import { effects } from '@/effects';
+import { Builds } from 'artifact-sandbox/lib';
+import { effects } from 'artifact-sandbox/effects';
 
 export default defineComponent({
   props: {

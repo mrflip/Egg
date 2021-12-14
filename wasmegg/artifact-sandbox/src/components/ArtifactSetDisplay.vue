@@ -35,7 +35,7 @@
       <template v-for="(artifact, artifactIndex) in build.artifacts" :key="artifactIndex">
         <div
           v-if="artifact.nonEmpty()"
-          class="text-sm text-center p-2 pt-2.5 bg-dark-23 rounded-lg shadow-inner leading-snug space-y-1"
+          class="text-sm text-center p-2 pt-2.5 rounded-lg shadow-inner leading-snug space-y-1"
         >
           <div class="uppercase">
             <span>{{ artifact.name }}</span
@@ -130,7 +130,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import ArtifactDisplay from '@/components/ArtifactDisplay.vue';
+import ArtifactDisplay from 'artifact-sandbox/components/ArtifactDisplay.vue';
 
 import {
   aggregateStoneSettingCost,
@@ -138,7 +138,7 @@ import {
   Config,
   formatPercentage,
   stoneSettingCost,
-} from '@/lib';
+} from 'artifact-sandbox/lib';
 import { iconURL } from 'lib';
 
 export default defineComponent({

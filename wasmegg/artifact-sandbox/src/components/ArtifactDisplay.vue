@@ -29,8 +29,8 @@
 import { defineComponent } from 'vue';
 
 import { iconURL } from 'lib';
-import { Artifact, Config } from '@/lib';
-import { ArtifactSpec } from '@/lib/proto';
+import { Artifact, Config } from 'artifact-sandbox/lib';
+import { ArtifactSpec } from 'artifact-sandbox/lib/proto';
 
 export default defineComponent({
   props: {

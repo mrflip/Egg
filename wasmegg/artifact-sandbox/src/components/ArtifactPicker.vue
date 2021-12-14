@@ -24,8 +24,8 @@
 <script lang="ts">
 import { computed, defineComponent, PropType, ref, toRefs, watch } from 'vue';
 
-import { ArtifactBuildProps, artifactFromId } from '@/lib';
-import ArtifactPickerItemSelect from '@/components/ArtifactPickerItemSelect.vue';
+import { ArtifactBuildProps, artifactFromId } from 'artifact-sandbox/lib';
+import ArtifactPickerItemSelect from 'artifact-sandbox/components/ArtifactPickerItemSelect.vue';
 
 export default defineComponent({
   components: {
