@@ -1,59 +1,49 @@
 <template>
-  <collapsible-section
-    section-title="Population"
-    :visible="isVisibleSection('population', true)"
-    class="my-2 text-sm"
-    @toggle="toggleSectionVisibility('population')"
-    >
+<collapsible-section
+  section-title="Population"
+  :visible="isVisibleSection('population', true)"
+  class="my-2 text-sm"
+  @toggle="toggleSectionVisibility('population')"
+  >
 
-    <div class="mt-1 relative rounded-md shadow-sm">
-      <e-i-value-input
-        v-model:raw="populationInput"
-        v-model:value="farmA.numChickens"
-        base-class="pl-10 pt-2.5 pb-2"
-        />
-      <e-i-value :value="farmA.numChickens" />
-      {{ populationInput }}
-      chx: {{ farmA.numChickens }}
-    </div>
-
-  <div class="flex flex-col">
-    <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-      <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-        <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
-          <table class="min-w divide-y divide-gray-200 tabular-nums">
-            <tbody>
-
-
-              <scenario-input-row
-                :row="rows.population"
-                @update-rowval="updatePopulation"
-                />
-
-              <tr
-                class="bg-white"
-              >
-                <td
-                  v-tippy="{ content: 'hi!' }"
-                  class="px-2 py-1 whitespace-nowrap text-sm font-medium text-gray-600"
-                >
-                  Title
-                </td>
-              </tr>
-
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+  <div class="mt-1 relative rounded-md shadow-sm">
+    <e-i-value-input
+      v-model:raw="populationInput"
+      v-model:value="farmA.numChickens"
+      base-class="pl-10 pt-2.5 pb-2"
+      />
+    <e-i-value :value="farmA.numChickens" />
+    {{ populationInput }}
+    chx: {{ farmA.numChickens }}
   </div>
 
-  </collapsible-section>
+  <scenario-table>
 
-  <collapsible-section section-title="Raw Data" :visible="isVisibleSection('raw_data')" class="my-2 text-sm" @toggle="toggleSectionVisibility('raw_data')">
-    {{ farmA.activeBoosts }}
-    {{ Object.keys(farmA) }}
-  </collapsible-section>
+    <tbody>
+    <scenario-input-row
+      :row="rows.population"
+      @update-rowval="updatePopulation"
+      />
+
+    <tr
+      class="bg-white"
+      >
+      <td
+        v-tippy="{ content: 'hi!' }"
+        class="px-2 py-1 whitespace-nowrap text-sm font-medium text-gray-600"
+        >
+        Title
+      </td>
+    </tr>
+    </tbody>
+
+  </scenario-table>
+</collapsible-section>
+
+<collapsible-section section-title="Raw Data" :visible="isVisibleSection('raw_data')" class="my-2 text-sm" @toggle="toggleSectionVisibility('raw_data')">
+  {{ farmA.activeBoosts }}
+  {{ Object.keys(farmA) }}
+</collapsible-section>
 </template>
 
 <script lang="ts">
@@ -69,12 +59,14 @@ import EIValueInput from '@/components/EIValueInput.vue';
 import researchesData from '@/researches.json';
 import StatsMatrix from '@/components/StatsMatrix.vue';
 import ScenarioInputRow from '@/components/ScenarioInputRow.vue'
+import ScenarioTable from '@/components/ScenarioTable.vue'
 
 export default defineComponent({
   components: {
     CollapsibleSection,
     // StatsMatrix,
     ScenarioInputRow,
+    ScenarioTable,
     EIValue,
     EIValueInput,
   },

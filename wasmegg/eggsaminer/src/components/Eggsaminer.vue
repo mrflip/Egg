@@ -1,5 +1,4 @@
 <template>
-<main>
   <p>{{ nickname }}</p>
   <p class="text-sm">
     Last synced to server:
@@ -33,9 +32,7 @@
 
   <simulator
     :backup="backup"
-  />
-
-</main>
+    />
 </template>
 
 <script lang="ts">

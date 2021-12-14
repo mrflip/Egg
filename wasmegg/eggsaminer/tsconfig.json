@@ -15,7 +15,8 @@
     "skipLibCheck": true,
     "paths": {
       "@/*": ["src/*"],
-      "ui/*": ["../../ui/*"]
+      "ui/*": ["../../ui/*"],
+      "artifact-sandbox/*": ["../../wasmegg/artifact-sandbox/src/*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"]
