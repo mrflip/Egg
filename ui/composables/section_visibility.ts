@@ -7,11 +7,11 @@ type SectionVisibility = { [section: string]: boolean };
 const SECTION_VISIBILITY_LOCALSTORAGE_KEY = 'sectionVisibility';
 
 export function useSectionVisibility(): {
-  isVisibleSection: (section: string) => boolean;
+  isVisibleSection: (section: string, initial?: boolean) => boolean;
   toggleSectionVisibility: (section: string) => void;
 } {
   const sectionVisibility = ref(loadSectionVisibilityFromLocalStorage());
-  const isVisibleSection = (section: string, initial) => {
+  const isVisibleSection = (section: string, initial?: boolean) => {
     const val = sectionVisibility.value[section]
     if (val === undefined) {
       sectionVisibility.value[section] = (initial !== false)
@@ -36,7 +36,7 @@ function loadSectionVisibilityFromLocalStorage(): SectionVisibility {
     const visibility: SectionVisibility = {};
     for (const [key, val] of Object.entries(JSON.parse(encoded))) {
       // if (val === false) {
-      visibility[key] = val;
+      visibility[key] = val as boolean;
       // }
     }
     return visibility;
