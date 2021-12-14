@@ -60,7 +60,7 @@ export const valueWithOptionalUnitRegExpExact = new RegExp(
 );
 
 export function parseValueWithUnit(s: string, unitRequired = true): number | null {
-  const match = s.match(unitRequired ? valueWithUnitRegExpExact : valueWithOptionalUnitRegExpExact);
+  const match = s.replace(',', '').match(unitRequired ? valueWithUnitRegExpExact : valueWithOptionalUnitRegExpExact);
   if (match === null) {
     return null;
   }
