@@ -1,7 +1,9 @@
 <template>
   <the-nav-bar active-entry-id="eggsaminer" />
 
-  <div class="w-full px-4 pb-4 mx-auto items-center">
+  <main class="full px-4 pb-4 mx-auto items-center">
+      <div class="mt-4">
+
     <h1 class="mx-4 mt-4 mb-2 text-center text-lg leading-6 font-medium text-gray-900">
       Stats Eggsaminer
     </h1>
@@ -11,12 +13,16 @@
     <!-- Use a key to recreate on data loading -->
     <base-error-boundary v-if="playerId" :key="`${playerId}:${refreshId}`">
       <suspense>
+
+        <!-- Action starts here -->
         <template #default>
           <eggsaminer :player-id="playerId" />
         </template>
+
         <template #fallback>
           <base-loading />
         </template>
+
       </suspense>
     </base-error-boundary>
 
@@ -27,14 +33,15 @@
     </template>
 
     <div class="text-sm mt-4 bg-gray-200 px-5 py-10 text-center">
-  This tool is based on the Egg project by @mk2
-  (<a href="https://github.com/fanaticscripter/Egg">Github link</a>),
-  but is not maintained by them. You may find their other tools at
-  <a href="https://wasmegg.netlify.app/">wasmegg.netlify.app</a>).
+      This tool is based on the Egg project by @mk2
+      (<a href="https://github.com/fanaticscripter/Egg">Github link</a>),
+      but is not maintained by them. You may find their other tools at
+      <a href="https://wasmegg.netlify.app/">wasmegg.netlify.app</a>).
     </div>
   </div>
+  </main>
 
-  <the-calculator-wrapper />
+  <!-- <the-calculator-wrapper /> -->
 </template>
 
 <script lang="ts">

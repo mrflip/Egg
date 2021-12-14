@@ -6,11 +6,10 @@ type Effect = {
   multiplier: number;
 };
 
-// Only effects on the enlightenment farm are considered here.
-function gatherRelevantEffects(artifacts: Artifact[], afxIds: ei.ArtifactSpec.Name[]): Effect[] {
+function gatherRelevantEffects(artifacts: Artifact[], afxIds: ei.ArtifactSpec.Name[], isEnlightenment = true): Effect[] {
   const deltas = [];
   for (const artifact of artifacts) {
-    const effectMultiplier = artifact.clarityEffect;
+    const effectMultiplier = isEnlightenment ? artifact.clarityEffect : 1.0;
     if (effectMultiplier === 0) {
       continue;
     }

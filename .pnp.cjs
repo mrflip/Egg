@@ -4530,18 +4530,22 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/lunr", "npm:2.3.4"],\
             ["@types/uuid", "npm:8.3.4"],\
             ["@vitejs/plugin-vue", "virtual:1d85737f3c4c6d64cdcc83bce0a0eb6c8b960111a7197e3a8efd8405c9d0d5462d4c1125e6febfc56c6c322ad56cf0c3e2438e78a591f18ef973fe91510506c6#npm:1.10.2"],\
+            ["@vitejs/plugin-vue-jsx", "npm:1.3.10"],\
             ["@vue/compiler-sfc", "npm:3.2.36"],\
             ["autoprefixer", "virtual:840db99354aa74c3f6824418161949ba97616d48d0c0298beb541e7b0e8da4e24026586e5b9fde0652a179716d69d5d38e156e11ba264c6191a70aade081c1a4#npm:10.4.7"],\
+            ["copy-text-to-clipboard", "npm:3.0.1"],\
             ["dayjs", "npm:1.11.2"],\
-            ["js-sha256", "npm:0.9.0"],\
+            ["html2canvas", "npm:1.4.1"],\
             ["lib", "workspace:lib"],\
             ["lodash", "npm:4.17.21"],\
             ["postcss", "npm:8.4.14"],\
             ["protobufjs", "npm:6.11.3"],\
+            ["scroll-into-view-if-needed", "npm:2.2.29"],\
             ["tailwindcss", "virtual:1d85737f3c4c6d64cdcc83bce0a0eb6c8b960111a7197e3a8efd8405c9d0d5462d4c1125e6febfc56c6c322ad56cf0c3e2438e78a591f18ef973fe91510506c6#npm:2.2.19"],\
             ["typescript", "patch:typescript@npm%3A4.7.2#~builtin<compat/typescript>::version=4.7.2&hash=7ad353"],\
             ["vite", "virtual:840db99354aa74c3f6824418161949ba97616d48d0c0298beb541e7b0e8da4e24026586e5b9fde0652a179716d69d5d38e156e11ba264c6191a70aade081c1a4#npm:2.9.9"],\
             ["vue", "npm:3.2.36"],\
+            ["vue-router", "virtual:840db99354aa74c3f6824418161949ba97616d48d0c0298beb541e7b0e8da4e24026586e5b9fde0652a179716d69d5d38e156e11ba264c6191a70aade081c1a4#npm:4.0.15"],\
             ["vue-tippy", "virtual:840db99354aa74c3f6824418161949ba97616d48d0c0298beb541e7b0e8da4e24026586e5b9fde0652a179716d69d5d38e156e11ba264c6191a70aade081c1a4#npm:6.0.0-alpha.58"],\
             ["vue-tsc", "virtual:1d85737f3c4c6d64cdcc83bce0a0eb6c8b960111a7197e3a8efd8405c9d0d5462d4c1125e6febfc56c6c322ad56cf0c3e2438e78a591f18ef973fe91510506c6#npm:0.28.10"]\
           ],\

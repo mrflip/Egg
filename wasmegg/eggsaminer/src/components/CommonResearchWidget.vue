@@ -1,10 +1,17 @@
 <template>
+
   <collapsible-section
     section-title="Common Research"
     :visible="isVisibleSection('common_research', false)"
     class="my-2 text-sm"
     @toggle="toggleSectionVisibility('common_research')"
     >
+
+    <scenario-input-row
+      :row="{ title: 'Daily Event Research Discount', val: this.scenarioA.gameev.research_discount }"
+      @update-rowval="updateCommonResearchDiscount"
+      />
+
     <stats-matrix
       :rows="rows"
       :data-headers="dataHeaders"
@@ -25,6 +32,7 @@ import _ from "lodash";
 import { useSectionVisibility } from 'ui/composables/section_visibility';
 import { defineComponent, PropType } from 'vue'; // toRefs
 import CollapsibleSection from '@/components/CollapsibleSection.vue';
+import ScenarioInputRow from '@/components/ScenarioInputRow.vue'
 //
 import researchesData from '@/researches.json';
 import StatsMatrix from '@/components/StatsMatrix.vue';
@@ -33,9 +41,18 @@ export default defineComponent({
   components: {
     CollapsibleSection,
     StatsMatrix,
+    ScenarioInputRow,
   },
 
   props: {
+    scenarioA: {
+      type: Object as PropType<Backup>,
+      required: true,
+    },
+    scenarioB: {
+      type: Object as PropType<Backup>,
+      required: true,
+    },
     farmA: {
       type: Object as PropType<Backup>,
       required: true,
@@ -46,7 +63,7 @@ export default defineComponent({
     },
   },
 
-  emits: ['update-list-by-id'],
+  emits: ['update-list-by-id', 'update-value'],
 
   setup() {
     const { isVisibleSection, toggleSectionVisibility } = useSectionVisibility(false);
@@ -120,6 +137,10 @@ export default defineComponent({
       const level = _.clamp(val, 0, max)
       console.warn('updateCommonResearchLevel', row, max, level)
       this.$emit('update-list-by-id', { path: 'scenarioA.farms[0].commonResearch', id: row.id, updates: { level } })
+    },
+
+    updateCommonResearchDiscount({ val }) {
+      this.$emit('update-value', { path: 'scenarioA.gameev.research_discount', val })
     },
   },
 
