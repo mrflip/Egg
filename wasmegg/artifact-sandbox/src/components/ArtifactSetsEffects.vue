@@ -333,9 +333,9 @@ import {
   shippingCapacityMultiplier,
   soulEggsGainMultiplier,
   soulEggsGainWithEmptyHabsStartMultiplier,
-} from '@/lib';
-import { effects } from '@/effects';
-import ArtifactSetsEffectsRow from '@/components/ArtifactSetsEffectsRow.vue';
+} from 'artifact-sandbox/lib';
+import { effects } from 'artifact-sandbox/effects';
+import ArtifactSetsEffectsRow from 'artifact-sandbox/components/ArtifactSetsEffectsRow.vue';
 
 export default defineComponent({
   components: {

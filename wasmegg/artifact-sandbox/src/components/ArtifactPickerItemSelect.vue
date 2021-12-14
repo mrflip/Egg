@@ -28,7 +28,7 @@ import {
   searchStones,
   stoneIdToStone,
   stones,
-} from '@/lib';
+} from 'artifact-sandbox/lib';
 
 import { GenericBaseSelectFilterable } from 'ui/components/BaseSelectFilterable.vue';
 
@@ -68,17 +68,17 @@ function rarityFgClass(afxRarity: Rarity): string {
 </script>
 
 <style lang="postcss" scoped>
-:deep(.Select__input) {
-  @apply bg-dark-20 border-gray-500;
-}
+/* :deep(.Select__input) { */
+/*   @apply bg-dark-20 border-gray-500; */
+/* } */
 
-:deep(.Select__dropdown) {
-  @apply bg-dark-20 text-gray-50 border border-gray-500;
-}
+/* :deep(.Select__dropdown) { */
+/*   @apply bg-dark-20 text-gray-50 border border-gray-500; */
+/* } */
 
-:deep(.Select__input::placeholder) {
-  @apply text-gray-50;
-}
+/* :deep(.Select__input::placeholder) { */
+/*   @apply text-gray-50; */
+/* } */
 
 :deep(.text-rare) {
   color: hsl(209, 100%, 70%);
