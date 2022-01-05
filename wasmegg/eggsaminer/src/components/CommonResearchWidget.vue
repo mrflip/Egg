@@ -8,7 +8,7 @@
     >
 
     <scenario-input-row
-      :row="{ title: 'Daily Event Research Discount', val: this.scenarioA.gameev.research_discount }"
+      :row="{ title: 'Daily Event Research Discount', val: scenarioA.gameev.research_discount }"
       @update-rowval="updateCommonResearchDiscount"
       />
 
@@ -69,7 +69,7 @@ export default defineComponent({
     const { isVisibleSection, toggleSectionVisibility } = useSectionVisibility(false);
 
     const dataHeaders = _.map([
-      'Level A', 'Level B', 'Max Levels', 'Effect', 'Action', 'Stacks?', 'Next Price', 'Paid', 'Remaining',
+      'Level A', 'Level B', 'Max Levels', 'Effect', 'Per Level', 'Total', 'Stacks?', 'Next Price', 'Paid', 'Remaining',
     ], (text) => ({ text }))
 
     return {
@@ -99,12 +99,14 @@ export default defineComponent({
         const paidPriceTot = sum(prices.slice(0, level))
         const leftPriceTot = sum(prices.slice(level))
 
-        const nextPrice = numOrQuiet(prices[level], '-',   level < levels,  { basey: true })
-        const paidPrice = numOrQuiet(paidPriceTot,  0,    paidPriceTot > 0, { basey: true })
-        const leftPrice = numOrQuiet(leftPriceTot,  0, leftPriceTot > 0,    { basey: true })
+        const nextPrice = numOrQuiet(prices[level], '-', level < levels,  { basey: true })
+        const paidPrice = numOrQuiet(paidPriceTot,   0,  paidPriceTot > 0, { basey: true })
+        const leftPrice = numOrQuiet(leftPriceTot,   0,  leftPriceTot > 0,    { basey: true })
 
         const symbol = effectSymbols[effect_type] || effect_type
-        const effect = `${symbol} ${per_level}`
+        const amount_pl = `${symbol} ${per_level}`
+
+        const amount_tot = 1
 
         const stacks = isStacking(levels_compound)
 
@@ -114,8 +116,9 @@ export default defineComponent({
           // { val: level },
           { val: alt,     class: ['text-center'] },
           { val: levels,  class: ['text-center'] },
-          { val: effect },
           { val: action },
+          { val: amount_pl },
+          { val: amount_tot },
           { val: stacks },
           nextPrice,
           paidPrice,

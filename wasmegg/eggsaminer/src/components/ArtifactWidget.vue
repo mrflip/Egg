@@ -6,12 +6,13 @@
   class="my-2 text-sm"
   @toggle="toggleSectionVisibility('artifacts')"
   >
+  {{ build.artifacts[0] }}
+  {{ Object.keys(build.artifacts[0]) }}
 
   <artifact-set-display :build="build" :config="config" />
 
   <artifact-set-builder
     v-model:build="build"
-    @update:build="updateBuild"
     />
 
 </collapsible-section>
@@ -96,59 +97,16 @@ export default defineComponent({
 
     console.warn('ArtifactWidget', build.artifacts)
 
-    return { build, artifacts: build.artifacts, config }
+    return { build, config }
   },
 
   methods: {
 
-    updateBuild(newBuild) {
-
-      console.warn(newBuild)
-    },
+    // updateBuild(newBuild) {
+    //   console.warn('updateBuild', newBuild)
+    //   this.build.artifacts = newBuild.artifacts
+    // },
   },
-
-  // setup(props) {
-  //   // const router = useRouter();
-  //   // const { serializedBuilds } = toRefs(props);
-  //
-  //   // Use a key to work around the problem of artifact-set-builder and
-  //   // configurator not updating upon manual hashchange.
-  //   // const key = ref(0);
-  //   // const builds = ref(deserializeBuilds(serializedBuilds.value));
-  //   // const showShareSheet = ref(false);
-  //   // const showFootnotesWhenSharing = ref(true);
-  //
-  //   watch(
-  //     builds,
-  //     () => {
-  //       window.history.replaceState(
-  //         {},
-  //         '',
-  //         router.resolve({
-  //           name: 'builds',
-  //           params: { serializedBuilds: builds.value.serialize() },
-  //         }).href
-  //       );
-  //     },
-  //     {
-  //       deep: true,
-  //     }
-  //   );
-  //
-  //   onBeforeRouteUpdate(to => {
-  //     // On manual hashchange, flip key to rerender everything.
-  //     const newSerializedBuilds = to.params.serializedBuilds as string | undefined;
-  //     builds.value = deserializeBuilds(newSerializedBuilds);
-  //     key.value = 1 - key.value;
-  //   });
-  //
-  //   return {
-  //     key,
-  //     builds,
-  //     showShareSheet,
-  //     showFootnotesWhenSharing,
-  //   };
-  // },
 
 });
 
