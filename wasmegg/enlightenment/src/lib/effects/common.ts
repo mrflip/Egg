@@ -6,10 +6,10 @@ type Effect = {
   multiplier: number;
 };
 
-function gatherRelevantEffects(artifacts: Artifact[], afxIds: ei.ArtifactSpec.Name[], isEnlightenment = true): Effect[] {
+function gatherRelevantEffects(artifacts: Artifact[], afxIds: ei.ArtifactSpec.Name[]): Effect[] {
   const deltas = [];
   for (const artifact of artifacts) {
-    const effectMultiplier = isEnlightenment ? artifact.clarityEffect : 1.0;
+    const effectMultiplier = artifact.clarityEffect;
     if (effectMultiplier === 0) {
       continue;
     }
