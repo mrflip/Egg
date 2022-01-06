@@ -15,6 +15,7 @@
     "fontfaceobserver": "^2.1.0",
     "lib": ">=0.1.0",
     "localforage": "^1.10.0",
+    "lodash": "^4.17.21",
     "safari-14-idb-fix": "^3.0.0",
     "vue": "^3.2.20",
     "vue-tippy": "^6.0.0-alpha.35"

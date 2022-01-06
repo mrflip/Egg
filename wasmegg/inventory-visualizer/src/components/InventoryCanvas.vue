@@ -23,6 +23,45 @@
       </div>
     </div>
 
+    <div class="flex justify-center mb-3" :class="loading ? 'opacity-50' : null">
+      <div class="space-y-0.5">
+        <div class="relative flex items-start">
+          <div class="flex items-center h-5">
+            <input
+              id="transpose"
+              v-model="transpose"
+              name="transpose"
+              type="checkbox"
+              class="focus:ring-0 focus:ring-green-500 h-4 w-4 text-green-600 border-gray-300 rounded"
+              :disabled="loading"
+            />
+          </div>
+          <div class="ml-2 text-sm">
+            <label for="transpose" class="text-gray-600">Horizonal first</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-center mb-3" :class="loading ? 'opacity-50' : null">
+      <div>
+        <div class="flex items-center h-10">
+          <input
+            id="itemsPerCol"
+            :value.number="ipc"
+            @input="itemsPerCol = $event.target.value"
+            name="itemsPerCol"
+            type="number"
+            :disabled="loading"
+            class="m-2 w-20"
+          />
+          <div class="ml-2 text-sm">
+            <label for="itemsPerCol" class="text-gray-600">Items per column (blank for squarish)</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <template v-if="loading">
       <p class="max-w-lg mx-auto text-center text-sm text-gray-500">
         Generating image, this might take a while...<br />
@@ -71,6 +110,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, PropType, ref, toRefs, watch } from 'vue';
+import * as _ from "lodash";
 
 import { getLocalStorage, Inventory, setLocalStorage } from 'lib';
 import { drawInventory, generateInventoryGrid } from '@/lib';
@@ -88,12 +128,26 @@ const rarerItemsFirst = ref(getLocalStorage(RARER_ITEMS_FIRST_LOCALSTORAGE_KEY) 
 watch(rarerItemsFirst, () =>
   setLocalStorage(RARER_ITEMS_FIRST_LOCALSTORAGE_KEY, rarerItemsFirst.value)
 );
+const TRANSPOSE_LOCALSTORAGE_KEY = 'transposeImage';
+const transpose = ref(getLocalStorage(TRANSPOSE_LOCALSTORAGE_KEY) === 'true');
+watch(transpose, () =>
+  setLocalStorage(TRANSPOSE_LOCALSTORAGE_KEY, transpose.value)
+);
+const ITEMS_PER_COL_LOCALSTORAGE_KEY = 'itemsPerCol';
+const itemsPerCol = ref(getLocalStorage(ITEMS_PER_COL_LOCALSTORAGE_KEY) || '');
+watch(itemsPerCol, () =>
+  setLocalStorage(ITEMS_PER_COL_LOCALSTORAGE_KEY, limitItemsPerCol(itemsPerCol.value))
+);
 const grid = computed(() =>
   generateInventoryGrid(inventory.value as Inventory, {
     rarerItemsFirst: rarerItemsFirst.value,
+    forceItemsPerCol: itemsPerCol.value,
+    transpose: transpose.value,
   })
 );
 const inventoryIsEmpty = computed(() => grid.value.length === 0);
+const limitItemsPerCol = (val) => (Number(val) > 0 ? _.clamp(val, 1, 200) : '');
+const ipc = computed(() => limitItemsPerCol(itemsPerCol.value));
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 const loading = ref(false);
@@ -109,7 +163,7 @@ const regenerate = async () => {
   blockedByFirefoxPrivacyResistFingerprinting.value = true;
   error.value = null;
   try {
-    const result = await drawInventory(canvasRef.value!, grid.value);
+    const result = await drawInventory(canvasRef.value!, grid.value, itemsPerCol.value, transpose.value);
     imageURL.value = result.url;
     width.value = result.width;
     height.value = result.height;
@@ -125,7 +179,8 @@ const regenerate = async () => {
 };
 
 onMounted(regenerate);
-watch(grid, regenerate, { deep: true });
+const regenerateDebounced = _.debounce(regenerate, 600)
+watch(grid, regenerateDebounced, { deep: true })
 
 async function imageIsEmpty(url: string): Promise<boolean> {
   const image = new Image();

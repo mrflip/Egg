@@ -17,7 +17,9 @@ const FONT_SIZE = 27;
 
 export async function drawInventory(
   el: HTMLCanvasElement,
-  grid: InventoryGrid
+  grid: InventoryGrid,
+  forceItemsPerCol: number,
+  transpose = true,
 ): Promise<{
   url: string;
   width: number;
@@ -32,11 +34,12 @@ export async function drawInventory(
   const ctx = el.getContext('2d')!;
 
   const numItems = grid.length;
-  const numItemsPerRow = Math.ceil(Math.sqrt(numItems));
-  const numItemsPerCol = Math.ceil(numItems / numItemsPerRow);
-  const targetWidth = GRID_SQUARE_SIZE * numItemsPerRow + GRID_SQUARE_GAP * (numItemsPerRow + 1);
+  const numItemsPerCol = Number(forceItemsPerCol) > 0 ? Number(forceItemsPerCol) : Math.ceil(Math.sqrt(numItems));
+  const numItemsPerRow = Math.ceil(numItems / numItemsPerCol);
+  let targetWidth = GRID_SQUARE_SIZE * numItemsPerRow + GRID_SQUARE_GAP * (numItemsPerRow + 1);
+  let targetHeight = GRID_SQUARE_SIZE * numItemsPerCol + GRID_SQUARE_GAP * (numItemsPerCol + 1);
+  if (transpose) { [targetWidth, targetHeight] = [targetHeight, targetWidth] }
   const width = targetWidth * scale;
-  const targetHeight = GRID_SQUARE_SIZE * numItemsPerCol + GRID_SQUARE_GAP * (numItemsPerCol + 1);
   const height = targetHeight * scale;
   el.width = width;
   el.height = height;
@@ -55,8 +58,10 @@ export async function drawInventory(
   for (let i = 0; i < numItems; i++) {
     const gridItem = grid[i];
 
-    const row = Math.floor(i / numItemsPerCol);
-    const col = i % numItemsPerCol;
+    let row = Math.floor(i / numItemsPerCol);
+    let col = i % numItemsPerCol;
+    if (transpose) { [row, col] = [col, row] }
+
     const left = (row * GRID_SQUARE_SIZE + (row + 1) * GRID_SQUARE_GAP) * scale;
     const top = (col * GRID_SQUARE_SIZE + (col + 1) * GRID_SQUARE_GAP) * scale;
     const right = left + GRID_SQUARE_SIZE * scale;
