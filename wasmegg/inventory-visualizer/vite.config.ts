@@ -18,5 +18,14 @@ export default defineConfig({
   },
   server: {
     host: true,
+
+    proxy: {
+      "^/eggincassets/.*": {
+        target: "https://eggincassets.tcl.sh",
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/eggincassets/, ""),
+      },
+    },
   },
 });
