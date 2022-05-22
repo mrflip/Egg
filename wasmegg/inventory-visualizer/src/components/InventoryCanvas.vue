@@ -49,7 +49,7 @@
           <input
             id="itemsPerCol"
             :value.number="ipc"
-            @input="itemsPerCol = $event.target.value"
+            @input="itemsPerCol = ($event.target as any).value"
             name="itemsPerCol"
             type="number"
             :disabled="loading"
@@ -141,12 +141,12 @@ watch(itemsPerCol, () =>
 const grid = computed(() =>
   generateInventoryGrid(inventory.value as Inventory, {
     rarerItemsFirst: rarerItemsFirst.value,
-    forceItemsPerCol: itemsPerCol.value,
+    forceItemsPerCol: Number(itemsPerCol.value),
     transpose: transpose.value,
   })
 );
 const inventoryIsEmpty = computed(() => grid.value.length === 0);
-const limitItemsPerCol = (val) => (Number(val) > 0 ? _.clamp(val, 1, 200) : '');
+const limitItemsPerCol = (val: number | string) => (Number(val) > 0 ? _.clamp(Number(val), 1, 200) : '');
 const ipc = computed(() => limitItemsPerCol(itemsPerCol.value));
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
@@ -163,7 +163,7 @@ const regenerate = async () => {
   blockedByFirefoxPrivacyResistFingerprinting.value = true;
   error.value = null;
   try {
-    const result = await drawInventory(canvasRef.value!, grid.value, itemsPerCol.value, transpose.value);
+    const result = await drawInventory(canvasRef.value!, grid.value, Number(itemsPerCol.value), transpose.value);
     imageURL.value = result.url;
     width.value = result.width;
     height.value = result.height;
