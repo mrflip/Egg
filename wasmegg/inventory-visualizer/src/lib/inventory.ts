@@ -67,8 +67,27 @@ const afxIdOrder = [
 
 export function generateInventoryGrid(
   inventory: Inventory,
-  options?: { rarerItemsFirst: boolean, forceItemsPerCol?: number, transpose: boolean }
+  options?: {
+    rarerItemsFirst: boolean,
+    forceItemsPerCol?: number,
+    transpose: boolean,
+    artifactLayoutLeg: number,
+    artifactLayoutEpic: number,
+    artifactLayoutRare: number,
+    artifactLayoutCommon: number,
+  }
 ): InventoryGrid {
+  const rarityMap = {
+    [Rarity.LEGENDARY]: Math.floor(options.artifactLayoutLeg),
+    [Rarity.EPIC]: Math.floor(options.artifactLayoutEpic) + 0.1,
+    [Rarity.RARE]: Math.floor(options.artifactLayoutRare) + 0.2,
+    other: Math.floor(options.artifactLayoutCommon) + 0.3,
+  }
+
+  function remapRarity(rarity) {
+    return rarityMap[rarity] || rarityMap.other
+  }
+
   const inventoryItems = [...inventory.items].sort((i1, i2) => {
     const cmp = afxIdOrder.indexOf(i1.afxId) - afxIdOrder.indexOf(i2.afxId);
     if (cmp !== 0) {
@@ -128,7 +147,7 @@ export function generateInventoryGrid(
     }
   }
   if (options?.rarerItemsFirst) {
-    grid.sort((i1, i2) => i2.afxRarity - i1.afxRarity);
+    grid.sort((i1, i2) => remapRarity(i1.afxRarity) - remapRarity(i2.afxRarity));
   }
   return grid;
 }
