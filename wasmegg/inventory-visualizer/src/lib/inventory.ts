@@ -67,7 +67,7 @@ const afxIdOrder = [
 
 export function generateInventoryGrid(
   inventory: Inventory,
-  options?: { rarerItemsFirst: boolean }
+  options?: { rarerItemsFirst: boolean, forceItemsPerCol?: number, transpose: boolean }
 ): InventoryGrid {
   const inventoryItems = [...inventory.items].sort((i1, i2) => {
     const cmp = afxIdOrder.indexOf(i1.afxId) - afxIdOrder.indexOf(i2.afxId);
