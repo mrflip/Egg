@@ -3,6 +3,7 @@
     <p class="max-w-lg mx-auto text-center">Looks like you don't have any artifact :(</p>
   </template>
   <template v-else>
+
     <div class="flex justify-center mb-3" :class="loading ? 'opacity-50' : null">
       <div class="space-y-0.5">
         <div class="relative flex items-start">
@@ -48,7 +49,7 @@
         <div class="flex items-center h-10">
           <input
             id="itemsPerCol"
-            :value.number="ipc"
+            :value.number="itemsPerColNum"
             @input="itemsPerCol = ($event.target as any).value"
             name="itemsPerCol"
             type="number"
@@ -104,7 +105,35 @@
         </div>
       </div>
     </template>
+
     <canvas ref="canvasRef" class="hidden"></canvas>
+
+    <div class="flex justify-center my-3" :class="loading ? 'opacity-50' : null">
+      <div>
+        <div class="flex items-center h-16">
+          <div class="ml-1 text-sm"><label for="artifactLayoutLeg" class="text-gray-600">
+              Sort Order By Type<br/>Lower = Lefter
+          </label></div>
+          <div class="flex-col ml-2">
+            <input class="mx-2 my-1 w-20 border"  id="artifactLayoutLeg" v-model="artifactLayoutLeg" name="artifactLayoutLeg" :disabled="loading" type="number" />
+            <div   class="text-sm text-center"><label for="artifactLayoutLeg" class="text-gray-600">Legendary</label></div>
+          </div>
+          <div class="flex-col ml-2">
+            <input class="mx-2 my-1 w-20 border"  id="artifactLayoutEpic" v-model="artifactLayoutEpic" name="artifactLayoutEpic" :disabled="loading" type="number" />
+            <div   class="text-sm text-center"><label for="artifactLayoutEpic" class="text-gray-600">Epic</label></div>
+          </div>
+          <div class="flex-col ml-2">
+            <input class="mx-2 my-1 w-20 border" id="artifactLayoutRare" v-model="artifactLayoutRare" name="artifactLayoutRare" :disabled="loading" type="number" />
+            <div   class="text-sm text-center"><label for="artifactLayoutRare" class="text-gray-600">Rare</label></div>
+          </div>
+          <div class="flex-col ml-2">
+            <input class="mx-2 my-1 w-20 border" id="artifactLayoutCommon" v-model="artifactLayoutCommon" name="artifactLayoutCommon" :disabled="loading" type="number" />
+            <div   class="text-sm text-center"><label for="artifactLayoutCommon" class="text-gray-600">Common</label></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </template>
 </template>
 
@@ -133,21 +162,53 @@ const transpose = ref(getLocalStorage(TRANSPOSE_LOCALSTORAGE_KEY) === 'true');
 watch(transpose, () =>
   setLocalStorage(TRANSPOSE_LOCALSTORAGE_KEY, transpose.value)
 );
+
 const ITEMS_PER_COL_LOCALSTORAGE_KEY = 'itemsPerCol';
 const itemsPerCol = ref(getLocalStorage(ITEMS_PER_COL_LOCALSTORAGE_KEY) || '');
 watch(itemsPerCol, () =>
   setLocalStorage(ITEMS_PER_COL_LOCALSTORAGE_KEY, limitItemsPerCol(itemsPerCol.value))
 );
+
+const ARTIFACT_LAYOUT_LEG_LOCALSTORAGE_KEY = 'artifactLayoutLeg';
+const artifactLayoutLeg = ref(getLocalStorage(ARTIFACT_LAYOUT_LEG_LOCALSTORAGE_KEY) || 10);
+watch(artifactLayoutLeg, () =>
+  setLocalStorage(ARTIFACT_LAYOUT_LEG_LOCALSTORAGE_KEY, Math.floor(Number(artifactLayoutLeg.value)))
+);
+
+const ARTIFACT_LAYOUT_EPIC_LOCALSTORAGE_KEY = 'artifactLayoutEpic';
+const artifactLayoutEpic = ref(getLocalStorage(ARTIFACT_LAYOUT_EPIC_LOCALSTORAGE_KEY) || 20);
+watch(artifactLayoutEpic, () =>
+  setLocalStorage(ARTIFACT_LAYOUT_EPIC_LOCALSTORAGE_KEY, Number(artifactLayoutEpic.value))
+);
+
+const ARTIFACT_LAYOUT_RARE_LOCALSTORAGE_KEY = 'artifactLayoutRare';
+const artifactLayoutRare = ref(getLocalStorage(ARTIFACT_LAYOUT_RARE_LOCALSTORAGE_KEY) || 30);
+watch(artifactLayoutRare, () =>
+  setLocalStorage(ARTIFACT_LAYOUT_RARE_LOCALSTORAGE_KEY, Math.floor(Number(artifactLayoutRare.value)))
+);
+
+const ARTIFACT_LAYOUT_COMMON_LOCALSTORAGE_KEY = 'artifactLayoutCommon';
+const artifactLayoutCommon = ref(getLocalStorage(ARTIFACT_LAYOUT_COMMON_LOCALSTORAGE_KEY) || 100);
+watch(artifactLayoutCommon, () =>
+  setLocalStorage(ARTIFACT_LAYOUT_COMMON_LOCALSTORAGE_KEY, Math.floor(Number(artifactLayoutCommon.value)))
+);
+
+const itemsPerColNum = computed(() => limitItemsPerCol(itemsPerCol.value));
+//
 const grid = computed(() =>
   generateInventoryGrid(inventory.value as Inventory, {
     rarerItemsFirst: rarerItemsFirst.value,
     forceItemsPerCol: Number(itemsPerCol.value),
+    artifactLayoutLeg:    Number(artifactLayoutLeg.value),
+    artifactLayoutEpic:   Number(artifactLayoutEpic.value),
+    artifactLayoutRare:   Number(artifactLayoutRare.value),
+    artifactLayoutCommon: Number(artifactLayoutCommon.value),
     transpose: transpose.value,
   })
 );
+
 const inventoryIsEmpty = computed(() => grid.value.length === 0);
 const limitItemsPerCol = (val: number | string) => (Number(val) > 0 ? _.clamp(Number(val), 1, 200) : '');
-const ipc = computed(() => limitItemsPerCol(itemsPerCol.value));
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 const loading = ref(false);
@@ -179,7 +240,7 @@ const regenerate = async () => {
 };
 
 onMounted(regenerate);
-const regenerateDebounced = _.debounce(regenerate, 600)
+const regenerateDebounced = _.debounce(regenerate, 1000)
 watch(grid, regenerateDebounced, { deep: true })
 
 async function imageIsEmpty(url: string): Promise<boolean> {
