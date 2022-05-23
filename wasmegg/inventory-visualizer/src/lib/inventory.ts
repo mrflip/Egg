@@ -1,4 +1,5 @@
 import { Artifact, ei, Inventory, Stone } from 'lib';
+import { Orderables } from '@/lib';
 import Name = ei.ArtifactSpec.Name;
 import Level = ei.ArtifactSpec.Level;
 import Rarity = ei.ArtifactSpec.Rarity;
@@ -65,25 +66,31 @@ const afxIdOrder = [
   Name.LUNAR_STONE_FRAGMENT,
 ];
 
+export function defaultLayoutOrder() {
+  return {
+    Legendary: { name: "Legendary", weight: 1 },
+    Epic:      { name: "Epic",      weight: 2 },
+    Rare:      { name: "Rare",      weight: 3 },
+    Common:    { name: "Common",    weight: 4 },
+  }
+}
+
 export function generateInventoryGrid(
   inventory: Inventory,
   options?: {
     rarerItemsFirst: boolean,
     forceItemsPerCol?: number,
     transpose: boolean,
-    artifactLayoutLeg: number,
-    artifactLayoutEpic: number,
-    artifactLayoutRare: number,
-    artifactLayoutCommon: number,
+    layoutOrder: Orderables,
   }
 ): InventoryGrid {
+  const { layoutOrder = defaultLayoutOrder() } = options
   const rarityMap = {
-    [Rarity.LEGENDARY]: Math.floor(options.artifactLayoutLeg),
-    [Rarity.EPIC]: Math.floor(options.artifactLayoutEpic) + 0.1,
-    [Rarity.RARE]: Math.floor(options.artifactLayoutRare) + 0.2,
-    other: Math.floor(options.artifactLayoutCommon) + 0.3,
+    [Rarity.LEGENDARY]: layoutOrder.Legendary.weight,
+    [Rarity.EPIC]: layoutOrder.Epic.weight,
+    [Rarity.RARE]: layoutOrder.Rare.weight,
+    other: layoutOrder.Common.weight,
   }
-
   function remapRarity(rarity) {
     return rarityMap[rarity] || rarityMap.other
   }
