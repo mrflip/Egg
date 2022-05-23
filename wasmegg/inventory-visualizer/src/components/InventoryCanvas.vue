@@ -4,7 +4,8 @@
   </template>
   <template v-else>
 
-    <div class="flex justify-center mb-3" :class="loading ? 'opacity-50' : null">
+    <div class="flex items-center justify-center mb-3" :class="loading ? 'opacity-50' : null">
+
       <div class="space-y-0.5">
         <div class="relative flex items-start">
           <div class="flex items-center h-5">
@@ -22,10 +23,8 @@
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="flex justify-center mb-3" :class="loading ? 'opacity-50' : null">
-      <div class="space-y-0.5">
+      <div class="ml-4 space-y-0.5">
         <div class="relative flex items-start">
           <div class="flex items-center h-5">
             <input
@@ -42,10 +41,8 @@
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="flex justify-center mb-3" :class="loading ? 'opacity-50' : null">
-      <div>
+      <div class="ml-4">
         <div class="flex items-center h-10">
           <input
             id="itemsPerCol"
@@ -57,7 +54,7 @@
             class="m-2 w-20"
           />
           <div class="ml-2 text-sm">
-            <label for="itemsPerCol" class="text-gray-600">Items per column (blank for squarish)</label>
+            <label for="itemsPerCol" class="text-gray-600">Items per {{ transpose ? 'row' : 'column' }} (blank for squarish)</label>
           </div>
         </div>
       </div>
@@ -82,19 +79,6 @@
           address bar and look for a picture icon which you can click and grant "Extract canvas
           data" permission to this site. Reload after granting the permission.
         </p>
-        <div class="flex items-center justify-center">
-          <a
-            :href="imageURL"
-            download="inventory.png"
-            class="inline-flex items-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-          >
-            Download Image
-          </a>
-        </div>
-        <p class="max-w-lg mx-auto text-center text-xs text-gray-500">
-          If the download button doesn't work, you may also right click / long press on the image
-          below to use your browser's image saving function.
-        </p>
         <div class="overflow-scroll">
           <img
             :src="imageURL"
@@ -108,31 +92,21 @@
 
     <canvas ref="canvasRef" class="hidden"></canvas>
 
-    <div class="flex justify-center my-3" :class="loading ? 'opacity-50' : null">
-      <div>
-        <div class="flex items-center h-16">
-          <div class="ml-1 text-sm"><label for="artifactLayoutLeg" class="text-gray-600">
-              Sort Order By Type<br/>Lower = Lefter
-          </label></div>
-          <div class="flex-col ml-2">
-            <input class="mx-2 my-1 w-20 border"  id="artifactLayoutLeg" v-model="artifactLayoutLeg" name="artifactLayoutLeg" :disabled="loading" type="number" />
-            <div   class="text-sm text-center"><label for="artifactLayoutLeg" class="text-gray-600">Legendary</label></div>
-          </div>
-          <div class="flex-col ml-2">
-            <input class="mx-2 my-1 w-20 border"  id="artifactLayoutEpic" v-model="artifactLayoutEpic" name="artifactLayoutEpic" :disabled="loading" type="number" />
-            <div   class="text-sm text-center"><label for="artifactLayoutEpic" class="text-gray-600">Epic</label></div>
-          </div>
-          <div class="flex-col ml-2">
-            <input class="mx-2 my-1 w-20 border" id="artifactLayoutRare" v-model="artifactLayoutRare" name="artifactLayoutRare" :disabled="loading" type="number" />
-            <div   class="text-sm text-center"><label for="artifactLayoutRare" class="text-gray-600">Rare</label></div>
-          </div>
-          <div class="flex-col ml-2">
-            <input class="mx-2 my-1 w-20 border" id="artifactLayoutCommon" v-model="artifactLayoutCommon" name="artifactLayoutCommon" :disabled="loading" type="number" />
-            <div   class="text-sm text-center"><label for="artifactLayoutCommon" class="text-gray-600">Common</label></div>
-          </div>
-        </div>
+    <template v-if="! loading">
+      <div class="flex items-center justify-center">
+        <a
+          :href="imageURL"
+          download="inventory.png"
+          class="inline-flex items-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+        >
+          Download Image
+        </a>
       </div>
-    </div>
+      <p class="max-w-lg mx-auto text-center text-xs text-gray-500">
+        If the download button doesn't work, you may also right click / long press on the image
+        below to use your browser's image saving function.
+      </p>
+    </template>
 
   </template>
 </template>
@@ -142,18 +116,22 @@ import { computed, onMounted, PropType, ref, toRefs, watch } from 'vue';
 import * as _ from "lodash";
 
 import { getLocalStorage, Inventory, setLocalStorage } from 'lib';
-import { drawInventory, generateInventoryGrid } from '@/lib';
+import { drawInventory, generateInventoryGrid, Orderables } from '@/lib';
 
 const props = defineProps({
   inventory: {
     type: Object as PropType<Inventory>,
     required: true,
   },
+  layoutOrder: {
+    type: Object as PropType<Orderables>,
+    required: true,
+  },
 });
-const { inventory } = toRefs(props);
+const { inventory, layoutOrder } = toRefs(props);
 
 const RARER_ITEMS_FIRST_LOCALSTORAGE_KEY = 'rarerItemsFirst';
-const rarerItemsFirst = ref(getLocalStorage(RARER_ITEMS_FIRST_LOCALSTORAGE_KEY) === 'true');
+const rarerItemsFirst = ref((getLocalStorage(RARER_ITEMS_FIRST_LOCALSTORAGE_KEY) ?? 'true') === 'true');
 watch(rarerItemsFirst, () =>
   setLocalStorage(RARER_ITEMS_FIRST_LOCALSTORAGE_KEY, rarerItemsFirst.value)
 );
@@ -169,42 +147,14 @@ watch(itemsPerCol, () =>
   setLocalStorage(ITEMS_PER_COL_LOCALSTORAGE_KEY, limitItemsPerCol(itemsPerCol.value))
 );
 
-const ARTIFACT_LAYOUT_LEG_LOCALSTORAGE_KEY = 'artifactLayoutLeg';
-const artifactLayoutLeg = ref(getLocalStorage(ARTIFACT_LAYOUT_LEG_LOCALSTORAGE_KEY) || 10);
-watch(artifactLayoutLeg, () =>
-  setLocalStorage(ARTIFACT_LAYOUT_LEG_LOCALSTORAGE_KEY, Math.floor(Number(artifactLayoutLeg.value)))
-);
-
-const ARTIFACT_LAYOUT_EPIC_LOCALSTORAGE_KEY = 'artifactLayoutEpic';
-const artifactLayoutEpic = ref(getLocalStorage(ARTIFACT_LAYOUT_EPIC_LOCALSTORAGE_KEY) || 20);
-watch(artifactLayoutEpic, () =>
-  setLocalStorage(ARTIFACT_LAYOUT_EPIC_LOCALSTORAGE_KEY, Number(artifactLayoutEpic.value))
-);
-
-const ARTIFACT_LAYOUT_RARE_LOCALSTORAGE_KEY = 'artifactLayoutRare';
-const artifactLayoutRare = ref(getLocalStorage(ARTIFACT_LAYOUT_RARE_LOCALSTORAGE_KEY) || 30);
-watch(artifactLayoutRare, () =>
-  setLocalStorage(ARTIFACT_LAYOUT_RARE_LOCALSTORAGE_KEY, Math.floor(Number(artifactLayoutRare.value)))
-);
-
-const ARTIFACT_LAYOUT_COMMON_LOCALSTORAGE_KEY = 'artifactLayoutCommon';
-const artifactLayoutCommon = ref(getLocalStorage(ARTIFACT_LAYOUT_COMMON_LOCALSTORAGE_KEY) || 100);
-watch(artifactLayoutCommon, () =>
-  setLocalStorage(ARTIFACT_LAYOUT_COMMON_LOCALSTORAGE_KEY, Math.floor(Number(artifactLayoutCommon.value)))
-);
-
 const itemsPerColNum = computed(() => limitItemsPerCol(itemsPerCol.value));
 //
-const grid = computed(() =>
-  generateInventoryGrid(inventory.value as Inventory, {
-    rarerItemsFirst: rarerItemsFirst.value,
-    forceItemsPerCol: Number(itemsPerCol.value),
-    artifactLayoutLeg:    Number(artifactLayoutLeg.value),
-    artifactLayoutEpic:   Number(artifactLayoutEpic.value),
-    artifactLayoutRare:   Number(artifactLayoutRare.value),
-    artifactLayoutCommon: Number(artifactLayoutCommon.value),
-    transpose: transpose.value,
-  })
+const grid = computed(() => generateInventoryGrid(inventory.value as Inventory, {
+  rarerItemsFirst: rarerItemsFirst.value,
+  forceItemsPerCol: Number(itemsPerCol.value),
+  layoutOrder: layoutOrder.value,
+  transpose: transpose.value,
+ })
 );
 
 const inventoryIsEmpty = computed(() => grid.value.length === 0);
@@ -257,4 +207,5 @@ async function imageIsEmpty(url: string): Promise<boolean> {
   }
   return image.naturalWidth === 0 || image.naturalHeight === 0;
 }
+
 </script>
