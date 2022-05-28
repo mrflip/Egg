@@ -1,5 +1,5 @@
 <template>
-<div class="flex items-center justify-center mb-3 DragOrderer">
+<div class="flex items-center justify-center DragOrderer">
   <draggable
     item-key="name"
     tag="ul"
@@ -10,7 +10,7 @@
     @end="isDragging = false"
     >
     <template #item="{ element }">
-      <li class="border mx-4 mb-2 px-2 py-1.5 flex orderable-item" :class="element.name" :key="element.name">
+      <li class="border mx-4 my-1 px-2 py-1.5 flex orderable-item" :class="`${element.id} ${itemClasses}`" :key="element.name">
         <slot name="listItem" :element="element">{{ element.name }}</slot>
       </li>
     </template>
@@ -40,6 +40,7 @@ export default defineComponent({
   props: {
     layoutOrder: { type: Object as Orderables },
     direction: { type: String, default: 'horiz' },
+    itemClasses: { type: String },
   },
   emits: ['updateOrder'],
   methods: {

@@ -32,7 +32,7 @@ export default defineComponent({
   },
   props: {
     actualPerRow: { type: Number },
-    gridInfo:     { type: Object as PropType<GridInfo> }
+    gridInfo:     { type: Object as PropType<GridInfo> },
   },
   // emits: ['updateOrder'],
   data() {
