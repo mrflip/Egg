@@ -92,8 +92,10 @@
 
     <canvas ref="canvasRef" class="hidden"></canvas>
 
+    <tickety-boo :gridInfo="gridInfo" />
+
     <template v-if="! loading">
-      <div class="flex items-center justify-center">
+      <div class="flex items-center justify-center my-4">
         <a
           :href="imageURL"
           download="inventory.png"
@@ -101,11 +103,11 @@
         >
           Download Image
         </a>
-      </div>
-      <p class="max-w-lg mx-auto text-center text-xs text-gray-500">
+      <p class="w-2/5 ml-4 text-left text-xs text-gray-500">
         If the download button doesn't work, you may also right click / long press on the image
         below to use your browser's image saving function.
       </p>
+      </div>
     </template>
 
   </template>
@@ -116,7 +118,8 @@ import { computed, onMounted, PropType, ref, toRefs, watch } from 'vue';
 import * as _ from "lodash";
 
 import { getLocalStorage, Inventory, setLocalStorage } from 'lib';
-import { drawInventory, generateInventoryGrid, Orderables } from '@/lib';
+import { drawInventory, generateInventoryGrid, LayoutOrderables } from '@/lib';
+import TicketyBoo from '@/components/TicketyBoo.vue'
 
 const props = defineProps({
   inventory: {
@@ -124,7 +127,7 @@ const props = defineProps({
     required: true,
   },
   layoutOrder: {
-    type: Object as PropType<Orderables>,
+    type: Object as PropType<LayoutOrderables>,
     required: true,
   },
 });
@@ -165,6 +168,7 @@ const loading = ref(false);
 const imageURL = ref('');
 const width = ref(0);
 const height = ref(0);
+const gridInfo = ref({ actualPerCol: 0, actualPerRow: 0, width, height })
 const blockedByFirefoxPrivacyResistFingerprinting = ref(false);
 const error = ref<Error | null>(null);
 
@@ -178,6 +182,7 @@ const regenerate = async () => {
     imageURL.value = result.url;
     width.value = result.width;
     height.value = result.height;
+    gridInfo.value = result;
     blockedByFirefoxPrivacyResistFingerprinting.value =
       result.blockedByFirefoxPrivacyResistFingerprinting;
     if (await imageIsEmpty(imageURL.value)) {
