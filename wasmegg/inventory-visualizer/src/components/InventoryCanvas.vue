@@ -4,67 +4,13 @@
   </template>
   <template v-else>
 
-    <div class="flex items-center justify-center mb-3" :class="loading ? 'opacity-50' : null">
-
-      <div class="space-y-0.5">
-        <div class="relative flex items-start">
-          <div class="flex items-center h-5">
-            <input
-              id="rarerItemsFirst"
-              v-model="rarerItemsFirst"
-              name="rarerItemsFirst"
-              type="checkbox"
-              class="focus:ring-0 focus:ring-green-500 h-4 w-4 text-green-600 border-gray-300 rounded"
-              :disabled="loading"
-            />
-          </div>
-          <div class="ml-2 text-sm">
-            <label for="rarerItemsFirst" class="text-gray-600">Rarer items first</label>
-          </div>
-        </div>
-      </div>
-
-      <div class="ml-4 space-y-0.5">
-        <div class="relative flex items-start">
-          <div class="flex items-center h-5">
-            <input
-              id="transpose"
-              v-model="transpose"
-              name="transpose"
-              type="checkbox"
-              class="focus:ring-0 focus:ring-green-500 h-4 w-4 text-green-600 border-gray-300 rounded"
-              :disabled="loading"
-            />
-          </div>
-          <div class="ml-2 text-sm">
-            <label for="transpose" class="text-gray-600">Horizonal first</label>
-          </div>
-        </div>
-      </div>
-
-      <div class="ml-4">
-        <div class="flex items-center h-10">
-          <input
-            id="itemsPerCol"
-            :value.number="itemsPerColNum"
-            @input="itemsPerCol = ($event.target as any).value"
-            name="itemsPerCol"
-            type="number"
-            :disabled="loading"
-            class="m-2 w-20"
-          />
-          <div class="ml-2 text-sm">
-            <label for="itemsPerCol" class="text-gray-600">Items per {{ transpose ? 'row' : 'column' }} (blank for squarish)</label>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <template v-if="loading">
+      <div class="min-h-[500px]">
       <p class="max-w-lg mx-auto text-center text-sm text-gray-500">
         Generating image, this might take a while...<br />
         Note that this tool may not work in all browsers.
       </p>
+      </div>
     </template>
     <template v-else>
       <template v-if="error !== null">
@@ -92,23 +38,57 @@
 
     <canvas ref="canvasRef" class="hidden"></canvas>
 
-    <tickety-boo :gridInfo="gridInfo" />
+    <tickety-boo :gridInfo="gridInfo" v-if="showTicks" />
 
-    <template v-if="! loading">
-      <div class="flex items-center justify-center my-4">
+    <div class="flex items-center justify-around my-4" :class="loading ? 'opacity-50' : null">
+
+      <div class="flex w-1//6 items-center justify-center">
+          <div class="flex items-center h-5">
+            <input
+              id="fragmentsWithStones"
+              v-model="fragmentsWithStones"
+              name="fragmentsWithStones"
+              type="checkbox"
+              class="focus:ring-0 focus:ring-green-500 h-4 w-4 text-green-600 border-gray-300 rounded"
+              :disabled="loading"
+            />
+          </div>
+          <div class="ml-4 text-sm">
+            <label for="fragmentsWithStones" class="text-gray-600">Combine Stones<br>with Fragments</label>
+          </div>
+      </div>
+
+      <div class="flex w-1/3 items-center justify-center">
+        <input
+          id="itemsPerCol"
+          :value.number="itemsPerColNum"
+          @input="itemsPerCol = ($event.target as any).value"
+          name="itemsPerCol"
+          type="number"
+          :disabled="loading"
+          class="m-2 w-20"
+        />
+        <div class="ml-2 text-sm">
+          <label for="itemsPerCol" class="text-gray-600">
+            Items per {{ transpose ? 'row' : 'column' }}<br />
+            (blank for squarish)</label>
+        </div>
+      </div>
+
+      <div class="flex w-1/2 py-1 items-center justify-center">
         <a
           :href="imageURL"
           download="inventory.png"
-          class="inline-flex items-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+          class="inline-flex text-center items-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
         >
           Download Image
         </a>
-      <p class="w-2/5 ml-4 text-left text-xs text-gray-500">
-        If the download button doesn't work, you may also right click / long press on the image
-        below to use your browser's image saving function.
-      </p>
+        <p class="w-[26em] ml-4 text-left text-xs text-gray-500">
+          If the download button doesn't work, you may also right click / long press on the image
+          above to use your browser's image saving function.
+        </p>
       </div>
-    </template>
+    </div>
 
   </template>
 </template>
@@ -130,13 +110,21 @@ const props = defineProps({
     type: Object as PropType<LayoutOrderables>,
     required: true,
   },
+  showTicks: {
+    type: Boolean,
+    default: false,
+  },
+  transpose: {
+    type: Boolean,
+    default: false,
+  },
 });
 const { inventory, layoutOrder } = toRefs(props);
 
-const RARER_ITEMS_FIRST_LOCALSTORAGE_KEY = 'rarerItemsFirst';
-const rarerItemsFirst = ref((getLocalStorage(RARER_ITEMS_FIRST_LOCALSTORAGE_KEY) ?? 'true') === 'true');
-watch(rarerItemsFirst, () =>
-  setLocalStorage(RARER_ITEMS_FIRST_LOCALSTORAGE_KEY, rarerItemsFirst.value)
+const FRAGMENTS_WITH_STONES_LOCALSTORAGE_KEY = 'fragmentsWithStones';
+const fragmentsWithStones = ref((getLocalStorage(FRAGMENTS_WITH_STONES_LOCALSTORAGE_KEY) ?? 'true') === 'true');
+watch(fragmentsWithStones, () =>
+  setLocalStorage(FRAGMENTS_WITH_STONES_LOCALSTORAGE_KEY, fragmentsWithStones.value)
 );
 const TRANSPOSE_LOCALSTORAGE_KEY = 'transposeImage';
 const transpose = ref(getLocalStorage(TRANSPOSE_LOCALSTORAGE_KEY) === 'true');
@@ -153,7 +141,7 @@ watch(itemsPerCol, () =>
 const itemsPerColNum = computed(() => limitItemsPerCol(itemsPerCol.value));
 //
 const grid = computed(() => generateInventoryGrid(inventory.value as Inventory, {
-  rarerItemsFirst: rarerItemsFirst.value,
+  fragmentsWithStones: fragmentsWithStones.value,
   forceItemsPerCol: Number(itemsPerCol.value),
   layoutOrder: layoutOrder.value,
   transpose: transpose.value,

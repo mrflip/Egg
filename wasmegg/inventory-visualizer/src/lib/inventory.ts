@@ -84,7 +84,7 @@ const ingredientOrder = [
 ];
 
 const afxIdOrder = [
-  ...artifactIdOrder, ...stoneIdOrder, ...Object.keys(fragmentToStone), ...ingredientOrder,
+  ...artifactIdOrder, ...stoneIdOrder, ...ingredientOrder, ..._.map(_.keys(fragmentToStone), Number),
 ]
 
 function hackyIconUrl(iconName: string): string {
@@ -144,8 +144,7 @@ const ingredientRe = /solar_titanium|tau_ceti_geode|gold_meteor/
 export function generateInventoryGrid(
   inventory: Inventory,
   options?: {
-    rarerItemsFirst: boolean,
-    forceItemsPerCol?: number,
+    fragmentsWithStones: boolean,
     transpose: boolean,
     layoutOrder: LayoutOrderables,
   }
@@ -211,20 +210,14 @@ export function generateInventoryGrid(
     }
   }
 
-  function byAfxOrder(item) {
-    if (! item) { return Infinity }
-    const stoneMaybe = fragmentToStone[item.afxId]
-    if (! _.isNil(stoneMaybe)) {
-      return stonesOrder[stoneMaybe]?.weight + 0.5
-    }
-    return (stonesOrder[item.afxId]?.weight) ?? (artifactsOrder[item.afxId]?.weight) ?? (1000 + item.afxID)
-  }
-
   function byTypeOrder(afx: InventoryGridItem) {
-    if (afx.afxType === Type.STONE) { return kindsOrder.Stone.weight }
-    if (afx.afxType === Type.STONE_INGREDIENT) { return kindsOrder.Stone.weight }
+    if (afx.afxType === Type.ARTIFACT)   { return kindsOrder.Common.weight }
+    if (afx.afxType === Type.STONE)      { return kindsOrder.Stone.weight }
     if (afx.afxType === Type.INGREDIENT) { return kindsOrder.Ingredient.weight }
-    return kindsOrder.Common.weight
+    // else it's Type.STONE_INGREDIENT
+    if (options.fragmentsWithStones) { return kindsOrder.Stone.weight }
+    // lump them with, but after, ingredients as per in-game order
+    return kindsOrder.Ingredient.weight + 0.1
   }
 
   function byKindOrder(afx: InventoryGridItem) {
@@ -233,6 +226,17 @@ export function generateInventoryGrid(
     if (afxRarity === Rarity.EPIC)      { return kindsOrder.Epic.weight }
     if (afxRarity === Rarity.RARE)      { return kindsOrder.Rare.weight }
     return byTypeOrder(afx)
+  }
+
+  function byAfxOrder(item) {
+    if (! item) { return Infinity }
+    const stoneMaybe = fragmentToStone[item.afxId]
+    if (! _.isNil(stoneMaybe)) {
+      return stonesOrder[stoneMaybe]?.weight + 0.5
+    }
+    return (stonesOrder[item.afxId]?.weight)
+      ?? (artifactsOrder[item.afxId]?.weight)
+      ?? (5555 + afxIdOrder.indexOf(item.afxId))
   }
 
   function byMountedOrder(afx: InventoryGridItem, idx: number) {
