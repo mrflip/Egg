@@ -25,6 +25,10 @@ export async function drawInventory(
   width: number;
   height: number;
   blockedByFirefoxPrivacyResistFingerprinting: boolean;
+  scale: number,
+  actualPerRow: number,
+  actualPerCol: number,
+  totalWidthPx: number, totalHeightPx: number, cellWidthPx: number, cellHeightPx: number,
 }> {
   // This scaling factor can be adjusted in case the canvas exceeds browser
   // limits (e.g. on Safari, a canvas cannot take up more than 16777216=16M
@@ -173,10 +177,25 @@ export async function drawInventory(
   const numColors = new Set(pixels).size;
   const blockedByFirefoxPrivacyResistFingerprinting = numColors < 10;
 
+  const actualPerRow = (transpose ? numItemsPerCol : numItemsPerRow)
+  const actualPerCol = (transpose ? numItemsPerRow : numItemsPerCol)
+  const totalWidthPx = scale * Math.min(1009, (
+    ((GRID_SQUARE_SIZE * actualPerRow) / 2) + (GRID_SQUARE_GAP * (actualPerRow + 1) / 2)
+  ))
+  const totalHeightPx = scale * Math.min(1009, (
+    ((GRID_SQUARE_SIZE * actualPerCol) / 2) + (GRID_SQUARE_GAP * (actualPerCol + 1) / 2)
+  ))
+  const cellWidthPx  = totalWidthPx  / actualPerRow
+  const cellHeightPx = totalHeightPx / actualPerCol
+
   return {
     url: await getObjectURLForCanvas(el),
     width: targetWidth,
     height: targetHeight,
+    scale,
+    actualPerRow,
+    actualPerCol,
+    totalWidthPx, totalHeightPx, cellWidthPx, cellHeightPx,
     blockedByFirefoxPrivacyResistFingerprinting,
   };
 }

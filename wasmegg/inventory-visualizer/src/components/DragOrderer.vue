@@ -1,17 +1,16 @@
 <template>
 <div class="flex items-center justify-center mb-3 DragOrderer">
-  <div class="m-3">Order of Rarity Groups:</div>
   <draggable
     item-key="name"
-    tag="transition-group"
-    :component-data="{ tag: 'ul', class: 'flex flex-row', name: 'orderable-list', onEnd: this.handleUpdate, type: 'transition' }"
+    tag="ul"
+    :component-data="{ tag: 'ul', class: `flex ${flexDir} ${direction}`, name: 'orderable-list', onEnd: this.handleUpdate }"
     v-model="list"
     v-bind="dragOptions"
     @start="isDragging = true"
     @end="isDragging = false"
     >
     <template #item="{ element }">
-      <li class="border mx-4 flex orderable-item" :class="element.name">
+      <li class="border mx-4 mb-2 px-2 py-1.5 flex orderable-item" :class="element.name" :key="element.name">
         <slot name="listItem" :element="element">{{ element.name }}</slot>
       </li>
     </template>
@@ -26,28 +25,42 @@ import draggable from 'vuedraggable';
 //
 import { Orderables } from '@/lib';
 
+function listFromLayoutOrder(layoutOrder) {
+  if (! layoutOrder) { return [{ name: 'null layoutOrder' }] }
+  return _.sortBy([...Object.values(layoutOrder)], 'weight')
+}
+
 export default defineComponent({
   name: "Drag Orderer",
-  display: "Transition",
+  // display: "Transition",
   order: 8,
   components: {
     draggable
   },
   props: {
     layoutOrder: { type: Object as Orderables },
+    direction: { type: String, default: 'horiz' },
   },
   emits: ['updateOrder'],
-  data() {
-    return {
-      list: _.sortBy([...Object.values(this.layoutOrder)], 'weight'),
-      dragging: false
-    };
-  },
   methods: {
     handleUpdate(args) {
-      const updated = Object.fromEntries(this.list.map((val, idx) => [val.name, { ...val, weight: idx + 1 }]))
+      const updated = Object.fromEntries(
+        this.list.map((val, idx) => [val.id, { ...val, weight: idx + 1 }])
+      )
       this.$emit('updateOrder', updated);
     },
+  },
+  watch: {
+    layoutOrder(newVal) {
+      this.list = listFromLayoutOrder(newVal)
+    },
+  },
+  data() {
+    return {
+      flexDir:  ((this.direction === 'vert') ? 'flex-col' : 'flex-row'),
+      list: listFromLayoutOrder(this.layoutOrder),
+      dragging: false
+    };
   },
   computed: {
     dragOptions() {

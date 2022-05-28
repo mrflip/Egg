@@ -50,6 +50,7 @@ export function getArtifactTierProps(afxId: Name, afxLevel: Level): Tier {
     throw new Error(`there's no artifact tier with id ${afxId} and level ${afxLevel}`);
   }
   if (tier.afx_id !== afxId || tier.afx_level !== afxLevel) {
+    console.error('Mismatched artifact', afxId, afxLevel, tier)
     throw new Error(
       `the impossible happened: getArtifactTierProps(${afxId}, ${afxLevel}) returned wrong item`
     );
