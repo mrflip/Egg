@@ -25,7 +25,7 @@
           address bar and look for a picture icon which you can click and grant "Extract canvas
           data" permission to this site. Reload after granting the permission.
         </p>
-        <div class="overflow-scroll">
+        <div class="overflow-auto">
           <img
             :src="imageURL"
             :width="width / 2"
@@ -38,44 +38,35 @@
 
     <canvas ref="canvasRef" class="hidden"></canvas>
 
-    <tickety-boo :gridInfo="gridInfo" v-if="showTicks" />
+    <tickety-boo v-if="showTicks" :grid-info="gridInfo" />
 
-    <div class="flex items-center justify-around my-4" :class="loading ? 'opacity-50' : null">
+    <div class="flex flex-col md:flex-row items-center justify-between mt-4" :class="loading ? 'opacity-50' : null">
 
-      <div class="flex w-1//6 items-center justify-center">
-          <div class="flex items-center h-5">
-            <input
-              id="fragmentsWithStones"
-              v-model="fragmentsWithStones"
-              name="fragmentsWithStones"
-              type="checkbox"
-              class="focus:ring-0 focus:ring-green-500 h-4 w-4 text-green-600 border-gray-300 rounded"
-              :disabled="loading"
-            />
+      <div class="flex md:w-3/5 w-full flex-row items-center justify-center">
+        <div class="flex w-full my-2 items-center justify-center md:justify-start">
+          <input
+            id="itemsPerCol"
+            :value.number="itemsPerColNum"
+            name="itemsPerCol"
+            type="number"
+            :disabled="loading"
+            class="mr-2 w-20"
+            @input="itemsPerCol = ($event.target as any).value"
+          />
+          <div class="ml-2 w-32 text-sm">
+            <label for="itemsPerCol" class="text-gray-600">
+              Items per {{ transpose ? 'row' : 'column' }}<br />
+              (blank for squarish)</label>
           </div>
-          <div class="ml-4 text-sm">
-            <label for="fragmentsWithStones" class="text-gray-600">Combine Stones<br>with Fragments</label>
-          </div>
-      </div>
+        </div>
 
-      <div class="flex w-1/3 items-center justify-center">
-        <input
-          id="itemsPerCol"
-          :value.number="itemsPerColNum"
-          @input="itemsPerCol = ($event.target as any).value"
-          name="itemsPerCol"
-          type="number"
-          :disabled="loading"
-          class="m-2 w-20"
-        />
-        <div class="ml-2 text-sm">
-          <label for="itemsPerCol" class="text-gray-600">
-            Items per {{ transpose ? 'row' : 'column' }}<br />
-            (blank for squarish)</label>
+        <div class="flex flex-col w-full px-2 my-1 items-center justify-center">
+          <check-option id="showTicks" class="w-full mb-2" :checked="showTicks" @change="updateShowTicks">Show Tickmarks</check-option>
+          <check-option id="transpose" class="w-full" :checked="transpose" @change="updateTranspose">Switch Rows and Columns</check-option>
         </div>
       </div>
 
-      <div class="flex w-1/2 py-1 items-center justify-center">
+      <div class="flex md:w-2/5 w-full px-2 my-2 md:flex-col flex-row items-center justify-center">
         <a
           :href="imageURL"
           download="inventory.png"
@@ -83,11 +74,12 @@
         >
           Download Image
         </a>
-        <p class="w-[26em] ml-4 text-left text-xs text-gray-500">
+        <p class="mt-2 ml-6 md:w-full w-1/2 text-left text-xs text-gray-500">
           If the download button doesn't work, you may also right click / long press on the image
           above to use your browser's image saving function.
         </p>
       </div>
+
     </div>
 
   </template>
@@ -99,7 +91,8 @@ import * as _ from "lodash";
 
 import { getLocalStorage, Inventory, setLocalStorage } from 'lib';
 import { drawInventory, generateInventoryGrid, LayoutOrderables } from '@/lib';
-import TicketyBoo from '@/components/TicketyBoo.vue'
+import CheckOption from '@/components/CheckOption.vue'
+import TicketyBoo  from '@/components/TicketyBoo.vue'
 
 const props = defineProps({
   inventory: {
@@ -110,27 +103,10 @@ const props = defineProps({
     type: Object as PropType<LayoutOrderables>,
     required: true,
   },
-  showTicks: {
-    type: Boolean,
-    default: false,
-  },
-  transpose: {
-    type: Boolean,
-    default: false,
-  },
+  // showTicks: { type: Boolean, default: true  },
+  // transpose: { type: Boolean, default: false },
 });
 const { inventory, layoutOrder } = toRefs(props);
-
-const FRAGMENTS_WITH_STONES_LOCALSTORAGE_KEY = 'fragmentsWithStones';
-const fragmentsWithStones = ref((getLocalStorage(FRAGMENTS_WITH_STONES_LOCALSTORAGE_KEY) ?? 'true') === 'true');
-watch(fragmentsWithStones, () =>
-  setLocalStorage(FRAGMENTS_WITH_STONES_LOCALSTORAGE_KEY, fragmentsWithStones.value)
-);
-const TRANSPOSE_LOCALSTORAGE_KEY = 'transposeImage';
-const transpose = ref(getLocalStorage(TRANSPOSE_LOCALSTORAGE_KEY) === 'true');
-watch(transpose, () =>
-  setLocalStorage(TRANSPOSE_LOCALSTORAGE_KEY, transpose.value)
-);
 
 const ITEMS_PER_COL_LOCALSTORAGE_KEY = 'itemsPerCol';
 const itemsPerCol = ref(getLocalStorage(ITEMS_PER_COL_LOCALSTORAGE_KEY) || '');
@@ -138,18 +114,28 @@ watch(itemsPerCol, () =>
   setLocalStorage(ITEMS_PER_COL_LOCALSTORAGE_KEY, limitItemsPerCol(itemsPerCol.value))
 );
 
+const SHOW_TICKS_LOCALSTORAGE_KEY = 'showTicksStorageKey';
+const showTicks = ref(getLocalStorage(SHOW_TICKS_LOCALSTORAGE_KEY) === 'true');
+watch(showTicks, () =>
+  setLocalStorage(SHOW_TICKS_LOCALSTORAGE_KEY, showTicks.value)
+);
+
+const TRANSPOSE_LOCALSTORAGE_KEY = 'transpose';
+const transpose = ref(getLocalStorage(TRANSPOSE_LOCALSTORAGE_KEY) === 'true');
+watch(transpose, () =>
+  setLocalStorage(TRANSPOSE_LOCALSTORAGE_KEY, transpose.value)
+);
+
 const itemsPerColNum = computed(() => limitItemsPerCol(itemsPerCol.value));
 //
 const grid = computed(() => generateInventoryGrid(inventory.value as Inventory, {
-  fragmentsWithStones: fragmentsWithStones.value,
   forceItemsPerCol: Number(itemsPerCol.value),
   layoutOrder: layoutOrder.value,
   transpose: transpose.value,
- })
-);
+}));
 
 const inventoryIsEmpty = computed(() => grid.value.length === 0);
-const limitItemsPerCol = (val: number | string) => (Number(val) > 0 ? _.clamp(Number(val), 1, 200) : '');
+const limitItemsPerCol = (val: number | string) => (Number(val) > 0 ? _.clamp(Number(val), 1, 100) : '');
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 const loading = ref(false);
@@ -166,7 +152,12 @@ const regenerate = async () => {
   blockedByFirefoxPrivacyResistFingerprinting.value = true;
   error.value = null;
   try {
-    const result = await drawInventory(canvasRef.value!, grid.value, Number(itemsPerCol.value), transpose.value);
+    const result = await drawInventory(
+      canvasRef.value!,
+      grid.value.slice(0, 30000),
+      Number(itemsPerCol.value),
+      transpose.value,
+    );
     imageURL.value = result.url;
     width.value = result.width;
     height.value = result.height;
@@ -185,6 +176,10 @@ const regenerate = async () => {
 onMounted(regenerate);
 const regenerateDebounced = _.debounce(regenerate, 1000)
 watch(grid, regenerateDebounced, { deep: true })
+
+function updateShowTicks(event) { showTicks.value = event.target.checked }
+
+function updateTranspose(event) { transpose.value = event.target.checked }
 
 async function imageIsEmpty(url: string): Promise<boolean> {
   const image = new Image();
