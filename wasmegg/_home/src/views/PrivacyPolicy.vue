@@ -2,10 +2,10 @@
   <h1 class="mb-4 text-center text-h1 leading-6 font-medium text-gray-900">Privacy Policy</h1>
 
   <p>
-    Pages on this domain and
-    <base-link href="https://eicoop.netlify.app">eicoop.netlify.app</base-link> use
+    Pages on this domain probably don't use
     <base-link href="https://www.goatcounter.com/">goatcounter.com</base-link> for privacy-friendly
-    analytics. Basic information about your visit and your browser is recorded to gauge interest and
+    analytics, because I tried to strip it out. Even so, with goatcounter only
+    basic information about your visit and your browser is recorded to gauge interest and
     guide development. No personal information is recorded, no fingerprinting is performed, and
     recorded data are only available to the author as aggregate statistics. You can "opt out" of
     analytics by blocking the gc.zgo.at domain with a content blocker, e.g. uBlock Origin, but as a
@@ -27,7 +27,7 @@
     information communicate with Egg, Inc.'s server through an intermediary due to browser
     restrictions preventing direct connectivity. The intermediary is a Cloudflare Workers domain
     under the author's control:
-    <base-link href="https://workers.dev/">wasmegg.zw.workers.dev</base-link>. Confidential
+    <base-link href="https://workers.dev/">mrflipeggfork-cors.mrflip.workers.dev</base-link>. Confidential
     information used in communications through this domain is not logged.
   </p>
 

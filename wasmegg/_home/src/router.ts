@@ -1,7 +1,6 @@
 import { nextTick } from 'vue';
 import { createRouter, createWebHashHistory } from 'vue-router';
 
-import { goatcounter } from 'lib';
 import Home from '@/views/Home.vue';
 import Contact from '@/views/Contact.vue';
 import Donate from '@/views/Donate.vue';
@@ -24,7 +23,7 @@ const router = createRouter({
       path: '/',
       component: Home,
       meta: {
-        title: "@mk2's public utilities for Egg, Inc.",
+        title: "@mrflip's fork of @mk2's public utilities for Egg, Inc.",
       },
     },
     {
@@ -83,23 +82,6 @@ router.afterEach((to, from, failure) => {
   if (!failure) {
     nextTick(() => {
       document.title = to.meta.title;
-      if (to.name === 'donate') {
-        setTimeout(() => {
-          goatcounter?.count({
-            path: 'https://wasmegg.netlify.app/#/donate',
-            title: 'Visited donation page',
-            event: true,
-          });
-        }, 0);
-      } else if (to.name === 'contact') {
-        setTimeout(() => {
-          goatcounter?.count({
-            path: 'https://wasmegg.netlify.app/#/contact',
-            title: 'Visited contact page',
-            event: true,
-          });
-        }, 0);
-      }
     });
   }
 });
