@@ -14,7 +14,7 @@
     <p class="max-w-lg mx-auto text-center text-base">Maybe try refreshing the page.</p>
   </div>
 
-  <div v-else class="max-w-5xl w-full px-4 pb-6 xl:px-0 mx-auto">
+  <div v-else class="max-w-5xl 2xl:max-w-7xl w-full px-4 pb-6 xl:px-0 mx-auto">
     <the-player-id-form :player-id="playerId" @submit="submitPlayerId" />
 
     <base-error-boundary v-if="playerId" :key="`${playerId}:${refreshId}`">
@@ -41,7 +41,7 @@
     </base-error-boundary>
 
     <template v-else>
-      <div class="text-sm mt-4 mx-4 xl:mx-0">
+      <div class="text-sm mt-4 mx-4 2xl:mx-0">
         This tool generates one single image of your artifact inventory; say goodbye to stitching
         together pages after pages of screenshots.
       </div>

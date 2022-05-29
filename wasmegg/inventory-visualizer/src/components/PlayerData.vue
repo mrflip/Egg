@@ -14,7 +14,7 @@
   </inventory-canvas>
 </template>
 
-<div class="flex max-w-full md:flex-row flex-col my-8 md:items-stretch items-center justify-around">
+<div class="flex 2xl:px-32 md:flex-row flex-col my-8 md:items-stretch items-center justify-around">
 
   <div class="p-2 mb-4 flex flex-col items-center Aspects ordering border border-blue-100">
     <h4 class="mb-2">Aspects</h4>
@@ -246,7 +246,7 @@ export default defineComponent({
   .DragOrderer li.byLegendary  { background: #FFFFC4; }
   .DragOrderer li.byEpic       { background: #F7DAF7; }
   .DragOrderer li.byRare       { background: #C0FFFF; }
-  .DragOrderer li.byCommon     { background: #E9E9E9; }
+  .DragOrderer li.byCommonArt  { background: #E9E9E9; }
   .DragOrderer li.byArtifact   { background: #E9E9E9; }
   .DragOrderer li.byFamily     { background: #DAF7E9; }
   .DragOrderer li.byType       { background: #F7DADA; }
