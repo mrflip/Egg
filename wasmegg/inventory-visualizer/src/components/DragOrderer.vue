@@ -1,16 +1,16 @@
 <template>
 <div class="flex items-center justify-center DragOrderer">
   <draggable
-    item-key="name"
-    tag="ul"
-    :component-data="{ tag: 'ul', class: `flex ${flexDir} ${direction}`, name: 'orderable-list', onEnd: this.handleUpdate }"
     v-model="list"
     v-bind="dragOptions"
+    item-key="name"
+    tag="ul"
+    :component-data="{ tag: 'ul', class: `flex ${flexDir}`, name: 'orderable-list', onEnd: handleUpdate }"
     @start="isDragging = true"
     @end="isDragging = false"
     >
     <template #item="{ element }">
-      <li class="border mx-4 my-1 px-2 py-1.5 flex orderable-item" :class="`${element.id} ${itemClasses}`" :key="element.name">
+      <li :key="element.name" class="border rounded-md mb-2 px-2 py-1.5 flex orderable-item" :class="`${element.id} ${itemClasses}`">
         <slot name="listItem" :element="element">{{ element.name }}</slot>
       </li>
     </template>
@@ -31,38 +31,30 @@ function listFromLayoutOrder(layoutOrder) {
 }
 
 export default defineComponent({
-  name: "Drag Orderer",
+  name: "DragOrderer",
   // display: "Transition",
   order: 8,
+
   components: {
     draggable
   },
+
   props: {
-    layoutOrder: { type: Object as Orderables },
+    layoutOrder: { type: Object as Orderables, required: true },
     direction: { type: String, default: 'horiz' },
-    itemClasses: { type: String },
+    itemClasses: { type: String, default: '' },
   },
+
   emits: ['updateOrder'],
-  methods: {
-    handleUpdate(args) {
-      const updated = Object.fromEntries(
-        this.list.map((val, idx) => [val.id, { ...val, weight: idx + 1 }])
-      )
-      this.$emit('updateOrder', updated);
-    },
-  },
-  watch: {
-    layoutOrder(newVal) {
-      this.list = listFromLayoutOrder(newVal)
-    },
-  },
+
   data() {
     return {
-      flexDir:  ((this.direction === 'vert') ? 'flex-col' : 'flex-row'),
+      flexDir:  ((this.direction === 'vert') ? 'flex-col' : 'flex-col sm:flex-row'),
       list: listFromLayoutOrder(this.layoutOrder),
       dragging: false
     };
   },
+
   computed: {
     dragOptions() {
       return {
@@ -74,6 +66,22 @@ export default defineComponent({
       };
     },
   },
+
+  watch: {
+    layoutOrder(newVal) {
+      this.list = listFromLayoutOrder(newVal)
+    },
+  },
+
+  methods: {
+    handleUpdate() {
+      const updated = Object.fromEntries(
+        this.list.map((val, idx) => [val.id, { ...val, weight: idx + 1 }])
+      )
+      this.$emit('updateOrder', updated);
+    },
+  },
+
 });
 </script>
 

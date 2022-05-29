@@ -1,9 +1,8 @@
 //
-export interface Orderable  { name: string, weight: number, img: string, glyph: string }
+export interface Orderable  { id: string, name: string, weight: number, img: string, glyph?: string }
 export interface Orderables { [key: string]: Orderable }
 
 export interface LayoutOrderables {
-  kinds:      Orderables
   artifacts:  Orderables
   stones:     Orderables
   aspects:    Orderables
