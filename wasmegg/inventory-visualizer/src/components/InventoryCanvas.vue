@@ -1,15 +1,15 @@
 <template>
   <template v-if="inventoryIsEmpty">
-    <p class="max-w-lg mx-auto text-center">Looks like you don't have any artifact :(</p>
+    <p class="max-w-lg mx-auto text-center">Looks like you don't have any artifacts :(</p>
   </template>
   <template v-else>
 
     <template v-if="loading">
       <div class="min-h-[500px]">
-      <p class="max-w-lg mx-auto text-center text-sm text-gray-500">
-        Generating image, this might take a while...<br />
-        Note that this tool may not work in all browsers.
-      </p>
+        <p class="max-w-lg 2xl:max-w-2xl mx-auto text-center text-sm text-gray-500">
+          Generating image, this might take a while...<br />
+          Note that this tool may not work in all browsers.
+        </p>
       </div>
     </template>
     <template v-else>
@@ -40,7 +40,7 @@
 
     <tickety-boo v-if="showTicks" :grid-info="gridInfo" />
 
-    <div class="flex flex-col md:flex-row items-center justify-between mt-4" :class="loading ? 'opacity-50' : null">
+    <div class="flex flex-col 2xl:px-24 md:flex-row items-center justify-between mt-4" :class="loading ? 'opacity-50' : null">
 
       <div class="flex md:w-3/5 w-full flex-row items-center justify-center">
 
