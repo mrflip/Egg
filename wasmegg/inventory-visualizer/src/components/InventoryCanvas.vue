@@ -49,6 +49,7 @@
         </div>
 
         <div class="flex flex-col w-full my-1 items-center justify-center">
+
           <check-option id="showTicks" class="w-full ml-2 mb-2" :checked="showTicks" @change="updateShowTicks">Show Tickmarks</check-option>
           <check-option id="transpose" class="w-full ml-2 mb-2" :checked="transpose" @change="updateTranspose">Switch Rows and Columns</check-option>
           <div class="flex w-full">
@@ -90,7 +91,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, PropType, ref, toRefs, watch } from 'vue';
+import { computed, onMounted, PropType, ref, toRefs, watch, Ref } from 'vue';
 import * as _ from "lodash";
 
 import { getLocalStorage, Inventory, setLocalStorage } from 'lib';
@@ -107,31 +108,54 @@ const props = defineProps({
     type: Object as PropType<LayoutOrderables>,
     required: true,
   },
-  // showTicks: { type: Boolean, default: true  },
-  // transpose: { type: Boolean, default: false },
+  bookmark: {
+    type: String,
+    required: true,
+  },
 });
-const { inventory, layoutOrder } = toRefs(props);
+const { inventory, layoutOrder, bookmark } = toRefs(props);
 
-const ITEMS_PER_COL_LOCALSTORAGE_KEY = 'itemsPerCol';
-const itemsPerCol = ref(getLocalStorage(ITEMS_PER_COL_LOCALSTORAGE_KEY) || '');
-watch(itemsPerCol, () =>
-  setLocalStorage(ITEMS_PER_COL_LOCALSTORAGE_KEY, limitItemsPerCol(itemsPerCol.value))
-);
+const LOCALSTORAGE_KEYS = {
+  itemsPerCol: 'itemsPerColStorageKey',
+  showTicks: 'showTicksStorageKey',
+  transpose: 'transposeStorageKey',
+}
+type StorableType = keyof (typeof LOCALSTORAGE_KEYS);
 
-const SHOW_TICKS_LOCALSTORAGE_KEY = 'showTicksStorageKey';
-const showTicks = ref(getLocalStorage(SHOW_TICKS_LOCALSTORAGE_KEY) === 'true');
-watch(showTicks, () =>
-  setLocalStorage(SHOW_TICKS_LOCALSTORAGE_KEY, showTicks.value)
-);
+function getStorageKey(base: StorableType): string {
+  return `${LOCALSTORAGE_KEYS[base]}${bookmark.value}`
+}
 
-const TRANSPOSE_LOCALSTORAGE_KEY = 'transpose';
-const transpose = ref(getLocalStorage(TRANSPOSE_LOCALSTORAGE_KEY) === 'true');
-watch(transpose, () =>
-  setLocalStorage(TRANSPOSE_LOCALSTORAGE_KEY, transpose.value)
-);
+function loadVal(base: StorableType): string | undefined {
+  const key = getStorageKey(base)
+  return getLocalStorage(key)
+}
 
-const itemsPerColNum = computed(() => limitItemsPerCol(itemsPerCol.value));
+function storeVal(base: StorableType, val: string) {
+  const key = getStorageKey(base)
+  // console.log('store', base, key, getLocalStorage(key), val)
+  setLocalStorage(key, val)
+}
+
+const loadShowTicks = (): boolean => (loadVal('showTicks') === 'true')
+const showTicks: Ref<boolean> = ref(loadShowTicks())
+watch(showTicks, () => storeVal('showTicks', String(showTicks.value === true)))
 //
+const loadTranspose = (): boolean => (loadVal('transpose') === 'true');
+const transpose: Ref<boolean> = ref(loadTranspose())
+watch(transpose, () => storeVal('transpose', String(transpose.value === true)))
+//
+const loadItemsPerCol = (): string => (loadVal('itemsPerCol') ?? '')
+const itemsPerCol: Ref<string> = ref(loadItemsPerCol());
+watch(itemsPerCol, () => storeVal('itemsPerCol', String(limitItemsPerCol(itemsPerCol.value))))
+const itemsPerColNum = computed(() => limitItemsPerCol(itemsPerCol.value));
+
+watch(bookmark, () => {
+  showTicks.value = loadShowTicks()
+  transpose.value = loadTranspose()
+  itemsPerCol.value = loadItemsPerCol()
+})
+
 const grid = computed(() => generateInventoryGrid(inventory.value as Inventory, {
   layoutOrder: layoutOrder.value,
   transpose: transpose.value,
