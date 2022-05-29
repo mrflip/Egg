@@ -2,7 +2,7 @@
   <div class="flex w-full items-center justify-center mb-4 border-b border-r border-l border-gray-200">
     <div
       class="flex gap-0 justify-items-stretch ticketyboo smusher"
-      :style="{ width:  smusherWidth }"
+      :style="{ width: smusherWidth }"
     >
       <template v-for="col of cols" :key="col">
         <span

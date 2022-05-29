@@ -4,6 +4,7 @@
   <inventory-canvas
     :inventory="inventory"
     :layout-order="layoutOrder"
+    :bookmark="bookmark"
     >
     <select id="bookmarks" v-model="bookmark" class="my-1" name="bookmarks" @change="handleBookmarkChange">
       <template v-for="bkInfo of bookmarkProps" :key="bkInfo.id">
@@ -58,7 +59,7 @@
 </template>
 
 <script lang="ts">
-  import _ from 'lodash'
+import _ from 'lodash'
 import { defineComponent } from 'vue';
 import { getLocalStorage, setLocalStorage, Inventory, requestFirstContact, UserBackupEmptyError } from 'lib';
 import { defaultAxisOrder, Orderables } from '@/lib'
@@ -98,18 +99,18 @@ const BOOKMARK_PROPS = {
 type Bookmarker = keyof (typeof BOOKMARK_PROPS);
 const DEFAULT_BOOKMARK: Bookmarker = 'BkA'
 
-function storageKeyFor(axis: OrderablesAxis, bookmark: string) {
+function getStorageKey(axis: OrderablesAxis, bookmark: string) {
   return `${LOCALSTORAGE_KEYS[axis]}${bookmark}`
 }
 
 function storeLayoutAxis(orderables: Orderables, axis: OrderablesAxis, bookmark: Bookmarker) {
   if (! bookmark) { throw new Error(axis) }
-  setLocalStorage(storageKeyFor(axis, bookmark), JSON.stringify(getOrderablesDna(orderables)))
+  setLocalStorage(getStorageKey(axis, bookmark), JSON.stringify(getOrderablesDna(orderables)))
 }
 
 function loadLayoutAxis(axis: OrderablesAxis, bookmark: Bookmarker): Orderables {
   const fallback   = defaultAxisOrder(axis)
-  const storageKey = storageKeyFor(axis, bookmark)
+  const storageKey = getStorageKey(axis, bookmark)
   //
   const axisJson = getLocalStorage(storageKey) || null
   if (axisJson) {
@@ -227,15 +228,6 @@ export default defineComponent({
       this.inventory    = new Inventory(artifactsDb) // eslint-disable-line @typescript-eslint/no-explicit-any
       this.loaded       = true
     },
-    // updateTranspose(ev) {
-    //   this.transpose = ev.target.checked
-    //   setLocalStorage(LOCALSTORAGE_KEYS.transpose, String(ev.target.checked))
-    // },
-    // updateShowTicks(ev) {
-    //   this.showTicks = ev.target.checked
-    //   setLocalStorage(LOCALSTORAGE_KEYS.showTicks, String(ev.target.checked))
-    // },
-    //
   },
 
 })
@@ -253,6 +245,7 @@ export default defineComponent({
   .DragOrderer li.byLevel      { background: #F7F7D9; }
   .DragOrderer li.byDecoration { background: #F2F7ED; }
   .DragOrderer li.byStone      { background: #F2F7ED; }
+  .DragOrderer li.byFragment   { background: #F2F7ED; }
   .DragOrderer li.byAnyStone   { background: #F2F7ED; }
   .DragOrderer li.byIngredient { background: #F3ECE8; }
   .DragOrderer .stone          { background: #F2F7ED; }

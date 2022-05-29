@@ -105,15 +105,16 @@ const DEFAULT_ASPECTS_ORDER: Orderables = _.mapValues({
   //
   byStone:      { name: 'Stone',             weight:  5, img: hackyIconUrl('afx_prophecy_stone_4.png') },
   byIngredient: { name: 'Ingredient',        weight:  6, img: hackyIconUrl('afx_gold_meteorite_3.png') },
-  byAnyStone:   { name: 'Stone or Fragment', weight:  7, img: hackyIconUrl('afx_soul_stone_1.png') },
+  byFragment:   { name: 'Fragment',          weight:  7, img: hackyIconUrl('afx_soul_stone_1.png') },
   //
   byFamily:     { name: 'Family',            weight:  8, glyph: '🌈', img: '' },
   byLevel:      { name: 'Level',             weight:  9, glyph: '🚀', img: '' },
   byDecoration: { name: 'Mounted Stones',    weight: 10, img: hackyIconUrl('afx_clarity_stone_2.png') },
   //
-  byArtifact:   { name: 'Artifact',          weight: 11, img: hackyIconUrl('afx_quantum_metronome_4.png') },
-  byUncommon:   { name: 'Uncommon',          weight: 12, img: hackyIconUrl('afx_puzzle_cube_4.png'), rarity: 'epic' },
-  byType:       { name: 'Type',              weight: 13, glyph: '📇', img: '' },
+  byAnyStone:   { name: 'Stone or Fragment', weight: 11, img: hackyIconUrl('afx_soul_stone_2.png') },
+  byArtifact:   { name: 'Artifact',          weight: 12, img: hackyIconUrl('afx_quantum_metronome_4.png') },
+  byUncommon:   { name: 'Uncommon',          weight: 13, img: hackyIconUrl('afx_puzzle_cube_4.png'), rarity: 'epic' },
+  byType:       { name: 'Type',              weight: 14, glyph: '📇', img: '' },
 
 }, (vv, id) => ({ ...vv, id }))
 
@@ -140,14 +141,16 @@ const Sorters: { [key:string]: SorterFunc }  = {
   byEpic(item: GridItem)       { return (item.afxRarity === Rarity.EPIC) ? 1 : Last },
   byRare(item: GridItem)       { return (item.afxRarity === Rarity.RARE) ? 1 : Last },
   byCommonArt(item: GridItem)  { return (item.afxRarity === Rarity.COMMON && item.afxType === Type.ARTIFACT) ? 1 : Last },
+  // byCommon(item: GridItem)  { return (item.afxRarity === Rarity.COMMON) ? 1 : Last },
   byUncommon(item: GridItem)   { return (item.afxRarity !== Rarity.COMMON) ? 1 : Last },
   byArtifact(item: GridItem)   { return (item.afxType === Type.ARTIFACT) ? 1 : Last },
   byStone(item: GridItem)      { return (item.afxType === Type.STONE) ? 1 : Last },
+  byFragment(item: GridItem)   { return (item.afxType === Type.STONE_INGREDIENT) ? 1 : Last },
   byIngredient(item: GridItem) { return (item.afxType === Type.INGREDIENT) ? 1 : Last },
   //
-  byAnyStone(item: GridItem, layoutOrder: LayoutOrderables)   {
+  byAnyStone(item: GridItem, layoutOrder: LayoutOrderables) {
     if  (! (item.afxType === Type.STONE_INGREDIENT || item.afxType === Type.STONE)) { return Last }
-    return Sorters.byFamily(item, layoutOrder)
+    return (1000 * layoutOrder.stones[item.nofragId]?.weight) + Sorters.byLevel(item, layoutOrder)
   },
   //
   byFamily(item: GridItem, layoutOrder: LayoutOrderables) {
