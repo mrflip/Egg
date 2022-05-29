@@ -5,7 +5,7 @@
       :id="id"
       :name="id"
       type="checkbox"
-      :checked="checkedState"
+      :checked="checked"
       class="focus:ring-0 focus:ring-green-500 h-4 w-4 text-green-600 border-gray-300 rounded"
       :disabled="disabled"
     />
@@ -28,11 +28,6 @@ export default defineComponent({
     classes:    { type: String, default: '' },
     checked:    { type: Boolean, default: false },
     disabled:   { type: Boolean, default: false },
-  },
-  data() {
-    return {
-      checkedState: this.checked,
-    };
   },
 });
 </script>
