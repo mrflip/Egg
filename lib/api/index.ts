@@ -10,10 +10,11 @@ export * from './encode';
 export * from './utils';
 export * from './version';
 
+// ADD HERE -- change to your worker site exactly as given by Cloudflare
 const API_ROOT =
   import.meta.env.DEV && import.meta.env.VITE_APP_MOCK
     ? '/api'
-    : 'https://wasmegg.zw.workers.dev/?url=https://www.auxbrain.com';
+    : 'https://mrflipeggfork-cors.mrflip.workers.dev/?url=https://www.auxbrain.com';
 const TIMEOUT = 5000;
 
 /**

@@ -1,4 +1,7 @@
 // Loosely adapted from https://developers.cloudflare.com/workers/examples/cors-header-proxy.
+//
+// For making your own fork, search "ADD HERE" in this file, and in /lib/api/index.ts
+//
 async function handleRequest(request) {
   const url = new URL(request.url);
   let proxiedURL = url.searchParams.get('url');
@@ -7,6 +10,7 @@ async function handleRequest(request) {
   if (proxiedURL == null) {
     // If not requesting a URL through the url param, return a small,
     // informational page.
+    // FIX HERE -- change to be your site.
     return new Response(
       `<!DOCTYPE html>
 <html>
@@ -15,7 +19,7 @@ async function handleRequest(request) {
     <meta name="robots" content="noindex">
   </head>
   <body>
-    <p>This is a supporting domain to <a href="https://wasmegg.netlify.app/">wasmegg.netlify.app</a>.</p>
+    <p>This is a supporting domain to <a href="https://mrflipeggfork.netlify.app/">mrflipeggfork.netlify.app</a>.</p>
   </body>
 </html>`,
       {
@@ -85,9 +89,12 @@ function accessControlAllowOriginHeader(origin) {
 }
 
 function isAllowedOrigin(origin) {
+  // FIX HERE -- add your worker in place of these
   return (
-    origin?.match(/^https:\/\/([\w-]+--)?wasmegg.netlify.app$/) ||
-    origin?.match(/^https:\/\/([\w-]+--)?eicoop.netlify.app$/) ||
+    origin?.match(/^https:\/\/([\w-]+--)?wasmegg\.netlify\.app$/) ||
+    origin?.match(/^https:\/\/([\w-]+--)?eicoop\.netlify\.app$/) ||
+    origin?.match(/^https:\/\/([\w-]+--)?mrflipeggfork\.netlify\.app$/) ||
+    origin?.match(/^https:\/\/([\w-]+--)?mrflipeggfork-dev\.netlify\.app$/) ||
     origin?.match(/^http:\/\/localhost(:\d+)?$/) ||
     origin?.match(/^http:\/\/127\.0\.0\.1(:\d+)?$/) ||
     origin?.match(/^http:\/\/192\.168\.\d+\.\d+(:\d+)?$/)
