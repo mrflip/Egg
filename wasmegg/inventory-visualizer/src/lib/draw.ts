@@ -14,6 +14,7 @@ const ICON_DISPLAY_SIZE = 128;
 const COUNT_BOX_COLOR = '#5e5e5e';
 const FONT_FAMILY = 'Always Together';
 const FONT_SIZE = 27;
+const MAX_DIM = 1024
 
 export async function drawInventory(
   el: HTMLCanvasElement,
@@ -28,7 +29,8 @@ export async function drawInventory(
   scale: number,
   actualPerRow: number,
   actualPerCol: number,
-  totalWidthPx: number, totalHeightPx: number, cellWidthPx: number, cellHeightPx: number,
+  totalWidthPx: number,
+  totalHeightPx: number,
 }> {
   // This scaling factor can be adjusted in case the canvas exceeds browser
   // limits (e.g. on Safari, a canvas cannot take up more than 16777216=16M
@@ -38,7 +40,10 @@ export async function drawInventory(
   const ctx = el.getContext('2d')!;
 
   const numItems = grid.length;
-  const numItemsPerCol = Number(forceItemsPerCol) > 0 ? Number(forceItemsPerCol) : Math.ceil(Math.sqrt(numItems));
+  let numItemsPerCol = Math.ceil(Math.sqrt(numItems))
+  if (Number(forceItemsPerCol) > 0) {
+    numItemsPerCol = Math.min(Math.max(Number(forceItemsPerCol), Math.ceil(numItems/50)), 100, numItems)
+  }
   const numItemsPerRow = Math.ceil(numItems / numItemsPerCol);
   let targetWidth = GRID_SQUARE_SIZE * numItemsPerRow + GRID_SQUARE_GAP * (numItemsPerRow + 1);
   let targetHeight = GRID_SQUARE_SIZE * numItemsPerCol + GRID_SQUARE_GAP * (numItemsPerCol + 1);
@@ -179,14 +184,12 @@ export async function drawInventory(
 
   const actualPerRow = (transpose ? numItemsPerCol : numItemsPerRow)
   const actualPerCol = (transpose ? numItemsPerRow : numItemsPerCol)
-  const totalWidthPx = scale * Math.min(1009, (
+  const totalWidthPx = scale * Math.min(MAX_DIM, (
     ((GRID_SQUARE_SIZE * actualPerRow) / 2) + (GRID_SQUARE_GAP * (actualPerRow + 1) / 2)
   ))
-  const totalHeightPx = scale * Math.min(1009, (
+  const totalHeightPx = scale * Math.min(MAX_DIM, (
     ((GRID_SQUARE_SIZE * actualPerCol) / 2) + (GRID_SQUARE_GAP * (actualPerCol + 1) / 2)
   ))
-  const cellWidthPx  = totalWidthPx  / actualPerRow
-  const cellHeightPx = totalHeightPx / actualPerCol
 
   return {
     url: await getObjectURLForCanvas(el),
@@ -195,7 +198,8 @@ export async function drawInventory(
     scale,
     actualPerRow,
     actualPerCol,
-    totalWidthPx, totalHeightPx, cellWidthPx, cellHeightPx,
+    totalWidthPx,
+    totalHeightPx,
     blockedByFirefoxPrivacyResistFingerprinting,
   };
 }
