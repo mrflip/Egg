@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "dev": "vite",
+    "dev": "LOCAL=true vite",
     "build": "vue-tsc --noEmit && vite build",
     "fastbuild": "vite build",
     "serve": "vite preview",

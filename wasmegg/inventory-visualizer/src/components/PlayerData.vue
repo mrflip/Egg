@@ -70,13 +70,13 @@
 import _ from 'lodash'
 import { defineComponent } from 'vue';
 import { getLocalStorage, setLocalStorage, Inventory, requestFirstContact, UserBackupEmptyError } from 'lib';
-import { defaultAxisOrder } from '@/lib'
+import { defaultAxisOrder, Orderables } from '@/lib'
 
 import InventoryCanvas from '@/components/InventoryCanvas.vue';
 import DragOrderer from '@/components/DragOrderer.vue';
 import ResetButton from '@/components/ResetButton.vue';
 
-async function fetchArtifactsDb(playerId) {
+async function fetchArtifactsDb(playerId: string) {
   const userinfo = await requestFirstContact(playerId);
   if (!userinfo.backup || !userinfo.backup.game) {
     throw new UserBackupEmptyError(playerId);
@@ -98,7 +98,7 @@ const LOCALSTORAGE_KEYS = {
   aspects:   'layoutOrderAspects',
 }
 
-function loadLayoutAxis(axis: Keys<LOCALSTORAGE_KEYS>): Orderables {
+function loadLayoutAxis(axis: keyof (typeof LOCALSTORAGE_KEYS)): Orderables {
   const fallback   = defaultAxisOrder(axis)
   const storageKey = LOCALSTORAGE_KEYS[axis]
   //
@@ -118,11 +118,11 @@ function loadLayoutAxis(axis: Keys<LOCALSTORAGE_KEYS>): Orderables {
   return fallback
 }
 
-function getOrderablesDna(orderables) {
+function getOrderablesDna(orderables: Orderables) {
   return _.mapValues(orderables, (orderable) => _.pick(orderable, ['weight']))
 }
 
-function storeLayoutAxis(axis: Keys<LOCALSTORAGE_KEYS>, orderables: Orderables) {
+function storeLayoutAxis(axis: keyof (typeof LOCALSTORAGE_KEYS), orderables: Orderables) {
   setLocalStorage(LOCALSTORAGE_KEYS[axis], JSON.stringify(getOrderablesDna(orderables)))
 }
 
@@ -139,7 +139,7 @@ export default defineComponent({
 
   data() {
     return {
-      inventory:      null,
+      inventory:      null as any, // eslint-disable-line @typescript-eslint/no-explicit-any
       loaded:         false,
       artifactsOrder: loadLayoutAxis('artifacts'),
       stonesOrder:    loadLayoutAxis('stones'),
@@ -159,11 +159,11 @@ export default defineComponent({
   },
 
   mounted() {
-    this.fetchArtifactsDb(this.playerId)
+    this.fetchArtifactsDb()
   },
 
   methods: {
-    updateArtifactsLayout(orderables) {
+    updateArtifactsLayout(orderables: Orderables) {
       storeLayoutAxis('artifacts', orderables)
       this.artifactsOrder = orderables
     },
@@ -173,7 +173,7 @@ export default defineComponent({
       this.artifactsOrder = orderables
     },
     //
-    updateStonesLayout(orderables) {
+    updateStonesLayout(orderables: Orderables) {
       storeLayoutAxis('stones', orderables)
       this.stonesOrder = orderables
     },
@@ -182,7 +182,7 @@ export default defineComponent({
       storeLayoutAxis('stones', orderables)
       this.stonesOrder = orderables
     },
-    updateAspectsLayout(orderables) {
+    updateAspectsLayout(orderables: Orderables) {
       storeLayoutAxis('aspects', orderables)
       this.aspectsOrder = orderables
     },

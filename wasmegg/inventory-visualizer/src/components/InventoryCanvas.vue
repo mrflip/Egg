@@ -129,7 +129,6 @@ watch(transpose, () =>
 const itemsPerColNum = computed(() => limitItemsPerCol(itemsPerCol.value));
 //
 const grid = computed(() => generateInventoryGrid(inventory.value as Inventory, {
-  forceItemsPerCol: Number(itemsPerCol.value),
   layoutOrder: layoutOrder.value,
   transpose: transpose.value,
 }));
@@ -142,7 +141,7 @@ const loading = ref(false);
 const imageURL = ref('');
 const width = ref(0);
 const height = ref(0);
-const gridInfo = ref({ actualPerCol: 0, actualPerRow: 0, width, height })
+const gridInfo = ref({ actualPerCol: 0, actualPerRow: 0, width, height, totalWidthPx: 1024 })
 const blockedByFirefoxPrivacyResistFingerprinting = ref(false);
 const error = ref<Error | null>(null);
 
@@ -176,10 +175,11 @@ const regenerate = async () => {
 onMounted(regenerate);
 const regenerateDebounced = _.debounce(regenerate, 1000)
 watch(grid, regenerateDebounced, { deep: true })
+watch(itemsPerCol, regenerateDebounced, { deep: true })
 
-function updateShowTicks(event) { showTicks.value = event.target.checked }
+function updateShowTicks(event: Event) { showTicks.value = (<HTMLInputElement>event.target)?.checked || false }
 
-function updateTranspose(event) { transpose.value = event.target.checked }
+function updateTranspose(event: Event) { transpose.value = (<HTMLInputElement>event.target)?.checked || false }
 
 async function imageIsEmpty(url: string): Promise<boolean> {
   const image = new Image();
