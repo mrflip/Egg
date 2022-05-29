@@ -6,8 +6,8 @@
     item-key="name"
     tag="ul"
     :component-data="{ tag: 'ul', class: `flex ${flexDir}`, name: 'orderable-list', onEnd: handleUpdate }"
-    @start="isDragging = true"
-    @end="isDragging = false"
+    @start="dragging = true"
+    @end="dragging = false"
     >
     <template #item="{ element }">
       <li :key="element.name" class="border rounded-md mb-2 px-2 py-1.5 flex orderable-item" :class="`${element.id} ${itemClasses}`">
@@ -20,13 +20,13 @@
 
 <script lang="ts">
 import _ from 'lodash';
-import { defineComponent } from 'vue';
+import { defineComponent, PropType } from 'vue';
 import draggable from 'vuedraggable';
 //
-import { Orderables } from '@/lib';
+import { Orderables, Orderable } from '@/lib';
 
-function listFromLayoutOrder(layoutOrder) {
-  if (! layoutOrder) { return [{ name: 'null layoutOrder' }] }
+function listFromLayoutOrder(layoutOrder: Orderables): Orderable[] {
+  if (! layoutOrder) { return [{ name: 'null layoutOrder', id: 'oops', weight: -1, img: '' }] }
   return _.sortBy([...Object.values(layoutOrder)], 'weight')
 }
 
@@ -40,7 +40,7 @@ export default defineComponent({
   },
 
   props: {
-    layoutOrder: { type: Object as Orderables, required: true },
+    layoutOrder: { type: Object as PropType<Orderables>, required: true },
     direction: { type: String, default: 'horiz' },
     itemClasses: { type: String, default: '' },
   },
@@ -69,14 +69,14 @@ export default defineComponent({
 
   watch: {
     layoutOrder(newVal) {
-      this.list = listFromLayoutOrder(newVal)
+      this.list = listFromLayoutOrder(newVal) as Orderable[]
     },
   },
 
   methods: {
     handleUpdate() {
       const updated = Object.fromEntries(
-        this.list.map((val, idx) => [val.id, { ...val, weight: idx + 1 }])
+        this.list.map((val: Orderable, idx): [string, Orderable] => [val.id, { ...val, weight: idx + 1 }])
       )
       this.$emit('updateOrder', updated);
     },

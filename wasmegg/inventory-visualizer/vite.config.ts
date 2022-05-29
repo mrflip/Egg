@@ -4,7 +4,7 @@ import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 
 // https://vitejs.dev/config/
-export default defineConfig({
+const config = {
   base: '/inventory-visualizer/',
   resolve: {
     alias: {
@@ -18,14 +18,18 @@ export default defineConfig({
   },
   server: {
     host: true,
-
-    proxy: {
-      "^/eggincassets/.*": {
-        target: "https://eggincassets.tcl.sh",
-        changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path.replace(/^\/eggincassets/, ""),
-      },
-    },
   },
-});
+};
+
+if (process.env.LOCAL === 'true') {
+  config.server.proxy = {
+    "^/eggincassets/.*": {
+      target: "https://eggincassets.tcl.sh",
+      changeOrigin: true,
+      secure: false,
+      rewrite: (path) => path.replace(/^\/eggincassets/, ""),
+    },
+  }
+}
+
+export default defineConfig(config)
