@@ -18,13 +18,14 @@
 
 <script lang="ts">
 import _ from 'lodash';
-import { defineComponent } from 'vue';
+import { defineComponent, PropType } from 'vue';
 
 export interface GridInfo {
   width:        number
   height:       number
   actualPerRow: number
   actualPerCol: number
+  totalWidthPx: number
 }
 
 export default defineComponent({
@@ -32,7 +33,6 @@ export default defineComponent({
   components: {
   },
   props: {
-    actualPerRow: { type: Number, required: true },
     gridInfo:     { type: Object as PropType<GridInfo>, required: true },
   },
   // emits: ['updateOrder'],

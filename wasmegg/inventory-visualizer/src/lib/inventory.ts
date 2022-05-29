@@ -66,7 +66,7 @@ const stoneIdOrder = [
   Name.SHELL_STONE,
 ]
 
-const fragmentToStone = {
+const fragmentToStone: { [key: string]: Name } = {
   [Name.PROPHECY_STONE_FRAGMENT]:   Name.PROPHECY_STONE,
   [Name.CLARITY_STONE_FRAGMENT]:    Name.CLARITY_STONE,
   [Name.DILITHIUM_STONE_FRAGMENT]:  Name.DILITHIUM_STONE,
@@ -189,6 +189,8 @@ export function generateInventoryGrid(
   const inventoryItems = [...inventory.items]
   const grid = <InventoryGrid>[];
   for (const item of inventoryItems) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     const afxType = item.afxTier.afx_type
     const commonProps = {
       afxId: item.afxId,
@@ -196,7 +198,7 @@ export function generateInventoryGrid(
       iconPath: item.iconPath,
       afxType,
       nofragType: ((afxType === Type.STONE_INGREDIENT) ? Type.STONE : afxType),
-      nofragId:   ((afxType === Type.STONE_INGREDIENT) ? fragmentToStone[item.afxId] : item.afxId),
+      nofragId:   ((afxType === Type.STONE_INGREDIENT) ? (<Name>fragmentToStone[item.afxId]) : item.afxId),
     };
     const stoned = {
       [Rarity.LEGENDARY]: <Artifact[]>[],
