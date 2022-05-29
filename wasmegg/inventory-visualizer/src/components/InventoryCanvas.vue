@@ -43,8 +43,16 @@
     <div class="flex flex-col md:flex-row items-center justify-between mt-4" :class="loading ? 'opacity-50' : null">
 
       <div class="flex md:w-3/5 w-full flex-row items-center justify-center">
-        <div class="flex w-full my-2 items-center justify-center md:justify-start">
-          <input
+
+        <div class="flex flex-col w-full my-2 px-2 items-center justify-center md:justify-start">
+          <slot></slot>
+        </div>
+
+        <div class="flex flex-col w-full my-1 items-center justify-center">
+          <check-option id="showTicks" class="w-full ml-2 mb-2" :checked="showTicks" @change="updateShowTicks">Show Tickmarks</check-option>
+          <check-option id="transpose" class="w-full ml-2 mb-2" :checked="transpose" @change="updateTranspose">Switch Rows and Columns</check-option>
+          <div class="flex w-full">
+            <input
             id="itemsPerCol"
             :value.number="itemsPerColNum"
             name="itemsPerCol"
@@ -58,11 +66,7 @@
               Items per {{ transpose ? 'row' : 'column' }}<br />
               (blank for squarish)</label>
           </div>
-        </div>
-
-        <div class="flex flex-col w-full px-2 my-1 items-center justify-center">
-          <check-option id="showTicks" class="w-full mb-2" :checked="showTicks" @change="updateShowTicks">Show Tickmarks</check-option>
-          <check-option id="transpose" class="w-full" :checked="transpose" @change="updateTranspose">Switch Rows and Columns</check-option>
+          </div>
         </div>
       </div>
 

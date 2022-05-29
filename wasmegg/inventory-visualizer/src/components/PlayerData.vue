@@ -4,35 +4,35 @@
   <inventory-canvas
     :inventory="inventory"
     :layout-order="layoutOrder"
-    />
+    >
+    <select id="bookmarks" v-model="bookmark" class="my-1" name="bookmarks" @change="handleBookmarkChange">
+      <template v-for="bkInfo of bookmarkProps" :key="bkInfo.id">
+        <option :value="bkInfo.id">{{ bkInfo.label }}</option>
+      </template>
+    </select>
+    <reset-button @click="resetAllMaybe">Reset Arrangement</reset-button>
+  </inventory-canvas>
 </template>
 
 <div class="flex max-w-full md:flex-row flex-col my-8 md:items-stretch items-center justify-around">
 
   <div class="p-2 mb-4 flex flex-col items-center Aspects ordering border border-blue-100">
     <h4 class="mb-2">Aspects</h4>
-    <drag-orderer item-classes="w-60" :layout-order="aspectsOrder" direction="vert" @updateOrder="updateAspectsLayout">
+    <drag-orderer item-classes="w-60" :layout-order="aspects" direction="vert" @updateOrder="updateAspectsLayout">
       <template #listItem="{element}">
-        <div class="h-8 w-8 relative rounded-full isolate bg-epic">
+        <div class="h-7 w-7 relative rounded-full isolate bg-epic">
+          <img v-if="element.rarity" class="absolute h-9 w-8 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" :src="`https://eggincassets.tcl.sh/256/egginc-extras/glow/${element.rarity}-13.png`" />
           <img v-if="element.img" class="absolute top-0 left-0 h-full w-full z-10" :src="element.img" />
           <span v-else class="absolute p-1 z-10 text-xl">{{ element.glyph }}</span>
         </div>
         <span class="m-1">{{ element.name }}</span>
       </template>
     </drag-orderer>
-    <div class="h-full flex flex-col justify-end">
-      <button
-        class="mt-2 mb-1 w-48 py-2 px-4 flex grow-0 justify-center border border-transparent rounded-md shadow-sm text-sm font-medium text-gray-800 bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50"
-        @click="resetAspects"
-        >
-        Reset Aspect Order
-      </button>
-    </div>
   </div>
 
   <div class="p-2 mb-4 flex flex-col items-center Artifacts ordering border border-blue-100">
     <h4>Artifacts</h4>
-    <drag-orderer item-classes="w-60 max-h-10 mb-1 items-center" :layout-order="artifactsOrder" direction="vert" @updateOrder="updateArtifactsLayout">
+    <drag-orderer item-classes="w-60 max-h-10 mb-1 items-center" :layout-order="artifacts" direction="vert" @updateOrder="updateArtifactsLayout">
       <template #listItem="{element}">
         <div class="h-7 w-7 relative rounded-full isolate">
           <img class="absolute top-0 left-0 h-full w-full z-10" :src="element.img" />
@@ -40,17 +40,11 @@
         <span class="m-1 ml-1.5">{{ element.name }}</span>
       </template>
     </drag-orderer>
-    <button
-      class="mt-2 mb-1 w-48 py-2 px-4 flex justify-center border border-transparent rounded-md shadow-sm text-sm font-medium text-gray-800 bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50"
-      @click="resetArtifacts"
-      >
-      Reset Artifact Order
-    </button>
   </div>
 
   <div class="p-2 mb-4 flex flex-col items-center Stones ordering border border-blue-100">
     <h4>Stones</h4>
-    <drag-orderer item-classes="w-60 stone" :layout-order="stonesOrder" direction="vert" @updateOrder="updateStonesLayout">
+    <drag-orderer item-classes="w-60 stone" :layout-order="stones" direction="vert" @updateOrder="updateStonesLayout">
       <template #listItem="{element}">
         <div class="h-8 w-8 relative isolate">
           <img class="absolute top-0 left-0 h-full w-full z-10" :src="element.img" />
@@ -58,16 +52,13 @@
         <span class="m-1">{{ element.name }}</span>
       </template>
     </drag-orderer>
-    <div class="h-full flex flex-col justify-end">
-      <reset-button @click="resetStones">Reset Stone Order</reset-button>
-    </div>
   </div>
 </div>
 
 </template>
 
 <script lang="ts">
-import _ from 'lodash'
+  import _ from 'lodash'
 import { defineComponent } from 'vue';
 import { getLocalStorage, setLocalStorage, Inventory, requestFirstContact, UserBackupEmptyError } from 'lib';
 import { defaultAxisOrder, Orderables } from '@/lib'
@@ -93,14 +84,32 @@ async function fetchArtifactsDb(playerId: string) {
 }
 
 const LOCALSTORAGE_KEYS = {
+  aspects:   'layoutOrderAspects',
   artifacts: 'layoutOrderArtifacts',
   stones:    'layoutOrderStones',
-  aspects:   'layoutOrderAspects',
+}
+type OrderablesAxis = keyof (typeof LOCALSTORAGE_KEYS);
+
+const BOOKMARK_PROPS = {
+  BkA: { id: "BkA", label: 'Bookmark A' },
+  BkB: { id: "BkB", label: 'Bookmark B' },
+  BkC: { id: "BkC", label: 'Bookmark C' },
+}
+type Bookmarker = keyof (typeof BOOKMARK_PROPS);
+const DEFAULT_BOOKMARK: Bookmarker = 'BkA'
+
+function storageKeyFor(axis: OrderablesAxis, bookmark: string) {
+  return `${LOCALSTORAGE_KEYS[axis]}${bookmark}`
 }
 
-function loadLayoutAxis(axis: keyof (typeof LOCALSTORAGE_KEYS)): Orderables {
+function storeLayoutAxis(orderables: Orderables, axis: OrderablesAxis, bookmark: Bookmarker) {
+  if (! bookmark) { throw new Error(axis) }
+  setLocalStorage(storageKeyFor(axis, bookmark), JSON.stringify(getOrderablesDna(orderables)))
+}
+
+function loadLayoutAxis(axis: OrderablesAxis, bookmark: Bookmarker): Orderables {
   const fallback   = defaultAxisOrder(axis)
-  const storageKey = LOCALSTORAGE_KEYS[axis]
+  const storageKey = storageKeyFor(axis, bookmark)
   //
   const axisJson = getLocalStorage(storageKey) || null
   if (axisJson) {
@@ -114,16 +123,35 @@ function loadLayoutAxis(axis: keyof (typeof LOCALSTORAGE_KEYS)): Orderables {
     }
   }
   // if nothing or error
-  storeLayoutAxis(axis, fallback)
+  storeLayoutAxis(fallback, axis, bookmark)
   return fallback
+}
+
+function loadLayoutAll(bookmark: Bookmarker = DEFAULT_BOOKMARK) {
+  const aspects   = loadLayoutAxis('aspects',   bookmark)
+  const artifacts = loadLayoutAxis('artifacts', bookmark)
+  const stones    = loadLayoutAxis('stones',    bookmark)
+  return { aspects, artifacts, stones }
 }
 
 function getOrderablesDna(orderables: Orderables) {
   return _.mapValues(orderables, (orderable) => _.pick(orderable, ['weight']))
 }
 
-function storeLayoutAxis(axis: keyof (typeof LOCALSTORAGE_KEYS), orderables: Orderables) {
-  setLocalStorage(LOCALSTORAGE_KEYS[axis], JSON.stringify(getOrderablesDna(orderables)))
+interface LayoutOrderableComponent {
+  stones: Orderables, artifacts: Orderables, aspects: Orderables, bookmark: Bookmarker,
+}
+
+function resetAxis(comp: LayoutOrderableComponent, axis: OrderablesAxis) {
+  const orderables = defaultAxisOrder(axis)
+  storeLayoutAxis(orderables, axis, comp.bookmark)
+  comp[axis] = orderables
+}
+
+function resetAll(comp: LayoutOrderableComponent) {
+  resetAxis(comp, 'aspects')
+  resetAxis(comp, 'stones')
+  resetAxis(comp, 'artifacts')
 }
 
 export default defineComponent({
@@ -138,22 +166,27 @@ export default defineComponent({
   },
 
   data() {
+    const bookmark: Bookmarker = DEFAULT_BOOKMARK
+    // I don't know how to make ts happy most of the time
+    const inventory: any = null // eslint-disable-line @typescript-eslint/no-explicit-any
     return {
-      inventory:      null as any, // eslint-disable-line @typescript-eslint/no-explicit-any
       loaded:         false,
-      artifactsOrder: loadLayoutAxis('artifacts'),
-      stonesOrder:    loadLayoutAxis('stones'),
-      aspectsOrder:   loadLayoutAxis('aspects'),
+      artifacts: loadLayoutAxis('artifacts', bookmark),
+      stones:    loadLayoutAxis('stones',    bookmark),
+      aspects:   loadLayoutAxis('aspects',   bookmark),
+      bookmark,
+      inventory,
       console,
+      bookmarkProps: BOOKMARK_PROPS,
     }
   },
 
   computed: {
     layoutOrder() {
       return {
-        stones:    this.stonesOrder,
-        artifacts: this.artifactsOrder,
-        aspects:   this.aspectsOrder,
+        stones:    this.stones,
+        artifacts: this.artifacts,
+        aspects:   this.aspects,
       }
     },
   },
@@ -164,36 +197,34 @@ export default defineComponent({
 
   methods: {
     updateArtifactsLayout(orderables: Orderables) {
-      storeLayoutAxis('artifacts', orderables)
-      this.artifactsOrder = orderables
-    },
-    resetArtifacts() {
-      const orderables = defaultAxisOrder('artifacts')
-      storeLayoutAxis('artifacts', orderables)
-      this.artifactsOrder = orderables
+      storeLayoutAxis(orderables, 'artifacts', this.bookmark)
+      this.artifacts = orderables
     },
     //
     updateStonesLayout(orderables: Orderables) {
-      storeLayoutAxis('stones', orderables)
-      this.stonesOrder = orderables
-    },
-    resetStones() {
-      const orderables = defaultAxisOrder('stones')
-      storeLayoutAxis('stones', orderables)
-      this.stonesOrder = orderables
+      storeLayoutAxis(orderables, 'stones', this.bookmark)
+      this.stones = orderables
     },
     updateAspectsLayout(orderables: Orderables) {
-      storeLayoutAxis('aspects', orderables)
-      this.aspectsOrder = orderables
+      storeLayoutAxis(orderables, 'aspects', this.bookmark)
+      this.aspects = orderables
     },
-    resetAspects() {
-      const orderables = defaultAxisOrder('aspects')
-      storeLayoutAxis('aspects', orderables)
-      this.aspectsOrder = orderables
+    //
+    resetAllMaybe() {
+      if (confirm('are you sure?')) {
+        resetAll(this)
+      }
+    },
+    handleBookmarkChange(ev: Event) {
+      const bookmark: Bookmarker = ((<HTMLInputElement>ev?.target)?.value || DEFAULT_BOOKMARK) as Bookmarker
+      const { artifacts, aspects, stones } = loadLayoutAll(bookmark)
+      this.artifacts = artifacts
+      this.aspects = aspects
+      this.stones = stones
     },
     async fetchArtifactsDb() {
       const artifactsDb = await fetchArtifactsDb(this.playerId)
-      this.inventory    = new Inventory(artifactsDb)
+      this.inventory    = new Inventory(artifactsDb) // eslint-disable-line @typescript-eslint/no-explicit-any
       this.loaded       = true
     },
     // updateTranspose(ev) {

@@ -98,9 +98,9 @@ const DEFAULT_ARTIFACTS_ORDER: Orderables = _.fromPairs(_.map(artifactIdOrder, (
 }))
 
 const DEFAULT_ASPECTS_ORDER: Orderables = _.mapValues({
-  byLegendary:  { name: 'Legendary',         weight:  1, img: hackyIconUrl('afx_book_of_basan_4.png') },
-  byEpic:       { name: 'Epic',              weight:  2, img: hackyIconUrl('afx_aurelian_brooch_4.png') },
-  byRare:       { name: 'Rare',              weight:  3, img: hackyIconUrl('afx_tungsten_ankh_4.png') },
+  byLegendary:  { name: 'Legendary',         weight:  1, img: hackyIconUrl('afx_book_of_basan_4.png'), rarity: 'legendary' },
+  byEpic:       { name: 'Epic',              weight:  2, img: hackyIconUrl('afx_aurelian_brooch_4.png'), rarity: 'epic' },
+  byRare:       { name: 'Rare',              weight:  3, img: hackyIconUrl('afx_tungsten_ankh_4.png'), rarity: 'rare' },
   //
   byArtifact:   { name: 'Artifact',          weight:  4, img: hackyIconUrl('afx_quantum_metronome_4.png') },
   byStone:      { name: 'Stone',             weight:  5, img: hackyIconUrl('afx_prophecy_stone_4.png') },
@@ -111,8 +111,9 @@ const DEFAULT_ASPECTS_ORDER: Orderables = _.mapValues({
   byLevel:      { name: 'Level',             weight:  9, glyph: '🚀', img: '' },
   byDecoration: { name: 'Mounted Stones',    weight: 10, img: hackyIconUrl('afx_clarity_stone_2.png') },
   //
-  byCommon:     { name: 'Common',            weight: 11, img: hackyIconUrl('afx_puzzle_cube_4.png') },
-  byType:       { name: 'Type!',             weight: 12, glyph: '📇', img: '' },
+  byCommon:     { name: 'Common',            weight: 11, img: hackyIconUrl('afx_puzzle_cube_1.png') },
+  byUncommon:   { name: 'Uncommon',          weight: 12, img: hackyIconUrl('afx_puzzle_cube_4.png'), rarity: 'epic' },
+  byType:       { name: 'Type',              weight: 13, glyph: '📇', img: '' },
 
 }, (vv, id) => ({ ...vv, id }))
 
@@ -135,25 +136,28 @@ const Last = 9e12
 
 type SorterFunc = (item: GridItem, layoutOrder: LayoutOrderables) => number
 const Sorters: { [key:string]: SorterFunc }  = {
-  byType(item: GridItem)       { return typeOrder.indexOf(item.afxType) },
-  byLevel(item: GridItem)      { return -1 * (item.afxType === Type.STONE ? (item.afxLevel + 1) : item.afxLevel) },
   byLegendary(item: GridItem)  { return (item.afxRarity === Rarity.LEGENDARY) ? 1 : Last },
   byEpic(item: GridItem)       { return (item.afxRarity === Rarity.EPIC) ? 1 : Last },
   byRare(item: GridItem)       { return (item.afxRarity === Rarity.RARE) ? 1 : Last },
   byCommon(item: GridItem)     { return (item.afxRarity === Rarity.COMMON) ? 1 : Last },
-  byIngredient(item: GridItem) { return (item.afxType === Type.INGREDIENT) ? 1 : Last },
+  byUncommon(item: GridItem)   { return (item.afxRarity !== Rarity.COMMON) ? 1 : Last },
   byArtifact(item: GridItem)   { return (item.afxType === Type.ARTIFACT) ? 1 : Last },
   byStone(item: GridItem)      { return (item.afxType === Type.STONE) ? 1 : Last },
+  byIngredient(item: GridItem) { return (item.afxType === Type.INGREDIENT) ? 1 : Last },
+  //
   byAnyStone(item: GridItem, layoutOrder: LayoutOrderables)   {
     if  (! (item.afxType === Type.STONE_INGREDIENT || item.afxType === Type.STONE)) { return Last }
     return Sorters.byFamily(item, layoutOrder)
   },
+  //
   byFamily(item: GridItem, layoutOrder: LayoutOrderables) {
     if (item.afxType    === Type.ARTIFACT)   { return layoutOrder.artifacts[item.afxId]?.weight }
     if (item.nofragType === Type.STONE)      { return 1e3 * layoutOrder.stones[item.nofragId]?.weight }
     if (item.afxType    === Type.INGREDIENT) { return 1e6 * ingredientOrder.indexOf(item.afxId) }
     return Last
   },
+  byLevel(item: GridItem)      { return -1 * (item.afxType === Type.STONE ? (item.afxLevel + 1) : item.afxLevel) },
+  byType(item: GridItem)       { return typeOrder.indexOf(item.afxType) },
   byDecoration(item: GridItem, lo: LayoutOrderables) {
     if (! item.afxRarity) { return Last * 1e12 }
     return ((byMountedOrder(item, 0, lo) * 1e6) + (byMountedOrder(item, 1, lo) * 1e3) + byMountedOrder(item, 2, lo))
