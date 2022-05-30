@@ -56,6 +56,7 @@ import { REPORT_LEGENDARIES } from '@/events';
 export default defineComponent({
   props: {
     eventBus: {
+      // @ts-ignore
       type: Object as PropType<Emitter>,
       required: true,
     },

@@ -62,6 +62,7 @@ export default defineComponent({
     eventBus: {
       // The component listens for getValue events on the event bus, and emits
       // update:modelValue correspondingly.
+      // @ts-ignore
       type: Object as PropType<Emitter | undefined>,
       default: undefined,
     },
