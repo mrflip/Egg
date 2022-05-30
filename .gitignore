@@ -7,3 +7,14 @@ dist/*
 **/dist
 wasmegg/_common/loot/mission_reward_count-pretty.json
 yarn.lock
+
+# Yarn 2 gitignore patterns
+
+.yarn/*
+!.yarn/cache
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.yarn/cache
