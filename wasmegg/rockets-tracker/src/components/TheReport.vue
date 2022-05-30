@@ -74,6 +74,7 @@ export default defineComponent({
       required: true,
     },
     eventBus: {
+      // @ts-ignore
       type: Object as PropType<Emitter>,
       required: true,
     },
