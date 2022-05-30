@@ -29,6 +29,9 @@
         <span class="m-1">{{ element.name }}</span>
       </template>
     </drag-orderer>
+    <div class="h-full flex flex-col justify-end">
+      <reset-button @click="() => this.resetAxis('aspects')">Reset Sorting</reset-button>
+    </div>
   </div>
 
   <div class="p-2 mb-4 flex flex-col items-center Artifacts ordering border border-blue-100">
@@ -41,6 +44,7 @@
         <span class="m-1 ml-1.5">{{ element.name }}</span>
       </template>
     </drag-orderer>
+    <reset-button @click="() => this.resetAxis('artifacts')">Reset Artifacts</reset-button>
   </div>
 
   <div class="p-2 mb-4 flex flex-col items-center Stones ordering border border-blue-100">
@@ -53,6 +57,9 @@
         <span class="m-1">{{ element.name }}</span>
       </template>
     </drag-orderer>
+    <div class="h-full flex flex-col justify-end">
+      <reset-button @click="() => this.resetAxis('stones')">Reset Stones</reset-button>
+    </div>
   </div>
 </div>
 
@@ -216,6 +223,7 @@ export default defineComponent({
         resetAll(this)
       }
     },
+    resetAxis(axis: OrderablesAxis) { resetAxis(this, axis) },
     handleBookmarkChange(ev: Event) {
       const bookmark: Bookmarker = ((<HTMLInputElement>ev?.target)?.value || DEFAULT_BOOKMARK) as Bookmarker
       const { artifacts, aspects, stones } = loadLayoutAll(bookmark)
