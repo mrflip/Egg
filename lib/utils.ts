@@ -37,8 +37,7 @@ export function iconURL(
   if (extension) {
     relpath = relpath.replace(/\.[a-z]+$/, `.${extension}`);
   }
-  // return `https://eggincassets.tcl.sh/${size}/${relpath}`;
-  return `http://localhost:3000/eggincassets/${size}/${relpath}`;
+  return `https://eggincassets.tcl.sh/${size}/${relpath}`;
 }
 
 // Trim trailing zeros, and possibly the decimal point.
