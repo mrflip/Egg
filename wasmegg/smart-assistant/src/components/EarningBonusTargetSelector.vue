@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Listbox v-model="selected" as="div" class="sm:max-w-xs">
+    <Listbox v-model="selected as string" as="div" class="sm:max-w-xs">
       <ListboxLabel class="block text-sm">Select your target EB:</ListboxLabel>
       <div class="mt-1 relative">
         <ListboxButton
@@ -34,7 +34,7 @@
               :key="index"
               v-slot="{ active: isActive, selected: isSelected }"
               as="template"
-              :value="target"
+              :value="target || ''"
             >
               <li
                 :class="[

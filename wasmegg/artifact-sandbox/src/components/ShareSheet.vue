@@ -269,7 +269,7 @@ export default defineComponent({
           if (canvas.width !== 0) {
             placeholderAspectRatio.value = canvas.height / canvas.width;
           }
-          imageURL.value = window.URL.createObjectURL(blob);
+          imageURL.value = window.URL.createObjectURL(blob!);
         }, 'image/png');
       } catch (e) {
         generateImageErrored.value = true;

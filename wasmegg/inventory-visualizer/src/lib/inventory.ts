@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { Artifact, ei, Inventory, Stone, getArtifactFamilyProps } from 'lib';
-import { Orderables, LayoutOrderables, LayoutAxis } from '@/lib';
+import { Orderables, Orderable, LayoutOrderables, LayoutAxis } from '@/lib';
 import Name = ei.ArtifactSpec.Name;
 import Level = ei.ArtifactSpec.Level;
 import Rarity = ei.ArtifactSpec.Rarity;
@@ -85,38 +85,38 @@ const ingredientOrder = [
   Name.GOLD_METEORITE,
 ];
 
-const DEFAULT_STONES_ORDER: Orderables = _.fromPairs(_.map(stoneIdOrder, (id, idx) => {
+const DEFAULT_STONES_ORDER: Orderables = _.fromPairs(_.map(stoneIdOrder, (id: Name, idx: number) => {
   const artfam = getArtifactFamilyProps(id as number)
   const art = _.last(artfam.tiers)
   return [id, { id: String(id), name: artfam.name, weight: Number(idx) + 1, img: hackyIconUrl(art?.icon_filename) }]
 }))
 
-const DEFAULT_ARTIFACTS_ORDER: Orderables = _.fromPairs(_.map(artifactIdOrder, (id, idx) => {
+const DEFAULT_ARTIFACTS_ORDER: Orderables = _.fromPairs(_.map(artifactIdOrder, (id: Name, idx: number) => {
   const artfam = getArtifactFamilyProps(id as number)
   const art = _.last(artfam.tiers)
   return [id, { id: String(id), name: artfam.name, weight: Number(idx) + 1, img: hackyIconUrl(art?.icon_filename) }]
 }))
 
-const DEFAULT_ASPECTS_ORDER: Orderables = _.mapValues({
-  byLegendary:  { name: 'Legendary',         weight:  1, img: hackyIconUrl('afx_book_of_basan_4.png'), rarity: 'legendary' },
-  byEpic:       { name: 'Epic',              weight:  2, img: hackyIconUrl('afx_aurelian_brooch_4.png'), rarity: 'epic' },
-  byRare:       { name: 'Rare',              weight:  3, img: hackyIconUrl('afx_tungsten_ankh_4.png'), rarity: 'rare' },
-  byCommonArt:  { name: 'Common Artifact',   weight:  4, img: hackyIconUrl('afx_puzzle_cube_1.png') },
+const DEFAULT_ASPECTS_ORDER: Orderables = {
+  byLegendary:  { name: 'Legendary',         id: 'byLegendary', weight:  1, img: hackyIconUrl('afx_book_of_basan_4.png'), rarity: 'legendary' },
+  byEpic:       { name: 'Epic',              id: 'byEpic',      weight:  2, img: hackyIconUrl('afx_aurelian_brooch_4.png'), rarity: 'epic' },
+  byRare:       { name: 'Rare',              id: 'byRare',      weight:  3, img: hackyIconUrl('afx_tungsten_ankh_4.png'), rarity: 'rare' },
+  byCommonArt:  { name: 'Common Artifact',   id: 'byCommonArt', weight:  4, img: hackyIconUrl('afx_puzzle_cube_1.png') },
   //
-  byStone:      { name: 'Stone',             weight:  5, img: hackyIconUrl('afx_prophecy_stone_4.png') },
-  byIngredient: { name: 'Ingredient',        weight:  6, img: hackyIconUrl('afx_gold_meteorite_3.png') },
-  byFragment:   { name: 'Fragment',          weight:  7, img: hackyIconUrl('afx_soul_stone_1.png') },
+  byStone:      { name: 'Stone',             id: 'byStone',     weight:  5, img: hackyIconUrl('afx_prophecy_stone_4.png') },
+  byIngredient: { name: 'Ingredient',        id: 'byIngredient',weight:  6, img: hackyIconUrl('afx_gold_meteorite_3.png') },
+  byFragment:   { name: 'Fragment',          id: 'byFragment',  weight:  7, img: hackyIconUrl('afx_soul_stone_1.png') },
   //
-  byFamily:     { name: 'Family',            weight:  8, glyph: '🌈', img: '' },
-  byLevel:      { name: 'Level',             weight:  9, glyph: '🚀', img: '' },
-  byDecoration: { name: 'Mounted Stones',    weight: 10, img: hackyIconUrl('afx_clarity_stone_2.png') },
+  byFamily:     { name: 'Family',            id: 'byFamily',    weight:  8, glyph: '🌈', img: '' },
+  byLevel:      { name: 'Level',             id: 'byLevel',     weight:  9, glyph: '🚀', img: '' },
+  byDecoration: { name: 'Mounted Stones',    id: 'byDecoration',weight: 10, img: hackyIconUrl('afx_clarity_stone_2.png') },
   //
-  byAnyStone:   { name: 'Stone or Fragment', weight: 11, img: hackyIconUrl('afx_soul_stone_2.png') },
-  byArtifact:   { name: 'Artifact',          weight: 12, img: hackyIconUrl('afx_quantum_metronome_4.png') },
-  byUncommon:   { name: 'Uncommon',          weight: 13, img: hackyIconUrl('afx_puzzle_cube_4.png'), rarity: 'epic' },
-  byType:       { name: 'Type',              weight: 14, glyph: '📇', img: '' },
+  byAnyStone:   { name: 'Stone or Fragment', id: 'byAnyStone',  weight: 11, img: hackyIconUrl('afx_soul_stone_2.png') },
+  byArtifact:   { name: 'Artifact',          id: 'byArtifact',  weight: 12, img: hackyIconUrl('afx_quantum_metronome_4.png') },
+  byUncommon:   { name: 'Uncommon',          id: 'byUncommon',  weight: 13, img: hackyIconUrl('afx_puzzle_cube_4.png'), rarity: 'epic' },
+  byType:       { name: 'Type',              id: 'byType',      weight: 14, glyph: '📇', img: '' },
 
-}, (vv, id) => ({ ...vv, id }))
+}
 
 const AxisOrders: LayoutOrderables = {
   artifacts:    DEFAULT_ARTIFACTS_ORDER,

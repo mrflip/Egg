@@ -180,7 +180,7 @@ const regenerate = async () => {
   error.value = null;
   try {
     const result = await drawInventory(
-      canvasRef.value!,
+      canvasRef.value! as HTMLCanvasElement,
       grid.value.slice(0, 30000),
       Number(itemsPerCol.value),
       transpose.value,
