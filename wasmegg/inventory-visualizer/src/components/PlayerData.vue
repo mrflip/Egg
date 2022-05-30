@@ -30,7 +30,7 @@
       </template>
     </drag-orderer>
     <div class="h-full flex flex-col justify-end">
-      <reset-button @click="() => this.resetAxis('aspects')">Reset Sorting</reset-button>
+      <reset-button @click="() => resetAxis('aspects')">Reset Sorting</reset-button>
     </div>
   </div>
 
@@ -44,7 +44,7 @@
         <span class="m-1 ml-1.5">{{ element.name }}</span>
       </template>
     </drag-orderer>
-    <reset-button @click="() => this.resetAxis('artifacts')">Reset Artifacts</reset-button>
+    <reset-button @click="() => resetAxis('artifacts')">Reset Artifacts</reset-button>
   </div>
 
   <div class="p-2 mb-4 flex flex-col items-center Stones ordering border border-blue-100">
@@ -58,7 +58,7 @@
       </template>
     </drag-orderer>
     <div class="h-full flex flex-col justify-end">
-      <reset-button @click="() => this.resetAxis('stones')">Reset Stones</reset-button>
+      <reset-button @click="() => resetAxis('stones')">Reset Stones</reset-button>
     </div>
   </div>
 </div>
