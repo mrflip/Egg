@@ -11,6 +11,12 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "lib": ["esnext", "dom"],
-    "types": ["vite/client"]
+    "types": [],
+    "paths": {
+      "@/*": ["src/*"],
+      "ui/*": ["../../ui/*"],
+      "lib": ["../../lib"],
+      "lib/*": ["../../lib/*"]
+    }
   }
 }

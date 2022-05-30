@@ -9,6 +9,7 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
       ui: path.resolve(__dirname, '../../ui'),
+      lib: path.resolve(__dirname, '../../lib'),
     },
   },
   plugins: [vue()],
