@@ -4,12 +4,13 @@ import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  base: '/rockets-tracker/',
+const config = {
+  base: '/inventory-visualizer/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
       ui: path.resolve(__dirname, '../../ui'),
+      lib: path.resolve(__dirname, '../../lib'),
     },
   },
   plugins: [vue()],
@@ -19,4 +20,17 @@ export default defineConfig({
   server: {
     host: true,
   },
-});
+};
+
+if (process.env.LOCAL === 'true') {
+  config.server.proxy = {
+    "^/eggincassets/.*": {
+      target: "https://eggincassets.tcl.sh",
+      changeOrigin: true,
+      secure: false,
+      rewrite: (path) => path.replace(/^\/eggincassets/, ""),
+    },
+  }
+}
+
+export default defineConfig(config)
