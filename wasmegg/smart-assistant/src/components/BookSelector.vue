@@ -1,5 +1,5 @@
 <template>
-  <Listbox v-model="selected" as="div" class="sm:max-w-xs" :disabled="disabled">
+  <Listbox v-model="selected as string" as="div" class="sm:max-w-xs" :disabled="disabled">
     <ListboxLabel class="block text-sm">Book of Basan:</ListboxLabel>
     <div class="mt-1 relative">
       <ListboxButton
@@ -44,7 +44,7 @@
             :key="index"
             v-slot="{ active: isActive, selected: isSelected }"
             as="template"
-            :value="book"
+            :value="book || ''"
           >
             <li
               :class="[
@@ -105,6 +105,7 @@
 </template>
 
 <script lang="ts">
+// @ts-nocheck
 import { defineComponent, PropType, ref, toRefs, watch } from 'vue';
 import {
   Listbox,
@@ -115,7 +116,7 @@ import {
 } from '@headlessui/vue';
 import { BanIcon, CheckIcon, SelectorIcon } from '@heroicons/vue/solid';
 
-import { ei, iconURL } from 'lib';
+import { ei, iconURL, Item } from 'lib';
 import { Book, books } from '@/lib';
 
 import Rarity = ei.ArtifactSpec.Rarity;
