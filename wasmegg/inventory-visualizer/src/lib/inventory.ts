@@ -114,7 +114,8 @@ const DEFAULT_ASPECTS_ORDER: Orderables = {
   byAnyStone:   { name: 'Stone or Fragment', id: 'byAnyStone',  weight: 11, img: hackyIconUrl('afx_soul_stone_2.png') },
   byArtifact:   { name: 'Artifact',          id: 'byArtifact',  weight: 12, img: hackyIconUrl('afx_quantum_metronome_4.png') },
   byUncommon:   { name: 'Uncommon',          id: 'byUncommon',  weight: 13, img: hackyIconUrl('afx_puzzle_cube_4.png'), rarity: 'epic' },
-  byType:       { name: 'Type',              id: 'byType',      weight: 14, glyph: '📇', img: '' },
+  byNonLegend:  { name: 'Non-Legendary',     id: 'byNonLegend', weight: 14, glyph: '🥱', img: '', rarity: 'epic' },
+  byType:       { name: 'Type',              id: 'byType',      weight: 15, glyph: '📇', img: '' },
 
 }
 
@@ -138,6 +139,7 @@ const Last = 9e12
 type SorterFunc = (item: GridItem, layoutOrder: LayoutOrderables) => number
 const Sorters: { [key:string]: SorterFunc }  = {
   byLegendary(item: GridItem)  { return (item.afxRarity === Rarity.LEGENDARY) ? 1 : Last },
+  byNonLegend(item: GridItem)  { return (item.afxRarity !== Rarity.LEGENDARY) ? 1 : Last },
   byEpic(item: GridItem)       { return (item.afxRarity === Rarity.EPIC) ? 1 : Last },
   byRare(item: GridItem)       { return (item.afxRarity === Rarity.RARE) ? 1 : Last },
   byCommonArt(item: GridItem)  { return (item.afxRarity === Rarity.COMMON && item.afxType === Type.ARTIFACT) ? 1 : Last },
