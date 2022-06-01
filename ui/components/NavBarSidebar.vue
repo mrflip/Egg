@@ -176,45 +176,47 @@ const entries: ({
     url: '/#/donate',
     icon: EmojiHappyIcon,
   },
+  //
+  // null,
+  //
+  // {
+  //   ...idToTool.get('eicoop')!,
+  //   title: 'coopTracker',
+  //   iconUrl: iconURL('egginc/egg_of_prophecy.png', 64),
+  // },
+  //
+  // null,
+  //
+  // idToTool.get('artifact-explorer')!,
+  // idToTool.get('artifact-sandbox')!,
+  // idToTool.get('rockets-tracker')!,
+  // idToTool.get('past-contracts')!,
 
-  null,
-
-  {
-    ...idToTool.get('eicoop')!,
-    title: 'coopTracker',
-    iconUrl: iconURL('egginc/egg_of_prophecy.png', 64),
-  },
-
-  null,
-
-  idToTool.get('artifact-explorer')!,
-  idToTool.get('artifact-sandbox')!,
-  idToTool.get('rockets-tracker')!,
-  idToTool.get('past-contracts')!,
   idToTool.get('inventory-visualizer')!,
-  idToTool.get('enlightenment')!,
-  idToTool.get('smart-assistant')!,
 
-  null,
-
-  idToTool.get('mission-list')!,
-  idToTool.get('consumption-sheet')!,
-  idToTool.get('loot-analysis')!,
-  idToTool.get('events')!,
-  idToTool.get('legendary-study')!,
-
-  null,
-
-  {
-    id: 'misc',
-    title: 'Miscellaneous tools',
-    url: 'https://eiadhoc.netlify.app/',
-    icon: ViewGridIcon,
-  },
-
-  null,
-
-  idToTool.get('EggLedger')!,
+  // idToTool.get('enlightenment')!,
+  // idToTool.get('smart-assistant')!,
+  //
+  // null,
+  //
+  // idToTool.get('mission-list')!,
+  // idToTool.get('consumption-sheet')!,
+  // idToTool.get('loot-analysis')!,
+  // idToTool.get('events')!,
+  // idToTool.get('legendary-study')!,
+  //
+  // null,
+  //
+  // {
+  //   id: 'misc',
+  //   title: 'Miscellaneous tools',
+  //   url: 'https://eiadhoc.netlify.app/',
+  //   icon: ViewGridIcon,
+  // },
+  //
+  // null,
+  //
+  // idToTool.get('EggLedger')!,
 
   null,
 ];
