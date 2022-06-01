@@ -5,7 +5,7 @@
   <template v-else>
 
     <template v-if="loading">
-      <div class="min-h-[500px]">
+      <div class="placeholder">
         <p class="max-w-lg 2xl:max-w-2xl mx-auto text-center text-sm text-gray-500">
           Generating image, this might take a while...<br />
           Note that this tool may not work in all browsers.
@@ -224,4 +224,37 @@ async function imageIsEmpty(url: string): Promise<boolean> {
   return image.naturalWidth === 0 || image.naturalHeight === 0;
 }
 
+
+const placeholderSizing = computed(() => {
+  const { height, width } = gridInfo.value
+   const tothfrac = height / width || 0.5
+   console.log(tothfrac, tothfrac * 1280, gridInfo.value)
+   return {
+     xxs: `${Math.floor((380-32) * tothfrac)}px`,
+     xs:  `${Math.floor((550-32) * tothfrac)}px`,
+     sm:  `${Math.floor((640-32) * tothfrac)}px`,
+     md:  `${Math.floor((768-32) * tothfrac)}px`,
+     lg:  `${Math.floor((1024-32) * tothfrac)}px`,
+     xl:  `${Math.floor((1280-32) * tothfrac)}px`,
+   }
+ })
+
 </script>
+<style>
+ .placeholder { height: v-bind('placeholderSizing.xxs') }
+ @media screen and (min-width:  500px) {
+   .placeholder { background: #eeeeff; height: v-bind('placeholderSizing.xs') }
+ }
+ @media screen and (min-width:  640px) {
+   .placeholder { background: #eeeeff; height: v-bind('placeholderSizing.sm') }
+ }
+ @media screen and (min-width:  768px) {
+   .placeholder { background: #eeeeff; height: v-bind('placeholderSizing.md') }
+ }
+ @media screen and (min-width: 1024px) {
+   .placeholder { background: #eeeeff; height: v-bind('placeholderSizing.lg') }
+ }
+ @media screen and (min-width: 1536px) {
+   .placeholder { background: #eeeeff; height: v-bind('placeholderSizing.xl') }
+ }
+</style>
