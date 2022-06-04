@@ -6,7 +6,7 @@
     >
       <template v-for="col of cols" :key="col">
         <span
-          class="flex w-full justify-center"
+          class="flex w-full justify-center text-center text-xs sm:text-base sillySize"
           :class="`${((col % 2 === 0) ? 'even' : 'odd')}`"
         >
           {{ col }}
@@ -37,16 +37,33 @@ export default defineComponent({
   },
   // emits: ['updateOrder'],
   computed: {
-    cols() { return _.range(1, this.gridInfo.actualPerRow + 1) },
+    cols() {
+      return _.range(1, this.gridInfo.actualPerRow + 1)
+    },
     smusherWidth() {
       const { totalWidthPx } = this.gridInfo
       return (totalWidthPx === 1024) ? '100%' : `${totalWidthPx}px`
     },
+    sillySizeFont() {
+      if (this.gridInfo.actualPerRow > 80) { return '0.25rem' }
+      if (this.gridInfo.actualPerRow > 50) { return '0.5rem' }
+      if (this.gridInfo.actualPerRow > 30) { return '0.75rem' }
+      return '1rem'
+    },
+    sillySizeOkReallyNow() {
+      if (this.gridInfo.actualPerRow > 160) { return 'none' }
+      return null // 'block'
+    },
   },
 });
+
 </script>
 
 <style scoped>
   .odd  { background: #f4f4f4; }
   .even { background: #ffffff; }
+  .sillySize {
+    font-size: v-bind('sillySizeFont');
+    display:   v-bind('sillySizeOkReallyNow');
+  }
 </style>

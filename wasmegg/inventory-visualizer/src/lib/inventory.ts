@@ -106,9 +106,9 @@ const DEFAULT_ASPECTS_ORDER: Orderables = {
   byStoningLvl: { name: 'Stoning Level',     weight:  6, grain: 2, area: 'stl', id: 'byStoningLvl',             img: hackyIconUrl('afx_clarity_stone_2.png') },
 
   byStone:      { name: 'Stone',             weight: 10, grain: 3, area: 'typ', id: 'byStone',                  img: hackyIconUrl('afx_prophecy_stone_4.png') },
+  byAnyStone:   { name: 'Stone or Fragment', weight: 13, grain: 2, area: 'typ', id: 'byAnyStone',               img: hackyIconUrl('afx_soul_stone_2.png') },
   byIngredient: { name: 'Ingredient',        weight: 11, grain: 3, area: 'typ', id: 'byIngredient',             img: hackyIconUrl('afx_gold_meteorite_3.png') },
   byFragment:   { name: 'Fragment',          weight: 12, grain: 3, area: 'typ', id: 'byFragment',               img: hackyIconUrl('afx_soul_stone_1.png') },
-  byAnyStone:   { name: 'Stone or Fragment', weight: 13, grain: 3, area: 'typ', id: 'byAnyStone',               img: hackyIconUrl('afx_soul_stone_2.png') },
   byArtifact:   { name: 'Artifact',          weight: 14, grain: 3, area: 'typ', id: 'byArtifact',               img: hackyIconUrl('afx_quantum_metronome_4.png') },
 
   byLegendary:  { name: 'Legendary',         weight: 21, grain: 3, area: 'rar', id: 'byLegendary',              img: hackyIconUrl('afx_book_of_basan_4.png'), rarity: 'legendary' },
@@ -193,7 +193,7 @@ const Sorters: { [key:string]: SorterFunc }  = {
   byType(item: GridItem)       { return typeOrder.indexOf(item.afxType) },
   byStoningLvl(item: GridItem, lo: LayoutOrderables) {
     if (! item.afxRarity) { return ((item.afxType === Type.ARTIFACT) ? 10 : 20) * 1e12 }
-    return (byStoningLvlOrder(item, 0, lo) * 1e6) // + (byStoningLvlOrder(item, 1, lo) * 1e3) + byStoningLvlOrder(item, 2, lo)
+    return (byStoningLvlOrder(item, 0) * 1e6) // + (byStoningLvlOrder(item, 1, lo) * 1e3) + byStoningLvlOrder(item, 2, lo)
     // return Math.min(byStoningLvlOrder(item, 0, lo), byStoningLvlOrder(item, 1, lo), byStoningLvlOrder(item, 2, lo))
   },
   byStoning(item: GridItem, lo: LayoutOrderables) {

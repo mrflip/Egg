@@ -11,7 +11,13 @@
     :smush-stoned="options.smushStoned"
     :transpose="options.transpose"
     :silly-sizes="options.sillySizes"
-  />
+  >
+    <select id="bookmarks" v-model="bookmark" class="my-1" name="bookmarks" @change="handleBookmarkChange">
+      <template v-for="bkInfo of bookmarkProps" :key="bkInfo.id">
+        <option :value="bkInfo.id">{{ bkInfo.label }}</option>
+      </template>
+    </select>
+  </inventory-canvas>
 </template>
 
 <tabs
@@ -25,11 +31,6 @@
   panels-wrapper-class="min-h-[400px] tabs-panels  border border-blue-100"
 >
   <tab id="options_tab" name="Options" class="p-2 mb-4 flex flex-col items-center justify-start Aspects ordering" :selected="true">
-    <select id="bookmarks" v-model="bookmark" class="my-1" name="bookmarks" @change="handleBookmarkChange">
-      <template v-for="bkInfo of bookmarkProps" :key="bkInfo.id">
-        <option :value="bkInfo.id">{{ bkInfo.label }}</option>
-      </template>
-    </select>
     <div class="flex flex-col justify-start mt-2">
     <check-option id="transpose" class="w-full ml-2 mb-2" :checked="options.transpose" @change="updateTranspose">Swap Rows / Columns</check-option>
     <check-option id="sillySizes" class="w-full ml-2 mb-2" :checked="options.sillySizes" @change="updateSillySizes">Allow Silly Sizes</check-option>
@@ -38,6 +39,10 @@
     </div>
     <reset-button class="mt-2" @click="resetAllMaybe">Reset {{ bookmarkProps[bookmark]?.label }}</reset-button>
     <reset-button class="bg-purple-200" @click="() => randomizeAxis('aspects')">I'm Feeling Lucky!</reset-button>
+    <p class="mt-2 ml-4 max-w-[320px] w-full text-left text-sm text-gray-500">
+      If the download button doesn't work, you may also right click / long press on the image
+      above to use your browser's image saving function.
+    </p>
 
   </tab>
 

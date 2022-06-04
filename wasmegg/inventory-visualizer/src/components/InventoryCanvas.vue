@@ -40,41 +40,36 @@
 
     <tickety-boo v-if="showTicks" :grid-info="gridInfo" />
 
-    <div class="flex flex-col 2xl:px-24 md:flex-row max-w-[1024px] m-auto items-center justify-around mt-4" :class="loading ? 'opacity-50' : null">
-
-      <div class="flex w-full md:w-2/5 flex-row items-center justify-center">
-        <div class="flex flex-col w-full my-1 items-center justify-center">
-          <div class="flex">
-            <input
-              id="itemsPerCol"
-              :value.number="itemsPerColNum"
-              name="itemsPerCol"
-              type="number"
-              :disabled="loading"
-              class="mr-2 w-20"
-              @input="itemsPerCol = ($event.target as any).value"
-            />
-            <div class="ml-2 w-32 text-sm">
-              <label for="itemsPerCol" class="text-gray-600">
-                Items per {{ transpose ? 'row' : 'column' }}<br />
-                (blank for squarish)</label>
-            </div>
-          </div>
-        </div>
+    <div class="flex flex-col 2xl:px-24 mt-4 xs:flex-row max-w-[1024px] m-auto items-center justify-around" :class="loading ? 'opacity-50' : null">
+      <div class="flex w-full justify-center order-last xs:order-first">
+        <slot></slot>
       </div>
 
-      <div class="flex w-full md:w-3/5 px-2 my-2 flex-row items-center justify-center">
+      <div class="flex w-full flex-row items-center justify-center">
+          <input
+            id="itemsPerCol"
+            :value.number="itemsPerColNum"
+            name="itemsPerCol"
+            type="number"
+            :disabled="loading"
+            class="w-16 md:w-20 max-h-32 self-center"
+            @input="itemsPerCol = ($event.target as any).value"
+          />
+          <div class="ml-2 w-32 xs:w-20 sm:w-32 text-sm">
+            <label for="itemsPerCol" class="text-gray-600">
+              Items per {{ transpose ? 'row' : 'column' }}<br />
+              (blank for squarish)</label>
+          </div>
+      </div>
+
+      <div class="flex w-full min-w-[150px] my-2 flex-col xs:flex-row items-center justify-center order-first xs:order-last">
         <a
           :href="imageURL"
           download="inventory.png"
-          class="inline-flex text-center items-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+          class="inline-flex text-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
         >
           Download Image
         </a>
-          <p class="mt-2 mx-6 max-w-[320px] w-full text-left text-xs text-gray-500">
-            If the download button doesn't work, you may also right click / long press on the image
-            above to use your browser's image saving function.
-          </p>
       </div>
 
     </div>
@@ -220,19 +215,18 @@ async function imageIsEmpty(url: string): Promise<boolean> {
   return image.naturalWidth === 0 || image.naturalHeight === 0;
 }
 
-
 const placeholderSizing = computed(() => {
-  const { height, width } = gridInfo.value
-   const tothfrac = height / width || 0.5
-   return {
-     xxs: `${Math.floor((380-32) * tothfrac)}px`,
-     xs:  `${Math.floor((550-32) * tothfrac)}px`,
-     sm:  `${Math.floor((640-32) * tothfrac)}px`,
-     md:  `${Math.floor((768-32) * tothfrac)}px`,
-     lg:  `${Math.floor((1024-32) * tothfrac)}px`,
-     xl:  `${Math.floor((1280-32) * tothfrac)}px`,
-   }
- })
+ const { height, width } = gridInfo.value
+  const tothfrac = height / width || 0.5
+  return {
+    xxs: `${Math.floor((380-32) * tothfrac)}px`,
+    xs:  `${Math.floor((550-32) * tothfrac)}px`,
+    sm:  `${Math.floor((640-32) * tothfrac)}px`,
+    md:  `${Math.floor((768-32) * tothfrac)}px`,
+    lg:  `${Math.floor((1024-32) * tothfrac)}px`,
+    xl:  `${Math.floor((1280-32) * tothfrac)}px`,
+  }
+})
 
 </script>
 <style>

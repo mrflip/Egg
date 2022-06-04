@@ -47,7 +47,7 @@
       </div>
     </template>
   </div>
-  <div class="h-[200px] flex flex-col items-center justify-end"><span class="flex">fin.</span></div>
+  <div class="h-[200px] flex flex-col items-center justify-end"><span class="flex">v:2022-6-04-b</span></div>
 </template>
 
 <script setup lang="ts">
