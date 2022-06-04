@@ -4274,6 +4274,7 @@ __metadata:
     vue: ^3.2.36
     vue-tippy: ^6.0.0-alpha.58
     vue-tsc: ^0.35.0
+    vue3-tabs-component: ^1.0.8
     vuedraggable: ^4.1.0
   languageName: unknown
   linkType: soft
@@ -6362,6 +6363,7 @@ __metadata:
     scroll-into-view-if-needed: ^2.2.29
     typescript: ^4.7.2
     vue: ^3.2.36
+    vue-eslint-parser: ^9.0.2
     vue-tsc: ^0.35.0
   languageName: unknown
   linkType: soft
@@ -7142,7 +7144,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vue-eslint-parser@npm:^9.0.1":
+"vue-eslint-parser@npm:^9.0.1, vue-eslint-parser@npm:^9.0.2":
   version: 9.0.2
   resolution: "vue-eslint-parser@npm:9.0.2"
   dependencies:
@@ -7191,6 +7193,15 @@ __metadata:
   bin:
     vue-tsc: bin/vue-tsc.js
   checksum: 32b05f3937264f49fbee1a38e8ef5fb56d21acf172273dfbe551f1771812f4bc2f6cbb47b354bfeb6f0d13aa3b11335f3eca9a1c5aeebbfb7c4f8724c18fb64e
+  languageName: node
+  linkType: hard
+
+"vue3-tabs-component@npm:^1.0.8":
+  version: 1.0.8
+  resolution: "vue3-tabs-component@npm:1.0.8"
+  peerDependencies:
+    vue: ^3.0.0
+  checksum: 395201262b2f2bb614031c286aac0dd97c9a05a8f026a0a0f152c9aca40e48b02b0e20fa3c51bb6b7f84b97e93d77e951f8ebe6183d0b0b387f0e593087a8f66
   languageName: node
   linkType: hard
 
