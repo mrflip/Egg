@@ -26,7 +26,7 @@ import draggable from 'vuedraggable';
 import { Orderables, Orderable } from '@/lib';
 
 function listFromLayoutOrder(layoutOrder: Orderables): Orderable[] {
-  if (! layoutOrder) { return [{ name: 'null layoutOrder', id: 'oops', weight: -1, img: '' }] }
+  if (! layoutOrder) { return [{ name: 'null layoutOrder', id: 'oops', weight: -1, img: '', desc: '', area: 'typ', grain: 3 }] }
   return _.sortBy([...Object.values(layoutOrder)], 'weight')
 }
 
@@ -41,8 +41,9 @@ export default defineComponent({
 
   props: {
     layoutOrder: { type: Object as PropType<Orderables>, required: true },
-    direction: { type: String, default: 'horiz' },
+    direction:   { type: String, default: 'horiz' },
     itemClasses: { type: String, default: '' },
+    group:       { type: String, required: true },
   },
 
   emits: ['updateOrder'],
@@ -58,11 +59,11 @@ export default defineComponent({
   computed: {
     dragOptions() {
       return {
-        animation: 0,
-        group: "description",
-        disabled: false,
-        ghostClass: "ghost",
-        dragClass: "chosen",
+        animation:      0,
+        group:          this.group,
+        disabled:       false,
+        ghostClass:     "ghost",
+        dragClass:      "chosen",
       };
     },
   },

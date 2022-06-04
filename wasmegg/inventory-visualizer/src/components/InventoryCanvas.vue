@@ -40,38 +40,30 @@
 
     <tickety-boo v-if="showTicks" :grid-info="gridInfo" />
 
-    <div class="flex flex-col 2xl:px-24 md:flex-row items-center justify-between mt-4" :class="loading ? 'opacity-50' : null">
+    <div class="flex flex-col 2xl:px-24 md:flex-row max-w-[1024px] m-auto items-center justify-around mt-4" :class="loading ? 'opacity-50' : null">
 
-      <div class="flex md:w-3/5 w-full flex-row items-center justify-center">
-
-        <div class="flex flex-col w-full my-2 px-2 items-center justify-center md:justify-start">
-          <slot></slot>
-        </div>
-
+      <div class="flex w-full md:w-2/5 flex-row items-center justify-center">
         <div class="flex flex-col w-full my-1 items-center justify-center">
-
-          <check-option id="showTicks" class="w-full ml-2 mb-2" :checked="showTicks" @change="updateShowTicks">Show Tickmarks</check-option>
-          <check-option id="transpose" class="w-full ml-2 mb-2" :checked="transpose" @change="updateTranspose">Switch Rows and Columns</check-option>
-          <div class="flex w-full">
+          <div class="flex">
             <input
-            id="itemsPerCol"
-            :value.number="itemsPerColNum"
-            name="itemsPerCol"
-            type="number"
-            :disabled="loading"
-            class="mr-2 w-20"
-            @input="itemsPerCol = ($event.target as any).value"
-          />
-          <div class="ml-2 w-32 text-sm">
-            <label for="itemsPerCol" class="text-gray-600">
-              Items per {{ transpose ? 'row' : 'column' }}<br />
-              (blank for squarish)</label>
-          </div>
+              id="itemsPerCol"
+              :value.number="itemsPerColNum"
+              name="itemsPerCol"
+              type="number"
+              :disabled="loading"
+              class="mr-2 w-20"
+              @input="itemsPerCol = ($event.target as any).value"
+            />
+            <div class="ml-2 w-32 text-sm">
+              <label for="itemsPerCol" class="text-gray-600">
+                Items per {{ transpose ? 'row' : 'column' }}<br />
+                (blank for squarish)</label>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="flex md:w-2/5 w-full px-2 my-2 md:flex-col flex-row items-center justify-center">
+      <div class="flex w-full md:w-3/5 px-2 my-2 flex-row items-center justify-center">
         <a
           :href="imageURL"
           download="inventory.png"
@@ -79,10 +71,10 @@
         >
           Download Image
         </a>
-        <p class="mt-2 ml-6 md:w-full w-1/2 text-left text-xs text-gray-500">
-          If the download button doesn't work, you may also right click / long press on the image
-          above to use your browser's image saving function.
-        </p>
+          <p class="mt-2 mx-6 max-w-[320px] w-full text-left text-xs text-gray-500">
+            If the download button doesn't work, you may also right click / long press on the image
+            above to use your browser's image saving function.
+          </p>
       </div>
 
     </div>
@@ -95,8 +87,7 @@ import { computed, onMounted, PropType, ref, toRefs, watch, Ref } from 'vue';
 import * as _ from "lodash";
 
 import { getLocalStorage, Inventory, setLocalStorage } from 'lib';
-import { drawInventory, generateInventoryGrid, LayoutOrderables } from '@/lib';
-import CheckOption from '@/components/CheckOption.vue'
+import { drawInventory, generateInventoryGrid, Orderables } from '@/lib';
 import TicketyBoo  from '@/components/TicketyBoo.vue'
 
 const props = defineProps({
@@ -104,21 +95,21 @@ const props = defineProps({
     type: Object as PropType<Inventory>,
     required: true,
   },
-  layoutOrder: {
-    type: Object as PropType<LayoutOrderables>,
-    required: true,
-  },
-  bookmark: {
-    type: String,
-    required: true,
-  },
+  aspects:     { type: Object as PropType<Orderables>, required: true },
+  artifacts:   { type: Object as PropType<Orderables>, required: true },
+  stones:      { type: Object as PropType<Orderables>, required: true },
+  bookmark:    { type: String,  required: true },
+  showTicks:   { type: Boolean, required: true },
+  sillySizes:  { type: Boolean, required: true },
+  smushStoned: { type: Boolean, required: true },
+  transpose:   { type: Boolean, required: true },
 });
-const { inventory, layoutOrder, bookmark } = toRefs(props);
+ const {
+   bookmark, inventory, aspects, artifacts, stones, showTicks, sillySizes, smushStoned, transpose,
+ } = toRefs(props);
 
 const LOCALSTORAGE_KEYS = {
   itemsPerCol: 'itemsPerColStorageKey',
-  showTicks: 'showTicksStorageKey',
-  transpose: 'transposeStorageKey',
 }
 type StorableType = keyof (typeof LOCALSTORAGE_KEYS);
 
@@ -133,36 +124,44 @@ function loadVal(base: StorableType): string | undefined {
 
 function storeVal(base: StorableType, val: string) {
   const key = getStorageKey(base)
-  // console.log('store', base, key, getLocalStorage(key), val)
   setLocalStorage(key, val)
 }
 
-const loadShowTicks = (): boolean => (loadVal('showTicks') === 'true')
-const showTicks: Ref<boolean> = ref(loadShowTicks())
-watch(showTicks, () => storeVal('showTicks', String(showTicks.value === true)))
-//
-const loadTranspose = (): boolean => (loadVal('transpose') === 'true');
-const transpose: Ref<boolean> = ref(loadTranspose())
-watch(transpose, () => storeVal('transpose', String(transpose.value === true)))
-//
 const loadItemsPerCol = (): string => (loadVal('itemsPerCol') ?? '')
 const itemsPerCol: Ref<string> = ref(loadItemsPerCol());
 watch(itemsPerCol, () => storeVal('itemsPerCol', String(limitItemsPerCol(itemsPerCol.value))))
 const itemsPerColNum = computed(() => limitItemsPerCol(itemsPerCol.value));
 
 watch(bookmark, () => {
-  showTicks.value = loadShowTicks()
-  transpose.value = loadTranspose()
   itemsPerCol.value = loadItemsPerCol()
 })
 
-const grid = computed(() => generateInventoryGrid(inventory.value as Inventory, {
-  layoutOrder: layoutOrder.value,
+const grid = computed(() => generateInventoryGrid(
+  inventory.value as Inventory, {
+  layoutOrder: { aspects: aspects.value, artifacts: artifacts.value, stones: stones.value },
   transpose: transpose.value,
+  smushStoned: smushStoned.value,
 }));
 
+watch(sillySizes, () => {
+  const { actualPerCol = 100, actualPerRow = 100 } = gridInfo.value
+  const squarish = Math.sqrt(grid.value?.length || 20)
+  if ((! sillySizes.value) && (
+    ((actualPerRow > 2 * squarish) || (actualPerCol > 2 * squarish)))) {
+    itemsPerCol.value = ''
+  }
+})
+
 const inventoryIsEmpty = computed(() => grid.value.length === 0);
-const limitItemsPerCol = (val: number | string) => (Number(val) > 0 ? _.clamp(Number(val), 1, 100) : '');
+
+const limitItemsPerCol = (val: number | string) => {
+   const numIPC = Number(val)
+  if (numIPC > 0) {
+    if (sillySizes.value) { return numIPC }
+    return _.clamp(numIPC, 1, 100)
+  }
+  return ''
+}
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 const loading = ref(false);
@@ -184,6 +183,7 @@ const regenerate = async () => {
       grid.value.slice(0, 30000),
       Number(itemsPerCol.value),
       transpose.value,
+      sillySizes.value,
     );
     imageURL.value = result.url;
     width.value = result.width;
@@ -205,10 +205,6 @@ const regenerateDebounced = _.debounce(regenerate, 1000)
 watch(grid, regenerateDebounced, { deep: true })
 watch(itemsPerCol, regenerateDebounced, { deep: true })
 
-function updateShowTicks(event: Event) { showTicks.value = (<HTMLInputElement>event.target)?.checked || false }
-
-function updateTranspose(event: Event) { transpose.value = (<HTMLInputElement>event.target)?.checked || false }
-
 async function imageIsEmpty(url: string): Promise<boolean> {
   const image = new Image();
   try {
@@ -218,7 +214,7 @@ async function imageIsEmpty(url: string): Promise<boolean> {
       image.src = url;
     });
   } catch (err) {
-    console.log(`failed to load image into HTMLImageElement: ${err}`);
+    console.warn(`failed to load image into HTMLImageElement: ${err}`);
     return false;
   }
   return image.naturalWidth === 0 || image.naturalHeight === 0;
@@ -228,7 +224,6 @@ async function imageIsEmpty(url: string): Promise<boolean> {
 const placeholderSizing = computed(() => {
   const { height, width } = gridInfo.value
    const tothfrac = height / width || 0.5
-   console.log(tothfrac, tothfrac * 1280, gridInfo.value)
    return {
      xxs: `${Math.floor((380-32) * tothfrac)}px`,
      xs:  `${Math.floor((550-32) * tothfrac)}px`,

@@ -21,6 +21,7 @@ export async function drawInventory(
   grid: InventoryGrid,
   forceItemsPerCol: number,
   transpose = true,
+  sillySizes = false,
 ): Promise<{
   url: string;
   width: number;
@@ -42,7 +43,10 @@ export async function drawInventory(
   const numItems = grid.length;
   let numItemsPerCol = Math.ceil(Math.sqrt(numItems))
   if (Number(forceItemsPerCol) > 0) {
-    numItemsPerCol = Math.min(Math.max(Number(forceItemsPerCol), Math.ceil(numItems/50)), 100, numItems)
+    numItemsPerCol = Math.min(Number(forceItemsPerCol), numItems)
+    if (! sillySizes) {
+      numItemsPerCol = Math.min(Math.max(numItemsPerCol, Math.ceil(numItems/50)), 100)
+    }
   }
   const numItemsPerRow = Math.ceil(numItems / numItemsPerCol);
   let targetWidth = GRID_SQUARE_SIZE * numItemsPerRow + GRID_SQUARE_GAP * (numItemsPerRow + 1);
