@@ -20,6 +20,7 @@
     "tippy.js": "^6.3.7",
     "vue": "^3.2.36",
     "vue-tippy": "^6.0.0-alpha.58",
+    "vue3-tabs-component": "^1.0.8",
     "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
