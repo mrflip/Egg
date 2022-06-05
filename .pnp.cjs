@@ -2122,6 +2122,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["@types/crypto-js", [\
+        ["npm:4.1.1", {\
+          "packageLocation": "./.yarn/cache/@types-crypto-js-npm-4.1.1-1c4ce3312a-ea3d6a67b6.zip/node_modules/@types/crypto-js/",\
+          "packageDependencies": [\
+            ["@types/crypto-js", "npm:4.1.1"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["@types/emscripten", [\
         ["npm:1.39.4", {\
           "packageLocation": "./.yarn/cache/@types-emscripten-npm-1.39.4-4d03380faa-7a51e08b22.zip/node_modules/@types/emscripten/",\
@@ -3867,6 +3876,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["crypto-js", [\
+        ["npm:4.1.1", {\
+          "packageLocation": "./.yarn/cache/crypto-js-npm-4.1.1-38a3b8c19d-b3747c12ee.zip/node_modules/crypto-js/",\
+          "packageDependencies": [\
+            ["crypto-js", "npm:4.1.1"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["css-line-break", [\
         ["npm:2.1.0", {\
           "packageLocation": "./.yarn/cache/css-line-break-npm-2.1.0-a1fd810d69-37b1fe632b.zip/node_modules/css-line-break/",\
@@ -5551,6 +5569,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@heroicons/vue", "virtual:2d9e00ce43f92887cd144dc38e0f1a0e8df39baf68c5a9489b2b0423b1fcddb9c0da72bb1309a8f06cb4ec3cda2c8a1c77376081b66f69c7c7e2dd6cf02694db#npm:1.0.6"],\
             ["@tailwindcss/forms", "virtual:840db99354aa74c3f6824418161949ba97616d48d0c0298beb541e7b0e8da4e24026586e5b9fde0652a179716d69d5d38e156e11ba264c6191a70aade081c1a4#npm:0.5.2"],\
             ["@types/autoprefixer", "npm:10.2.0"],\
+            ["@types/crypto-js", "npm:4.1.1"],\
             ["@types/fontfaceobserver", "npm:2.1.0"],\
             ["@types/lodash", "npm:4.14.182"],\
             ["@types/vue", "npm:2.0.0"],\
@@ -5558,6 +5577,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@vue/compiler-sfc", "npm:3.2.36"],\
             ["autoprefixer", "virtual:840db99354aa74c3f6824418161949ba97616d48d0c0298beb541e7b0e8da4e24026586e5b9fde0652a179716d69d5d38e156e11ba264c6191a70aade081c1a4#npm:10.4.7"],\
             ["copy-text-to-clipboard", "npm:3.0.1"],\
+            ["crypto-js", "npm:4.1.1"],\
             ["fontfaceobserver", "npm:2.3.0"],\
             ["lib", "workspace:lib"],\
             ["localforage", "npm:1.10.0"],\
