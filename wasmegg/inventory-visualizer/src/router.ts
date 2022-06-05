@@ -1,22 +1,29 @@
-import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
+import {
+  createRouter, createWebHistory, createWebHashHistory, RouteRecordRaw
+} from 'vue-router';
 
-import PlayerData from '@/components/PlayerData.vue';
+import Visualizer from '@/views/Visualizer.vue';
+
+console.log(createWebHistory === createWebHashHistory)
+// const BASE_ROUTE = '/inventory-visualizer/v/'
+const BASE_ROUTE = '/v/'
 
 const routes: RouteRecordRaw[] = [
   {
-    name: 'player-data',
-    path: '/i/:dna?',
-    component: PlayerData,
+    name: 'visualizer',
+    path: BASE_ROUTE + ':urldna?',
+    component: Visualizer,
     props: true,
   },
   {
     path: '/:catchAll(.*)',
-    redirect: '/i/',
+    redirect: BASE_ROUTE,
   },
 ];
 
 const router = createRouter({
   routes,
+  // history: createWebHistory(),
   history: createWebHashHistory(),
 });
 

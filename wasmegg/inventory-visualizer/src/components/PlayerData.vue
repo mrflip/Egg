@@ -1,6 +1,6 @@
 <template>
 
-  <template v-if="true && loaded">
+  <template v-if="false && loaded">
     <inventory-canvas
       :inventory="inventory"
       :artifacts="artifacts"
@@ -33,7 +33,7 @@
     <div class="flex flex-col md:flex-row items-center justify-center py-2">
       <button
         class="inline-flex w-40 text-center items-center disabled:bg-gray-100 disabled:text-gray-400 py-2 px-2 border border-transparent text-sm font-medium rounded-md bg-purple-200 hover:bg-purple-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-400"
-        @click="loadDNA()"
+        @click="loadDNA(loadableDNA)"
         :disabled="(! canLoadDNA)"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -43,7 +43,7 @@
           (invalid DNA)
         </span>
         <span v-else-if="loadableDNA === dna">Paste DNA:</span>
-        <span v-else>Replace DNA</span>
+        <span v-else>Replace Current</span>
       </button>
       <div
         v-if="dnaLoadMsg"
@@ -221,9 +221,12 @@
 <script lang="ts">
 import _ from 'lodash'
 import { defineComponent } from 'vue';
-import { getLocalStorage, setLocalStorage, Inventory, requestFirstContact, UserBackupEmptyError } from 'lib';
+import {
+  getLocalStorage, setLocalStorage, Inventory, requestFirstContact, UserBackupEmptyError,
+} from 'lib';
 import {
   defaultAxisOrder, Orderables, dnaStr, vivifyDNA, validateLoadableDNA,
+  VisualizerConfigAxis, LayoutAxis, PlayerDataOptions,
 } from '@/lib'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -258,15 +261,6 @@ const LOCALSTORAGE_KEYS = {
   options:   'optionsBag'
 }
 type StorageKeyName = keyof (typeof LOCALSTORAGE_KEYS);
-type OrderablesAxis = 'aspects' | 'artifacts' | 'stones'
-
-export interface PlayerDataOptions {
-  transpose:    boolean
-  sillySizes:   boolean
-  showTicks:    boolean
-  smushStoned:  boolean
-  fancy:        boolean
-}
 
 const DEFAULT_OPTIONS = {
   transpose:    false,
@@ -296,12 +290,12 @@ function storeOptions(options: PlayerDataOptions, bookmark: Bookmarker) {
   setLocalStorage(getStorageKey('options', bookmark), JSON.stringify(options))
 }
 
-function storeLayoutAxis(orderables: Orderables, axis: OrderablesAxis, bookmark: Bookmarker) {
+function storeLayoutAxis(orderables: Orderables, axis: LayoutAxis, bookmark: Bookmarker) {
   if (! bookmark) { console.error('no bookmark!', bookmark); return }
   setLocalStorage(getStorageKey(axis, bookmark), JSON.stringify(getOrderablesDNA(orderables)))
 }
 
-function loadJson(flavor, bookmark) {
+function loadJson(flavor: VisualizerConfigAxis, bookmark: Bookmarker) {
   const storageKey = getStorageKey(flavor, bookmark)
   return getLocalStorage(storageKey) || null
 }
@@ -323,7 +317,7 @@ function loadOptions(bookmark: Bookmarker): PlayerDataOptions {
   return _.cloneDeep(DEFAULT_OPTIONS)
 }
 
-function loadLayoutAxis(axis: OrderablesAxis, bookmark: Bookmarker): Orderables {
+function loadLayoutAxis(axis: LayoutAxis, bookmark: Bookmarker): Orderables {
   const fallback   = defaultAxisOrder(axis)
   const axisJson = loadJson(axis, bookmark)
   if (axisJson) {
@@ -356,7 +350,7 @@ interface LayoutOrderableComponent {
   stones: Orderables, artifacts: Orderables, aspects: Orderables, bookmark: Bookmarker,
 }
 
-function randomizeAxis(comp: LayoutOrderableComponent, axis: OrderablesAxis) {
+function randomizeAxis(comp: LayoutOrderableComponent, axis: LayoutAxis) {
   const shuff1 = _.shuffle(_.values(_.groupBy(defaultAxisOrder(axis), 'area')))
   const shuff2 = _.flatten(_.map(shuff1, _.shuffle))
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -367,7 +361,7 @@ function randomizeAxis(comp: LayoutOrderableComponent, axis: OrderablesAxis) {
 
 }
 
-function resetAxis(comp: LayoutOrderableComponent, axis: OrderablesAxis) {
+function resetAxis(comp: LayoutOrderableComponent, axis: LayoutAxis) {
   const orderables = defaultAxisOrder(axis)
   storeLayoutAxis(orderables, axis, comp.bookmark)
   comp[axis] = orderables
@@ -396,13 +390,15 @@ export default defineComponent({
     DragOrderer, InventoryCanvas, ResetButton, Tabs, Tab, CheckOption, CopyButton,
   },
   props: {
-    playerId: {
-      type: String,
-      required: true,
-    },
+    playerId: { type: String, required: true },
+    urldna: { type: String, required: false, default: '' },
   },
+  emits: ['dnaChange'],
 
   data() {
+    if (this.urldna) {
+      console.log('born with this', this.urldna)
+    }
     const bookmark: Bookmarker = DEFAULT_BOOKMARK
     // I don't know how to make ts happy most of the time
     const inventory: any = null // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -420,7 +416,7 @@ export default defineComponent({
       inventory,
       console,
       bookmarkProps:    BOOKMARK_PROPS,
-      loadableDNA:      'Gerlciagnzvsfxuyot_Aotemfqsckrlynibguadpv_Sdcplsqxthu_Otf',
+      loadableDNA:      '',
       vivified:          {},
       canLoadDNA:       false,
       dnaLoadMsg:       '',
@@ -491,8 +487,8 @@ export default defineComponent({
         resetAll(this)
       }
     },
-    randomizeAxis(axis: OrderablesAxis) { randomizeAxis(this, axis) },
-    resetAxis(axis: OrderablesAxis) { resetAxis(this, axis) },
+    randomizeAxis(axis: LayoutAxis) { randomizeAxis(this, axis) },
+    resetAxis(axis: LayoutAxis) { resetAxis(this, axis) },
     handleBookmarkChange(ev: Event) {
       const bookmark: Bookmarker = ((<HTMLInputElement>ev?.target)?.value || DEFAULT_BOOKMARK) as Bookmarker
       const { artifacts, aspects, stones } = loadLayoutAll(bookmark)
@@ -506,14 +502,14 @@ export default defineComponent({
       this.inventory    = new Inventory(artifactsDb) // eslint-disable-line @typescript-eslint/no-explicit-any
       this.loaded       = true
     },
-    updateLoadableDNA(valIn) {
+    updateLoadableDNA(valIn: string) {
       const val = String(valIn).replace(/\W+/g, '').slice(0, 80)
       this.loadableDNA = val
       this.canLoadDNA = (val !== this.dna) && validateLoadableDNA(val)
     },
-    loadDNA() {
+    loadDNA(loadableDNA: string) {
       try {
-        const res      = vivifyDNA(this.loadableDNA, { aspects: this.aspects })
+        const res      = vivifyDNA(loadableDNA)
         this.options   = res.options
         this.aspects   = res.aspects
         this.artifacts = res.artifacts
@@ -541,17 +537,15 @@ export default defineComponent({
   watch: {
     dna() {
       console.warn('watch', this.dna)
-      /* window.history.replaceState(
-       *   {},
-       *   '',
-       *   router.resolve({
-       *     name: 'dna',
-       *     params: { dna },
-       *   }).href
-       * ); */
+      this.$emit('dnaChange', { dna: this.dna })
+    },
+    urldna(val) {
+      console.log('born with this', this.urldna, val)
+      if (validateLoadableDNA(val)) {
+        this.loadDNA(val)
+      }
     },
   },
-
 })
 
 </script>
