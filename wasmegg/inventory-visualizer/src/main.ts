@@ -1,5 +1,6 @@
 import { createApp } from 'vue';
 import App from './App.vue';
+import router from './router';
 import './index.css';
 
 import VueTippy from 'vue-tippy';
@@ -17,6 +18,7 @@ import { performWebpTest } from '@/lib';
   await performWebpTest();
 
   const app = createApp(App);
+  // app.use(router);
   app.use(VueTippy, {
     defaultProps: { theme: 'translucent' },
   });

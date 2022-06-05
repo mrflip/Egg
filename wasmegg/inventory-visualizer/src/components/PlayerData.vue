@@ -1,180 +1,220 @@
 <template>
 
-<template v-if="true && loaded">
-  <inventory-canvas
-    :inventory="inventory"
-    :artifacts="artifacts"
-    :stones="stones"
-    :aspects="selaspects"
-    :bookmark="bookmark"
-    :show-ticks="options.showTicks"
-    :smush-stoned="options.smushStoned"
-    :transpose="options.transpose"
-    :silly-sizes="options.sillySizes"
-  >
-    <select id="bookmarks" v-model="bookmark" class="my-1" name="bookmarks" @change="handleBookmarkChange">
-      <template v-for="bkInfo of bookmarkProps" :key="bkInfo.id">
-        <option :value="bkInfo.id">{{ bkInfo.label }}</option>
-      </template>
-    </select>
-  </inventory-canvas>
-</template>
+  <template v-if="true && loaded">
+    <inventory-canvas
+      :inventory="inventory"
+      :artifacts="artifacts"
+      :stones="stones"
+      :aspects="selaspects"
+      :bookmark="bookmark"
+      :show-ticks="options.showTicks"
+      :smush-stoned="options.smushStoned"
+      :transpose="options.transpose"
+      :silly-sizes="options.sillySizes"
+    >
+      <select id="bookmarks" v-model="bookmark" class="my-1" name="bookmarks" @change="handleBookmarkChange">
+        <template v-for="bkInfo of bookmarkProps" :key="bkInfo.id">
+          <option :value="bkInfo.id">{{ bkInfo.label }}</option>
+        </template>
+      </select>
+    </inventory-canvas>
+  </template>
 
-<tabs
-  :options="{ useUrlFragment: false, defaultTabHash: 'grouping_tab' }"
-  class="max-w-[1024px] m-auto"
-  nav-class="tab-nav flex 2xl:px-32 flex-row my-8 md:items-stretch items-center justify-around"
-  nav-item-class="tabs-nav grow flex py-2"
-  nav-item-link-class="tabs-tab-nav flex w-full justify-center text-center"
-  nav-item-active-class="tab-is-active bg-gray-200"
-  nav-item-disabled-class="bg-red"
-  panels-wrapper-class="min-h-[400px] tabs-panels  border border-blue-100"
->
-  <tab id="options_tab" name="Options" class="p-2 mb-4 flex flex-col items-center justify-start Aspects ordering" :selected="true">
-    <div class="flex flex-col justify-start mt-2">
-    <check-option id="transpose" class="w-full ml-2 mb-2" :checked="options.transpose" @change="updateTranspose">Swap Rows / Columns</check-option>
-    <check-option id="sillySizes" class="w-full ml-2 mb-2" :checked="options.sillySizes" @change="updateSillySizes">Allow Silly Sizes</check-option>
-    <check-option id="showTicks" class="w-full ml-2 mb-2" :checked="options.showTicks" @change="updateShowTicks">Show Tickmarks</check-option>
-    <check-option id="smushStoned" class="w-full ml-2 mb-2" :checked="options.smushStoned" @change="updateSmushStoned">Combine Similar Artifacts</check-option>
+  <div class="flex flex-col py-4 justify-start">
+    <div class="flex flex-col md:flex-row items-center justify-center py-2">
+      <copy-button
+        class="inline-flex w-40 text-center items-center py-2 px-2 border border-transparent text-sm font-medium rounded-md bg-blue-200 hover:bg-blue-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400"
+        :content="dna"
+        tooltip="Copy DNA to clipboard">
+        <span >Copy DNA:</span>
+      </copy-button>
+      <code class="text-xs p-2 md:ml-2 bg-blue-100 w-[30rem] text-center">{{ dna }}</code>
     </div>
-    <reset-button class="mt-2" @click="resetAllMaybe">Reset {{ bookmarkProps[bookmark]?.label }}</reset-button>
-    <reset-button class="bg-purple-200" @click="() => randomizeAxis('aspects')">I'm Feeling Lucky!</reset-button>
-    <p class="mt-2 ml-4 max-w-[320px] w-full text-left text-sm text-gray-500">
-      If the download button doesn't work, you may also right click / long press on the image
-      above to use your browser's image saving function.
-    </p>
-
-  </tab>
-
-  <tab
-    id="grouping_tab"
-    name="Groups"
-    class="p-2 mb-4 flex flex-col items-start justify-around Aspects ordering"
-    :selected="false"
-  >
-
-    <div class="flex flex-row w-full items-start justify-around">
-
-      <div class="flex w-full items-center justify-center flex-col">
-        <h3 class="mb-2 font-bold m-2 text-center">Groups</h3>
-        <drag-orderer item-classes="w-60" :layout-order="selaspects" group="aspects" direction="vert" @update-order="updateAspectsLayout">
-          <template #listItem="{element}">
-            <div class="h-7 w-7 relative rounded-full isolate bg-epic">
-              <img v-if="element.rarity" class="absolute h-9 w-8 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" :src="`https://eggincassets.tcl.sh/256/egginc-extras/glow/${element.rarity}-13.png`" />
-              <img v-if="element.img" class="absolute top-0 left-0 h-full w-full z-10" :src="element.img" />
-              <span v-else class="absolute p-1 z-10 text-xl">{{ element.glyph }}</span>
-            </div>
-            <span class="m-1">{{ element.name }}</span>
-          </template>
-        </drag-orderer>
-        <reset-button @click="() => resetAxis('aspects')">Reset Sorting</reset-button>
-        <reset-button class="bg-purple-200" @click="() => randomizeAxis('aspects')">I'm Feeling Lucky!</reset-button>
-        <div class="flex w-full justify-center">
-          <check-option id="fancy" class="ml-2 mt-2" :checked="options.fancy" @change="updateFancy">Fancy Groupings</check-option>
-        </div>
+    <div class="flex flex-col md:flex-row items-center justify-center py-2">
+      <button
+        class="inline-flex w-40 text-center items-center disabled:bg-gray-100 disabled:text-gray-400 py-2 px-2 border border-transparent text-sm font-medium rounded-md bg-purple-200 hover:bg-purple-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-400"
+        @click="loadDNA()"
+        :disabled="(! canLoadDNA)"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span v-if="loadableDNA && (loadableDNA !== dna) && (! canLoadDNA)">
+          (invalid DNA)
+        </span>
+        <span v-else-if="loadableDNA === dna">Paste DNA:</span>
+        <span v-else>Replace DNA</span>
+      </button>
+      <div
+        v-if="dnaLoadMsg"
+        class="text-xs font-mono p-2 md:ml-2 bg-red-100 w-[30rem] text-center"
+      >
+        {{ dnaLoadMsg }}&nbsp;
       </div>
-
-      <div class="flex w-full items-center content-center justify-center flex-col hidden md:block">
-        <h3 class="mb-2 font-bold m-2 text-center">Artifact Ordering</h3>
-        <drag-orderer item-classes="w-60 max-h-10 mb-1 items-center" group="artifacts" :layout-order="artifacts" direction="vert" @update-order="updateArtifactsLayout">
-          <template #listItem="{element}">
-            <div class="h-7 w-7 relative rounded-full isolate">
-              <img class="absolute top-0 left-0 h-full w-full z-10" :src="element.img" />
-            </div>
-            <span class="m-1 ml-1.5">{{ element.name }}</span>
-          </template>
-        </drag-orderer>
-        <reset-button @click="() => resetAxis('artifacts')">Reset Artifacts</reset-button>
-      </div>
-
-      <div class="flex w-full items-center justify-center flex-col hidden md:block">
-
-        <h3 class="mb-2 font-bold m-2 text-center">Stones Ordering</h3>
-        <drag-orderer item-classes="w-60 stone" :layout-order="stones" group="stones" direction="vert" @update-order="updateStonesLayout">
-          <template #listItem="{element}">
-            <div class="h-8 w-8 relative isolate">
-              <img class="absolute top-0 left-0 h-full w-full z-10" :src="element.img" />
-            </div>
-            <span class="m-1">{{ element.name }}</span>
-          </template>
-        </drag-orderer>
-        <div class="h-full flex flex-col justify-end">
-          <reset-button @click="() => resetAxis('stones')">Reset Stones</reset-button>
-        </div>
-      </div>
+      <input v-else
+        id="dna-in"
+        name="DNA"
+        class="text-xs font-mono p-2 md:ml-2 bg-red-100 w-[30rem] text-center"
+        :value="loadableDNA"
+        @input="updateLoadableDNA(($event.target as any).value)"
+      />
     </div>
-  </tab>
-
-  <tab id="artifact_tab" name="Artifacts" class="p-2 mb-4 flex flex-col items-center Artifacts ordering">
-    <h3 class="mb-2 font-bold m-2 text-center">Artifact Ordering</h3>
-    <drag-orderer item-classes="w-60 max-h-10 mb-1 items-center" group="artifacts" :layout-order="artifacts" direction="vert" @update-order="updateArtifactsLayout">
-      <template #listItem="{element}">
-        <div class="h-7 w-7 relative rounded-full isolate">
-          <img class="absolute top-0 left-0 h-full w-full z-10" :src="element.img" />
-        </div>
-        <span class="m-1 ml-1.5">{{ element.name }}</span>
-      </template>
-    </drag-orderer>
-    <reset-button @click="() => resetAxis('artifacts')">Reset Artifacts</reset-button>
-  </tab>
-
-  <tab id="stone_tab" name="Stones" class="p-2 mb-4 flex flex-col items-center Stones ordering">
-    <h3 class="mb-2 font-bold m-2 text-center">Stones Ordering</h3>
-    <drag-orderer item-classes="w-60 stone" :layout-order="stones" group="stones" direction="vert" @update-order="updateStonesLayout">
-      <template #listItem="{element}">
-        <div class="h-8 w-8 relative isolate">
-          <img class="absolute top-0 left-0 h-full w-full z-10" :src="element.img" />
-        </div>
-        <span class="m-1">{{ element.name }}</span>
-      </template>
-    </drag-orderer>
-    <div class="h-full flex flex-col justify-end">
-      <reset-button @click="() => resetAxis('stones')">Reset Stones</reset-button>
-    </div>
-  </tab>
-</tabs>
-
-<div class="flex flex-col w-full items-center justify-center">
-  <div class="text-left mt-2 px-2 max-w-[600px] lg:max-w-[800px]">
-    <h3 class="mb-2 font-bold m-2 text-center">How this works</h3>
-    <p>
-      To organize your inventory we
-      {{ options.smushStoned ? 'first combine all items with the same stoning into a square. Then we' : '' }}
-    </p>
-    <ul class="pl-4">
-      <li class="list-disc">{{ examples[0]?.desc }};      </li>
-      <li class="list-disc">then {{ examples[1]?.desc }}, </li>
-      <li class="list-disc">then {{ examples[2]?.desc }}, </li>
-      <li class="list-disc">then {{ examples[3]?.desc }}, </li>
-      <li class="list-disc">then {{ examples[4]?.desc }}, </li>
-    </ul>
-    <p class="mb-2">
-      and so forth. You can change that in the 'Groups' tab.
-    </p>
-    <p class="mt-2 mb-2">
-      When it comes time to sort by Family, we will use the order
-      you choose in the "Artifacts" tab: the way it is now puts the
-      {{ firstArtifact }} first and the {{ lastArtifact }} last.
-      Similarly, the "Stones" widget is set to choose the
-      {{ firstStone }} first for stones and fragments
-      and when sorting by mounted stone.
-    </p>
-    <p v-if="examples.slice(4).some(({ id }) => (id === 'byStoning'))">
-      But if you, say, moved '{{ aspects.byStoning?.name }}' to the top, it would first {{ aspects.byStoning?.desc }}.
-    </p>
-    <p v-else-if="examples.slice(4).some(({ id }) => (id === 'byFamily'))">
-      But if you, say, moved '{{ aspects.byFamily?.name }}' to the top, it would first {{ aspects.byFamily?.desc }}.
-    </p>
-    <p v-else>
-      But if you, say, moved '{{ _.last(examples).name }}' to the top, it would first {{ _.last(examples).desc }}.
-    </p>
-    <p class="mt-2">
-      Or -- instead of reading blah blah blah, click the "I'm Feeling
-      Lucky!" buttonn and play around with what comes out. (The button
-      probably isn't a rickroll, you'll have to weigh the risks.)
-    </p>
   </div>
-</div>
+
+  <tabs
+    :options="{ useUrlFragment: false, defaultTabHash: 'grouping_tab' }"
+    class="max-w-[1024px] m-auto"
+    nav-class="tab-nav flex 2xl:px-32 flex-row my-8 md:items-stretch items-center justify-around"
+    nav-item-class="tabs-nav grow flex py-2"
+    nav-item-link-class="tabs-tab-nav flex w-full justify-center text-center"
+    nav-item-active-class="tab-is-active bg-gray-200"
+    nav-item-disabled-class="bg-red"
+    panels-wrapper-class="min-h-[400px] tabs-panels  border border-blue-100"
+  >
+    <tab id="options_tab" name="Options" class="p-2 mb-4 flex flex-col items-center justify-start Aspects ordering" :selected="true">
+      <div class="flex flex-col justify-start mt-2">
+        <check-option id="transpose" class="w-full ml-2 mb-2" :checked="options.transpose" @change="updateTranspose">Swap Rows / Columns</check-option>
+        <check-option id="sillySizes" class="w-full ml-2 mb-2" :checked="options.sillySizes" @change="updateSillySizes">Allow Silly Sizes</check-option>
+        <check-option id="showTicks" class="w-full ml-2 mb-2" :checked="options.showTicks" @change="updateShowTicks">Show Tickmarks</check-option>
+        <check-option id="smushStoned" class="w-full ml-2 mb-2" :checked="options.smushStoned" @change="updateSmushStoned">Combine Similar Artifacts</check-option>
+      </div>
+      <reset-button class="mt-2" @click="resetAllMaybe">Reset {{ bookmarkProps[bookmark]?.label }}</reset-button>
+      <reset-button class="bg-purple-200" @click="() => randomizeAxis('aspects')">I'm Feeling Lucky!</reset-button>
+      <p class="mt-2 ml-4 max-w-[320px] w-full text-left text-sm text-gray-500">
+        If the download button doesn't work, you may also right click / long press on the image
+        above to use your browser's image saving function.
+      </p>
+    </tab>
+
+    <tab
+      id="grouping_tab"
+      name="Groups"
+      class="p-2 mb-4 flex flex-col items-start justify-around Aspects ordering"
+      :selected="false"
+    >
+
+      <div class="flex flex-row w-full items-start justify-around">
+
+        <div class="flex w-full items-center justify-center flex-col">
+          <h3 class="mb-2 font-bold m-2 text-center">Groups</h3>
+          <drag-orderer item-classes="w-60" :layout-order="selaspects" group="aspects" direction="vert" @update-order="updateAspectsLayout">
+            <template #listItem="{element}">
+              <div class="h-7 w-7 relative rounded-full isolate bg-epic">
+                <img v-if="element.rarity" class="absolute h-9 w-8 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" :src="`https://eggincassets.tcl.sh/256/egginc-extras/glow/${element.rarity}-13.png`" />
+                <img v-if="element.img" class="absolute top-0 left-0 h-full w-full z-10" :src="element.img" />
+                <span v-else class="absolute p-1 z-10 text-xl">{{ element.glyph }}</span>
+              </div>
+              <span class="m-1">{{ element?.name }}</span>
+            </template>
+          </drag-orderer>
+          <reset-button @click="() => resetAxis('aspects')">Reset Sorting</reset-button>
+          <reset-button class="bg-purple-200" @click="() => randomizeAxis('aspects')">I'm Feeling Lucky!</reset-button>
+          <div class="flex w-full justify-center">
+            <check-option id="fancy" class="ml-2 mt-2" :checked="options.fancy" @change="updateFancy">Fancy Groupings</check-option>
+          </div>
+        </div>
+
+        <div class="flex w-full items-center content-center justify-center flex-col hidden md:block">
+          <h3 class="mb-2 font-bold m-2 text-center">Artifact Ordering</h3>
+          <drag-orderer item-classes="w-60 max-h-10 mb-1 items-center" group="artifacts" :layout-order="artifacts" direction="vert" @update-order="updateArtifactsLayout">
+            <template #listItem="{element}">
+              <div class="h-7 w-7 relative rounded-full isolate">
+                <img class="absolute top-0 left-0 h-full w-full z-10" :src="element.img" />
+              </div>
+              <span class="m-1 ml-1.5">{{ element?.name }}</span>
+            </template>
+          </drag-orderer>
+          <reset-button @click="() => resetAxis('artifacts')">Reset Artifacts</reset-button>
+        </div>
+
+        <div class="flex w-full items-center justify-center flex-col hidden md:block">
+
+          <h3 class="mb-2 font-bold m-2 text-center">Stones Ordering</h3>
+          <drag-orderer item-classes="w-60 stone" :layout-order="stones" group="stones" direction="vert" @update-order="updateStonesLayout">
+            <template #listItem="{element}">
+              <div class="h-8 w-8 relative isolate">
+                <img class="absolute top-0 left-0 h-full w-full z-10" :src="element.img" />
+              </div>
+              <span class="m-1">{{ element?.name }}</span>
+            </template>
+          </drag-orderer>
+          <div class="h-full flex flex-col justify-end">
+            <reset-button @click="() => resetAxis('stones')">Reset Stones</reset-button>
+          </div>
+        </div>
+      </div>
+    </tab>
+
+    <tab id="artifact_tab" name="Artifacts" class="p-2 mb-4 flex flex-col items-center Artifacts ordering">
+      <h3 class="mb-2 font-bold m-2 text-center">Artifact Ordering</h3>
+      <drag-orderer item-classes="w-60 max-h-10 mb-1 items-center" group="artifacts" :layout-order="artifacts" direction="vert" @update-order="updateArtifactsLayout">
+        <template #listItem="{element}">
+          <div class="h-7 w-7 relative rounded-full isolate">
+            <img class="absolute top-0 left-0 h-full w-full z-10" :src="element.img" />
+          </div>
+          <span class="m-1 ml-1.5">{{ element?.name }}</span>
+        </template>
+      </drag-orderer>
+      <reset-button @click="() => resetAxis('artifacts')">Reset Artifacts</reset-button>
+    </tab>
+
+    <tab id="stone_tab" name="Stones" class="p-2 mb-4 flex flex-col items-center Stones ordering">
+      <h3 class="mb-2 font-bold m-2 text-center">Stones Ordering</h3>
+      <drag-orderer item-classes="w-60 stone" :layout-order="stones" group="stones" direction="vert" @update-order="updateStonesLayout">
+        <template #listItem="{element}">
+          <div class="h-8 w-8 relative isolate">
+            <img class="absolute top-0 left-0 h-full w-full z-10" :src="element.img" />
+          </div>
+          <span class="m-1">{{ element?.name }}</span>
+        </template>
+      </drag-orderer>
+      <div class="h-full flex flex-col justify-end">
+        <reset-button @click="() => resetAxis('stones')">Reset Stones</reset-button>
+      </div>
+    </tab>
+  </tabs>
+
+  <div class="flex flex-col w-full items-center justify-center">
+    <div class="text-left mt-2 px-2 max-w-[600px] lg:max-w-[800px]">
+      <h3 class="mb-2 font-bold m-2 text-center">How this works</h3>
+      <p>
+        To organize your inventory we
+        {{ options.smushStoned ? 'first combine all items with the same stoning into a square. Then we' : '' }}
+      </p>
+      <ul class="pl-4">
+        <li class="list-disc">{{ examples[0]?.desc }};      </li>
+        <li class="list-disc">then {{ examples[1]?.desc }}, </li>
+        <li class="list-disc">then {{ examples[2]?.desc }}, </li>
+        <li class="list-disc">then {{ examples[3]?.desc }}, </li>
+        <li class="list-disc">then {{ examples[4]?.desc }}, </li>
+      </ul>
+      <p class="mb-2">
+        and so forth. You can change that in the 'Groups' tab.
+      </p>
+      <p class="mt-2 mb-2">
+        When it comes time to sort by Family, we will use the order
+        you choose in the "Artifacts" tab: the way it is now puts the
+        {{ firstArtifact }} first and the {{ lastArtifact }} last.
+        Similarly, the "Stones" widget is set to choose the
+        {{ firstStone }} first for stones and fragments
+        and when sorting by mounted stone.
+      </p>
+      <p v-if="examples.slice(4).some(({ id }) => (id === 'byStoning'))">
+        But if you, say, moved '{{ aspects.byStoning?.name }}' to the top, it would first {{ aspects.byStoning?.desc }}.
+      </p>
+      <p v-else-if="examples.slice(4).some(({ id }) => (id === 'byFamily'))">
+        But if you, say, moved '{{ aspects.byFamily?.name }}' to the top, it would first {{ aspects.byFamily?.desc }}.
+      </p>
+      <p v-else>
+        But if you, say, moved '{{ _.last(examples)?.name }}' to the top, it would first {{ _.last(examples).desc }}.
+      </p>
+      <p class="mt-2">
+        Or -- instead of reading blah blah blah, click the "I'm Feeling
+        Lucky!" buttonn and play around with what comes out. (The button
+        probably isn't a rickroll, you'll have to weigh the risks.)
+      </p>
+    </div>
+  </div>
 
 </template>
 
@@ -182,15 +222,18 @@
 import _ from 'lodash'
 import { defineComponent } from 'vue';
 import { getLocalStorage, setLocalStorage, Inventory, requestFirstContact, UserBackupEmptyError } from 'lib';
-import { defaultAxisOrder, Orderables } from '@/lib'
+import {
+  defaultAxisOrder, Orderables, dnaStr, vivifyDNA, validateLoadableDNA,
+} from '@/lib'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+// @ts-ignore
 import {Tabs, Tab} from 'vue3-tabs-component'
 
 import InventoryCanvas from '@/components/InventoryCanvas.vue';
 import DragOrderer from '@/components/DragOrderer.vue';
 import ResetButton from '@/components/ResetButton.vue';
 import CheckOption from '@/components/CheckOption.vue'
+import CopyButton  from '@/components/CopyButton.vue'
 
 async function fetchArtifactsDb(playerId: string) {
   const userinfo = await requestFirstContact(playerId);
@@ -223,9 +266,7 @@ export interface PlayerDataOptions {
   showTicks:    boolean
   smushStoned:  boolean
   fancy:        boolean
-  coarse:       boolean
 }
-
 
 const DEFAULT_OPTIONS = {
   transpose:    false,
@@ -233,10 +274,8 @@ const DEFAULT_OPTIONS = {
   showTicks:    false,
   smushStoned:  false,
   fancy:        false,
-  coarse:       false,
 }
 
-// const COARSE_GRAIN = 1
 const ALWAYS_GRAIN = 2
 const FANCY_GRAIN  = 3
 
@@ -259,18 +298,21 @@ function storeOptions(options: PlayerDataOptions, bookmark: Bookmarker) {
 
 function storeLayoutAxis(orderables: Orderables, axis: OrderablesAxis, bookmark: Bookmarker) {
   if (! bookmark) { console.error('no bookmark!', bookmark); return }
-  setLocalStorage(getStorageKey(axis, bookmark), JSON.stringify(getOrderablesDna(orderables)))
+  setLocalStorage(getStorageKey(axis, bookmark), JSON.stringify(getOrderablesDNA(orderables)))
+}
+
+function loadJson(flavor, bookmark) {
+  const storageKey = getStorageKey(flavor, bookmark)
+  return getLocalStorage(storageKey) || null
 }
 
 function loadOptions(bookmark: Bookmarker): PlayerDataOptions {
-  const storageKey = getStorageKey('options', bookmark)
-  //
-  const optionsJson = getLocalStorage(storageKey) || null
+  const optionsJson = loadJson('options', bookmark)
   if (optionsJson) {
     try {
       const parsed = JSON.parse(optionsJson)
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+      // @ts-ignore
       return _.pick(_.merge({}, DEFAULT_OPTIONS, parsed), _.keys(DEFAULT_OPTIONS))
     }  catch (err) {
       console.warn("could not parse stored JSON", optionsJson, err)
@@ -283,12 +325,10 @@ function loadOptions(bookmark: Bookmarker): PlayerDataOptions {
 
 function loadLayoutAxis(axis: OrderablesAxis, bookmark: Bookmarker): Orderables {
   const fallback   = defaultAxisOrder(axis)
-  const storageKey = getStorageKey(axis, bookmark)
-  //
-  const axisJson = getLocalStorage(storageKey) || null
+  const axisJson = loadJson(axis, bookmark)
   if (axisJson) {
     try {
-      const parsed = getOrderablesDna(JSON.parse(axisJson))
+      const parsed = getOrderablesDNA(JSON.parse(axisJson))
       // allow the keys to change without having leftover/missing entries
       const combined = _.pick(_.merge({}, fallback, parsed), _.keys(fallback))
       return combined
@@ -308,7 +348,7 @@ function loadLayoutAll(bookmark: Bookmarker = DEFAULT_BOOKMARK) {
   return { aspects, artifacts, stones }
 }
 
-function getOrderablesDna(orderables: Orderables) {
+function getOrderablesDNA(orderables: Orderables) {
   return _.mapValues(orderables, (orderable) => _.pick(orderable, ['weight']))
 }
 
@@ -347,13 +387,13 @@ function selectAspects(aspects: Orderables, options: PlayerDataOptions) {
   return _.pickBy(aspects, ({ grain }) => {
     if (grain === ALWAYS_GRAIN) { return true }
     if (grain === FANCY_GRAIN) { return (options.fancy) }
-    return (! options.fancy) // || options.coarse
+    return (! options.fancy)
   })
 }
 
 export default defineComponent({
   components: {
-    DragOrderer, InventoryCanvas, ResetButton, Tabs, Tab, CheckOption,
+    DragOrderer, InventoryCanvas, ResetButton, Tabs, Tab, CheckOption, CopyButton,
   },
   props: {
     playerId: {
@@ -380,6 +420,10 @@ export default defineComponent({
       inventory,
       console,
       bookmarkProps:    BOOKMARK_PROPS,
+      loadableDNA:      'Gerlciagnzvsfxuyot_Aotemfqsckrlynibguadpv_Sdcplsqxthu_Otf',
+      vivified:          {},
+      canLoadDNA:       false,
+      dnaLoadMsg:       '',
       _, // eslint-disable-line vue/no-reserved-keys
     }
   },
@@ -392,6 +436,9 @@ export default defineComponent({
     lastArtifact()  { return _.last(_.sortBy(this.artifacts, 'weight'))?.name },
     firstStone()    { return _.first(_.sortBy(this.stones, 'weight'))?.name },
     selaspects()    { return selectAspects(this.aspects, this.options) },
+    dna() {
+      return this.dnaStr()
+    },
   },
 
   mounted() {
@@ -435,7 +482,6 @@ export default defineComponent({
         const weight = orderables[aspect.id]?.weight || (100 + aspect.weight)
         return { ...aspect, weight }
       })
-      console.warn(aspects, full, orderables)
       storeLayoutAxis(aspects, 'aspects', this.bookmark)
       this.aspects = aspects
     },
@@ -460,10 +506,53 @@ export default defineComponent({
       this.inventory    = new Inventory(artifactsDb) // eslint-disable-line @typescript-eslint/no-explicit-any
       this.loaded       = true
     },
+    updateLoadableDNA(valIn) {
+      const val = String(valIn).replace(/\W+/g, '').slice(0, 80)
+      this.loadableDNA = val
+      this.canLoadDNA = (val !== this.dna) && validateLoadableDNA(val)
+    },
+    loadDNA() {
+      try {
+        const res      = vivifyDNA(this.loadableDNA, { aspects: this.aspects })
+        this.options   = res.options
+        this.aspects   = res.aspects
+        this.artifacts = res.artifacts
+        this.stones    = res.stones
+        this.vivified  = res
+        this.loadableDNA = '' // this.dnaStr()
+        this.dnaLoadMsg = "New DNA loaded!"
+      } catch (err) {
+        console.error(err)
+        this.dnaLoadMsg = "Could not load DNA, sorry!"
+      } finally {
+        setTimeout(() => { this.dnaLoadMsg = '' }, 5000)
+      }
+    },
+    dnaStr() {
+      return dnaStr(
+        this.bookmark,
+        this.options,
+        { aspects: this.aspects, artifacts: this.artifacts, stones: this.stones },
+      )
+    },
+    // async dnaStrSmol() { lzma.compress(this.dna).then((smol) => { this.smol = { smol, len: smol.length } }) },
+  },
+
+  watch: {
+    dna() {
+      console.warn('watch', this.dna)
+      /* window.history.replaceState(
+       *   {},
+       *   '',
+       *   router.resolve({
+       *     name: 'dna',
+       *     params: { dna },
+       *   }).href
+       * ); */
+    },
   },
 
 })
-
 
 </script>
 <style>

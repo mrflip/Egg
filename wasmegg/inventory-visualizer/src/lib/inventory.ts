@@ -66,6 +66,143 @@ const stoneIdOrder = [
   Name.SHELL_STONE,
 ]
 
+const ORDERABLES_ABBRS = {
+  artifacts: _.fromPairs([
+    [Name.LIGHT_OF_EGGENDIL,    'e'],
+    [Name.BOOK_OF_BASAN,        'o'],
+    [Name.TACHYON_DEFLECTOR,    't'],
+    [Name.SHIP_IN_A_BOTTLE,     's'],
+    [Name.TITANIUM_ACTUATOR,    'y'],
+    [Name.DILITHIUM_MONOCLE,    'm'],
+    [Name.QUANTUM_METRONOME,    'q'],
+    [Name.PHOENIX_FEATHER,      'f'],
+    [Name.THE_CHALICE,          'c'],
+    [Name.INTERSTELLAR_COMPASS, 'i'],
+    [Name.CARVED_RAINSTICK,     'r'],
+    [Name.BEAK_OF_MIDAS,        'k'],
+    [Name.MERCURYS_LENS,        'l'],
+    [Name.NEODYMIUM_MEDALLION,  'n'],
+    [Name.ORNATE_GUSSET,        'g'],
+    [Name.TUNGSTEN_ANKH,        'a'],
+    [Name.AURELIAN_BROOCH,      'b'],
+    [Name.VIAL_MARTIAN_DUST,    'v'],
+    [Name.DEMETERS_NECKLACE,    'd'],
+    [Name.LUNAR_TOTEM,          'u'],
+    [Name.PUZZLE_CUBE,          'p'],
+  ]),
+  //
+  stones: _.fromPairs([
+    [Name.PROPHECY_STONE,       'p'],
+    [Name.CLARITY_STONE,        'c'],
+    [Name.DILITHIUM_STONE,      'd'],
+    [Name.LIFE_STONE,           'l'],
+    [Name.QUANTUM_STONE,        'q'],
+    [Name.SOUL_STONE,           's'],
+    [Name.TERRA_STONE,          't'],
+    [Name.TACHYON_STONE,        'x'],
+    [Name.LUNAR_STONE,          'u'],
+    [Name.SHELL_STONE,          'h'],
+  ]),
+  //
+  options: { transpose: 'x', sillySizes: 'z', showTicks: 't', smushStoned: 'm', fancy: 'f' },
+  //
+  aspects: {
+    byRarity:     'o',
+    byType:       't',
+    byFamily:     'g',
+    byLevel:      'v',
+    byStoning:    'n',
+    byStoningLvl: 'z',
+    //
+    byStone:      's',
+    byAnyStone:   'a',
+    byIngredient: 'i',
+    byFragment:   'f',
+    byArtifact:   'x',
+    //
+    byLegendary:  'l',
+    byEpic:       'e',
+    byRare:       'r',
+    byCommonArt:  'c',
+    byUncommon:   'u',
+    byNonLegend:  'y',
+  },
+  //
+  axes: { options: 'O', aspects: 'G', artifacts: 'A', stones: 'S' },
+}
+
+const UNABBR_ORDERABLES = _.mapValues(ORDERABLES_ABBRS, _.invert)
+
+_.each(ORDERABLES_ABBRS, (abbrs, kk) => {
+  const vals = _.values(abbrs).sort()
+  if (! (_.uniq(vals).length == vals.length)) {
+    throw new Error(`Duplicate key in ${kk}: ${vals.join()}`)
+  }
+  if (! (_.every(abbrs, (abbr, abkey) => UNABBR_ORDERABLES[kk][abbr] === abkey))) {
+    console.error('bad lookup table', abbrs, UNABBR_ORDERABLES[kk])
+  }
+})
+
+function abbrOpts(val, name) {
+  return val ? ORDERABLES_ABBRS.options[name] : ''
+}
+
+function dnaStrForOrderable(orderables, key) {
+  const abbrs = ORDERABLES_ABBRS[key]
+  const ordIds = _.map(_.sortBy(orderables, 'weight'), 'id')
+  return _.map(ordIds, (id) => abbrs[id]).join('')
+}
+
+function dnaStrForAxis(str, axis) {
+  return `${ORDERABLES_ABBRS.axes[axis]}${str}`
+}
+
+export function dnaStr(bookmark, options, layoutOrder: LayoutOrderables) {
+  const opts = _.map(options, abbrOpts).join('')
+  const wts = _.mapValues(layoutOrder, dnaStrForOrderable)
+  const dna = _.map({ ...wts, options: opts }, dnaStrForAxis).join('_')
+  return dna
+}
+
+export function vivifyOrderables(axis, dnaseg, curr) {
+  try {
+    const abbrs = ORDERABLES_ABBRS[axis]
+    const orderables = defaultAxisOrder(axis)
+    if (! dnaseg) { return orderables }
+    _.each(orderables, (bag) => {
+      const abbr = abbrs[bag.id]
+      if (! dnaseg.includes(abbr)) { bag.weight += 50; return }
+      bag.weight = dnaseg.indexOf(abbr) + 1
+    })
+    return orderables
+  } catch (err) {
+    console.error(err)
+    return defaultAxisOrder(axis)
+  }
+}
+
+export function vivifyDNA(dna, layoutOrder) {
+  const { options = '', ...obSegs } = dnaToBag(dna)
+  const newLayout = {
+    aspects:   vivifyOrderables('aspects',   obSegs.aspects,   layoutOrder.aspects),
+    artifacts: vivifyOrderables('artifacts', obSegs.artifacts, layoutOrder.artifacts),
+    stones:    vivifyOrderables('stones',    obSegs.stones,    layoutOrder.stones),
+  }
+  newLayout.options = _.mapValues(ORDERABLES_ABBRS.options, (kk) => options.includes(kk))
+  return newLayout
+}
+
+function dnaToBag(dna) {
+  const abbrBag = _.fromPairs(dna.split(/_/g).map((str) => ([_.first(str), str.slice(1)])))
+  const ret = _.mapKeys(abbrBag, (_vv, abbr) => (UNABBR_ORDERABLES.axes[abbr] || 'NOPE'))
+  delete ret.NOPE
+  return ret
+}
+
+export function validateLoadableDNA(dna) {
+  return (dna && _.isString(dna) && /^(?:[AGOS][a-z]*_?)+$/.test(dna))
+}
+
 const fragmentToStone: { [key: string]: Name } = {
   [Name.PROPHECY_STONE_FRAGMENT]:   Name.PROPHECY_STONE,
   [Name.CLARITY_STONE_FRAGMENT]:    Name.CLARITY_STONE,
@@ -307,11 +444,6 @@ export function generateInventoryGrid(
     }
   }
 
-  // const layoutOrder: LayoutOrderables = _.merge({
-  //   artifacts:  _.pick(defaultAxisOrder('artifacts'), _.keys(
-  //   stones:     defaultAxisOrder('stones'),
-  //   aspects:    defaultAxisOrder('aspects'),
-  // }, options?.layoutOrder || {})
   const { layoutOrder } = options
 
   const sortAspects: SorterFunc[] = _.compact(
@@ -326,27 +458,5 @@ export function generateInventoryGrid(
     return 0
   });
 
-  // const grid2 = sorted.slice(0, 30)
-  // // console.log(grid2)
-  // const g3 = _.reduce(grid2, (acc, it) => {
-  //   const tail = _.last(acc)
-  //   console.log(fingerprint(it), it)
-  //   console.log(fingerprint(tail), tail)
-  //   if (tail && (fingerprint(tail) === fingerprint(it))) {
-  //     tail.count += it.count
-  //   } else {
-  //     acc.push(it)
-  //   }
-  //   return acc
-  // }, [])
-
   return grid
 }
-
-// function fingerprint(afx) {
-//   if (! afx) { return null }
-//   const { stones, count:_c, ...attrs } = afx
-//   const stoneNames = _.map(stones, 'id')
-//   const vals = _.map(_.keys(attrs).sort(), (key) => attrs[key])
-//   return JSON.stringify([...vals, stoneNames])
-// }
