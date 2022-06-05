@@ -18,7 +18,7 @@ import { performWebpTest } from '@/lib';
   await performWebpTest();
 
   const app = createApp(App);
-  // app.use(router);
+  app.use(router)
   app.use(VueTippy, {
     defaultProps: { theme: 'translucent' },
   });

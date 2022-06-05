@@ -1,6 +1,9 @@
 import _ from 'lodash'
 import { Artifact, ei, Inventory, Stone, getArtifactFamilyProps } from 'lib';
-import { Orderables, LayoutOrderables, LayoutAxis } from '@/lib';
+import {
+  LayoutAxis, LayoutOrderables, Orderable, Orderables,
+  PlayerDataOptions, VisualizerConfig, VisualizerConfigAxis,
+} from '@/lib';
 import Name = ei.ArtifactSpec.Name;
 import Level = ei.ArtifactSpec.Level;
 import Rarity = ei.ArtifactSpec.Rarity;
@@ -66,7 +69,7 @@ const stoneIdOrder = [
   Name.SHELL_STONE,
 ]
 
-const ORDERABLES_ABBRS = {
+const ORDERABLES_ABBRS: { [axis in VisualizerConfigAxis]: { [key: string]: string } } = {
   artifacts: _.fromPairs([
     [Name.LIGHT_OF_EGGENDIL,    'e'],
     [Name.BOOK_OF_BASAN,        'o'],
@@ -128,43 +131,49 @@ const ORDERABLES_ABBRS = {
     byNonLegend:  'y',
   },
   //
-  axes: { options: 'O', aspects: 'G', artifacts: 'A', stones: 'S' },
 }
 
-const UNABBR_ORDERABLES = _.mapValues(ORDERABLES_ABBRS, _.invert)
+const UNABBR_ORDERABLES: { [key in VisualizerConfigAxis]: { [key: string]: string } } = _.mapValues(ORDERABLES_ABBRS, _.invert)
 
-_.each(ORDERABLES_ABBRS, (abbrs, kk) => {
-  const vals = _.values(abbrs).sort()
-  if (! (_.uniq(vals).length == vals.length)) {
-    throw new Error(`Duplicate key in ${kk}: ${vals.join()}`)
-  }
-  if (! (_.every(abbrs, (abbr, abkey) => UNABBR_ORDERABLES[kk][abbr] === abkey))) {
-    console.error('bad lookup table', abbrs, UNABBR_ORDERABLES[kk])
-  }
-})
+const DNA_AXIS_ABBRS: { [key in VisualizerConfigAxis]: string } = {
+  options: 'O', aspects: 'G', artifacts: 'A', stones: 'S',
+}
+// @ts-ignore
+const DNA_AXIS_UNABBRS: { [key in 'O' | 'G' | 'A' | 'S']: VisualizerConfigAxis } = _.invert(DNA_AXIS_ABBRS)
 
-function abbrOpts(val, name) {
+// _.each(ORDERABLES_ABBRS, (abbrs, kk: VisualizerConfigAxis) => {
+//   const vals = _.values(abbrs).sort()
+//   if (! (_.uniq(vals).length == vals.length)) {
+//     throw new Error(`Duplicate key in ${kk}: ${vals.join()}`)
+//   }
+//   if (! (_.every(abbrs, (abbr, abkey) => UNABBR_ORDERABLES[kk][abbr] === abkey))) {
+//     console.error('bad lookup table', abbrs, UNABBR_ORDERABLES[kk])
+//   }
+// })
+
+function abbrOpts(val: any, name: keyof PlayerDataOptions): string {
   return val ? ORDERABLES_ABBRS.options[name] : ''
 }
 
-function dnaStrForOrderable(orderables, key) {
+function dnaStrForOrderable(orderables: Orderables, key: LayoutAxis) {
   const abbrs = ORDERABLES_ABBRS[key]
   const ordIds = _.map(_.sortBy(orderables, 'weight'), 'id')
   return _.map(ordIds, (id) => abbrs[id]).join('')
 }
 
-function dnaStrForAxis(str, axis) {
-  return `${ORDERABLES_ABBRS.axes[axis]}${str}`
+function dnaStrForAxis(str: string, axis: LayoutAxis) {
+  return `${DNA_AXIS_ABBRS[axis]}${str}`
 }
 
-export function dnaStr(bookmark, options, layoutOrder: LayoutOrderables) {
+export function dnaStr(bookmark: string, options: PlayerDataOptions, layoutOrder: LayoutOrderables) {
+  // @ts-ignore
   const opts = _.map(options, abbrOpts).join('')
   const wts = _.mapValues(layoutOrder, dnaStrForOrderable)
   const dna = _.map({ ...wts, options: opts }, dnaStrForAxis).join('_')
   return dna
 }
 
-export function vivifyOrderables(axis, dnaseg, curr) {
+export function vivifyOrderables(axis: LayoutAxis, dnaseg: string): Orderables {
   try {
     const abbrs = ORDERABLES_ABBRS[axis]
     const orderables = defaultAxisOrder(axis)
@@ -181,26 +190,26 @@ export function vivifyOrderables(axis, dnaseg, curr) {
   }
 }
 
-export function vivifyDNA(dna, layoutOrder) {
+export function vivifyDNA(dna: string): VisualizerConfig {
   const { options = '', ...obSegs } = dnaToBag(dna)
-  const newLayout = {
-    aspects:   vivifyOrderables('aspects',   obSegs.aspects,   layoutOrder.aspects),
-    artifacts: vivifyOrderables('artifacts', obSegs.artifacts, layoutOrder.artifacts),
-    stones:    vivifyOrderables('stones',    obSegs.stones,    layoutOrder.stones),
-  }
-  newLayout.options = _.mapValues(ORDERABLES_ABBRS.options, (kk) => options.includes(kk))
-  return newLayout
+  const newConfig: VisualizerConfig = {
+    aspects:   vivifyOrderables('aspects',   obSegs.aspects),
+    artifacts: vivifyOrderables('artifacts', obSegs.artifacts),
+    stones:    vivifyOrderables('stones',    obSegs.stones),
+  } as VisualizerConfig
+  newConfig.options = _.mapValues(ORDERABLES_ABBRS.options, (kk: string) => options.includes(kk)) as PlayerDataOptions
+  return newConfig
 }
 
-function dnaToBag(dna) {
+function dnaToBag(dna: string) {
   const abbrBag = _.fromPairs(dna.split(/_/g).map((str) => ([_.first(str), str.slice(1)])))
-  const ret = _.mapKeys(abbrBag, (_vv, abbr) => (UNABBR_ORDERABLES.axes[abbr] || 'NOPE'))
+  const ret = _.mapKeys(abbrBag, (_vv, abbr: keyof typeof DNA_AXIS_UNABBRS) => (DNA_AXIS_UNABBRS[abbr] || 'NOPE'))
   delete ret.NOPE
   return ret
 }
 
-export function validateLoadableDNA(dna) {
-  return (dna && _.isString(dna) && /^(?:[AGOS][a-z]*_?)+$/.test(dna))
+export function validateLoadableDNA(dna: string): boolean {
+  return (!! dna) && _.isString(dna) && /^(?:[AGOS][a-z]*_?)+$/.test(dna)
 }
 
 const fragmentToStone: { [key: string]: Name } = {
@@ -280,7 +289,7 @@ const ASPECT_DESCRIPTIONS: { [key: AspectsKey]: string } = {
   byAnyStone:   'group stones and fragments together',
   byArtifact:   'group all artifacts',
 }
-_.each(DEFAULT_ASPECTS_ORDER, (bag) => { bag.desc = ASPECT_DESCRIPTIONS[bag.id] })
+_.each(DEFAULT_ASPECTS_ORDER, (bag: Orderable) => { bag.desc = ASPECT_DESCRIPTIONS[bag.id] })
 
 const AxisOrders: LayoutOrderables = {
   artifacts:    DEFAULT_ARTIFACTS_ORDER,
