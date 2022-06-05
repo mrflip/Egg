@@ -12,6 +12,7 @@
   "dependencies": {
     "@headlessui/vue": "^1.6.4",
     "@heroicons/vue": "^1.0.6",
+    "copy-text-to-clipboard": "^3.0.1",
     "fontfaceobserver": "^2.3.0",
     "lib": ">=0.1.0",
     "localforage": "^1.10.0",
@@ -19,6 +20,7 @@
     "safari-14-idb-fix": "^3.0.0",
     "tippy.js": "^6.3.7",
     "vue": "^3.2.36",
+    "vue-router": "^4.0.15",
     "vue-tippy": "^6.0.0-alpha.58",
     "vue3-tabs-component": "^1.0.8",
     "vuedraggable": "^4.1.0"
