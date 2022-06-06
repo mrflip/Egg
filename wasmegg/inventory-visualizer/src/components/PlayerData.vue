@@ -1,89 +1,164 @@
 <template>
 
-  <template v-if="false && loaded">
+  <template v-if="true && loaded">
     <inventory-canvas
       :inventory="inventory"
       :artifacts="artifacts"
-      :stones="stones"
       :aspects="selaspects"
-      :bookmark="bookmark"
+      :stones="stones"
       :show-ticks="options.showTicks"
       :smush-stoned="options.smushStoned"
       :transpose="options.transpose"
       :silly-sizes="options.sillySizes"
-    >
-      <select id="bookmarks" v-model="bookmark" class="my-1" name="bookmarks" @change="handleBookmarkChange">
-        <template v-for="bkInfo of bookmarkProps" :key="bkInfo.id">
-          <option :value="bkInfo.id">{{ bkInfo.label }}</option>
-        </template>
-      </select>
-    </inventory-canvas>
+      :per-col="clampedPerCol"
+      @imageURLChange="(val) => { imageURL = val }"
+      @loadingChange="(val) => { loading = val }"
+    />
   </template>
 
-  <div class="flex flex-col py-4 justify-start">
-    <div class="flex flex-col md:flex-row items-center justify-center py-2">
-      <copy-button
-        class="inline-flex w-40 text-center items-center py-2 px-2 border border-transparent text-sm font-medium rounded-md bg-blue-200 hover:bg-blue-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400"
-        :content="dna"
-        tooltip="Copy DNA to clipboard">
-        <span >Copy DNA:</span>
-      </copy-button>
-      <code class="text-xs p-2 md:ml-2 bg-blue-100 w-[30rem] text-center">{{ dna }}</code>
+  <div class="flex flex-row 2xl:px-24 mt-2 max-w-[1024px] m-auto items-center justify-around" :class="loading ? 'opacity-50' : null">
+    <div class="hidden sm:flex w-full items-center justify-center">
+      <select id="bookmarks" :value="bookmark" class="flex my-1" name="bookmarks" @change="handleBookmarkChange">
+        <template v-for="bkInfo of bookmarkProps" :key="bkInfo.id">
+          <option :value="bkInfo.id" :id="bkInfo.id">{{ bkInfo.label }}</option>
+        </template>
+      </select>
+      <icon-button
+        class="mx-2"
+        @click="() => adoptNewDNA({ dna: savedDNA[bookmark] })"
+        :disabled="(! canLoadDNA(savedDNA[bookmark])) || (savedDNA[bookmark] === dna)"
+      >
+        <replace-icon class="w-6 h-6" />
+        <span class="hidden sm:flex ml-1">Load</span>
+      </icon-button>
     </div>
-    <div class="flex flex-col md:flex-row items-center justify-center py-2">
-      <button
-        class="inline-flex w-40 text-center items-center disabled:bg-gray-100 disabled:text-gray-400 py-2 px-2 border border-transparent text-sm font-medium rounded-md bg-purple-200 hover:bg-purple-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-400"
-        @click="loadDNA(loadableDNA)"
-        :disabled="(! canLoadDNA)"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <span v-if="loadableDNA && (loadableDNA !== dna) && (! canLoadDNA)">
-          (invalid DNA)
-        </span>
-        <span v-else-if="loadableDNA === dna">Paste DNA:</span>
-        <span v-else>Replace Current</span>
-      </button>
-      <div
-        v-if="dnaLoadMsg"
-        class="text-xs font-mono p-2 md:ml-2 bg-red-100 w-[30rem] text-center"
-      >
-        {{ dnaLoadMsg }}&nbsp;
-      </div>
-      <input v-else
-        id="dna-in"
-        name="DNA"
-        class="text-xs font-mono p-2 md:ml-2 bg-red-100 w-[30rem] text-center"
-        :value="loadableDNA"
-        @input="updateLoadableDNA(($event.target as any).value)"
+
+    <div class="flex w-full flex-row items-center justify-center">
+      <input
+        id="perCol"
+        :value.number="options.perCol"
+        name="perCol"
+        type="number"
+        :disabled="loading"
+        class="w-12 xs:w-16 md:w-20 max-h-32 self-center"
+        @input="options.perCol = ($event.target as any).value"
       />
+      <div class="ml-2 text-sm">
+        <label for="perCol" class="text-gray-600">
+          Items per {{ options.transpose ? 'row' : 'column' }}; <br />
+          blank = squarish
+        </label>
+      </div>
+    </div>
+
+    <div class="flex w-1/3 xs:w-full min-w-[150px] my-2 flex-col xs:flex-row items-center justify-center">
+      <a
+        :href="imageURL"
+        download="inventory.png"
+        class="inline-flex text-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+      >
+        Download<span class="hidden xs:inline">&nbsp;Image</span>
+      </a>
     </div>
   </div>
 
   <tabs
     :options="{ useUrlFragment: false, defaultTabHash: 'grouping_tab' }"
     class="max-w-[1024px] m-auto"
-    nav-class="tab-nav flex 2xl:px-32 flex-row my-8 md:items-stretch items-center justify-around"
+    nav-class="tab-nav border-b-2 flex 2xl:px-32 flex-row mt-4 mb-2 md:items-stretch items-center justify-around"
     nav-item-class="tabs-nav grow flex py-2"
     nav-item-link-class="tabs-tab-nav flex w-full justify-center text-center"
     nav-item-active-class="tab-is-active bg-gray-200"
     nav-item-disabled-class="bg-red"
-    panels-wrapper-class="min-h-[400px] tabs-panels  border border-blue-100"
+    panels-wrapper-class="min-h-[400px] tabs-panels"
   >
-    <tab id="options_tab" name="Options" class="p-2 mb-4 flex flex-col items-center justify-start Aspects ordering" :selected="true">
-      <div class="flex flex-col justify-start mt-2">
-        <check-option id="transpose" class="w-full ml-2 mb-2" :checked="options.transpose" @change="updateTranspose">Swap Rows / Columns</check-option>
-        <check-option id="sillySizes" class="w-full ml-2 mb-2" :checked="options.sillySizes" @change="updateSillySizes">Allow Silly Sizes</check-option>
-        <check-option id="showTicks" class="w-full ml-2 mb-2" :checked="options.showTicks" @change="updateShowTicks">Show Tickmarks</check-option>
-        <check-option id="smushStoned" class="w-full ml-2 mb-2" :checked="options.smushStoned" @change="updateSmushStoned">Combine Similar Artifacts</check-option>
+    <tab id="options_tab" name="Options" class="mb-4 flex flex-col items-center justify-start Aspects ordering" :selected="true">
+
+      <div class="flex w-full justify-center items-center flex-col xs:flex-row">
+        <div class="flex flex-wrap md:w-2/3 justify-around">
+          <div class="flex flex-col w-52 justify-start">
+            <check-option id="transpose"   class="w-full mb-1" :checked="options.transpose" @change="updateTranspose">Swap Rows / Columns</check-option>
+            <check-option id="smushStoned" class="w-full"      :checked="options.smushStoned" @change="updateSmushStoned">Combine Similar Artifacts</check-option>
+          </div>
+          <div class="flex flex-col items-start justify-start">
+            <check-option id="sillySizes" class="w-full mb-1" :checked="options.sillySizes" @change="updateSillySizes">Allow Silly Sizes</check-option>
+            <check-option id="showTicks"  class="w-full " :checked="options.showTicks" @change="updateShowTicks">Show Tickmarks</check-option>
+          </div>
+        </div>
+        <div class="flex flex-row md:w-2/5 flex-wrap ml-2 items-center justify-between">
+          <reset-button class="              w-[7rem]" @click="resetAllMaybe">Reset {{ bookmarkProps['ArA']?.label }}</reset-button>
+          <reset-button class="bg-purple-200 w-[7rem]" @click="() => randomizeAxis('aspects')">I Feel Lucky!</reset-button>
+        </div>
       </div>
-      <reset-button class="mt-2" @click="resetAllMaybe">Reset {{ bookmarkProps[bookmark]?.label }}</reset-button>
-      <reset-button class="bg-purple-200" @click="() => randomizeAxis('aspects')">I'm Feeling Lucky!</reset-button>
-      <p class="mt-2 ml-4 max-w-[320px] w-full text-left text-sm text-gray-500">
-        If the download button doesn't work, you may also right click / long press on the image
-        above to use your browser's image saving function.
-      </p>
+
+      <div class="flex flex-col py-4 justify-center itens-center">
+        <div class="flex flex-col justify-start m-auto">
+
+          <div class="flex flex-col md:flex-row items-center py-2">
+            <copy-button :content="dna" tooltip="Copy DNA to clipboard" class="order-last md:order-first">
+              <span >Copy DNA:</span>
+            </copy-button>
+            <dna-box class="bg-blue-100">{{ dna }}</dna-box>
+          </div>
+
+          <div class="flex flex-col md:flex-row items-center">
+            <icon-button
+              class="w-40 justify-center order-last md:order-first"
+              @click="() => adoptNewDNA({ dna: injectableDNA })"
+              :disabled="(! canLoadDNA(injectableDNA))"
+              type="submit"
+            >
+              <replace-icon class="w-6 h-6 mr-1" />
+              <span v-if="injectableDNA && (injectableDNA !== dna) && (! canLoadDNA(injectableDNA))">
+                (invalid DNA)
+              </span>
+              <span v-else-if="(! injectableDNA) || (injectableDNA === dna)">Paste <i>New</i> DNA:</span>
+              <span v-else>Replace Current</span>
+            </icon-button>
+            <div
+              v-if="dnaLoadMsg"
+              class="text-xs font-mono p-2 my-2 md:ml-2 bg-green-50 w-[16rem] xs:w-[24rem] sm:w-[30rem] text-center"
+            >
+              {{ dnaLoadMsg }}&nbsp;
+            </div>
+            <input v-else
+              id="dna-in"
+              name="DNA"
+              class="text-xs font-mono p-2 my-2 md:ml-2 bg-violet-50 w-[16rem] xs:w-[24rem] sm:w-[30rem] text-center"
+              :value="injectableDNA"
+              @input="updateInjectableDNA(($event.target as any).value)"
+              @keyup.enter="() => adoptNewDNA({ dna: injectableDNA })"
+            />
+          </div>
+
+          <template v-for="[id, dnaN] of Object.entries(savedDNA)" :key="id">
+            <div class="flex md:flex-nowrap flex-wrap-reverse md:flex-row items-center justify-center contents-around py-2">
+              <icon-button
+                class="w-24 order-first mr-4 md:mr-2 md:order-first"
+                @click="() => adoptNewDNA({ dna: dnaN })"
+                :disabled="(! canLoadDNA(dnaN)) || (dnaN === dna)"
+              >
+                <replace-icon class="w-6 h-6 mr-1" />
+                <span v-if="dnaN === dna">Current</span>
+                <span v-else>Load</span>
+              </icon-button>
+              <dna-box class="bg-amber-50 order-5">{{ dnaN }}</dna-box>
+              <icon-button class="w-24 ml-4 md:ml-2 order-4 md:order-7"
+                :disabled="dnaN === dna"
+                @click="() => saveCurrDNA(id, dnaN)">
+                <bookmark-icon class="w-6 h-6 mr-1" />
+                <span>Save</span>
+              </icon-button>
+            </div>
+          </template>
+        </div>
+      </div>
+      <div>
+        <p class="mt-2 sm:max-w-[320px] w-full text-left text-sm text-gray-500">
+          If the download button doesn't work, you may also right click / long press on the image
+          above to use your browser's image saving function.
+        </p>
+      </div>
     </tab>
 
     <tab
@@ -96,7 +171,7 @@
       <div class="flex flex-row w-full items-start justify-around">
 
         <div class="flex w-full items-center justify-center flex-col">
-          <h3 class="mb-2 font-bold m-2 text-center">Groups</h3>
+          <h3 class="hidden md:flex mb-2 font-bold m-2 text-center">Groups</h3>
           <drag-orderer item-classes="w-60" :layout-order="selaspects" group="aspects" direction="vert" @update-order="updateAspectsLayout">
             <template #listItem="{element}">
               <div class="h-7 w-7 relative rounded-full isolate bg-epic">
@@ -108,27 +183,26 @@
             </template>
           </drag-orderer>
           <reset-button @click="() => resetAxis('aspects')">Reset Sorting</reset-button>
-          <reset-button class="bg-purple-200" @click="() => randomizeAxis('aspects')">I'm Feeling Lucky!</reset-button>
-          <div class="flex w-full justify-center">
-            <check-option id="fancy" class="ml-2 mt-2" :checked="options.fancy" @change="updateFancy">Fancy Groupings</check-option>
+          <reset-button class="bg-purple-200" @click="() => randomizeAxis('aspects')">I Feel Lucky!</reset-button>
+          <div class="flex w-full justify-center items-center">
+            <check-option id="fancy" class="mt-2 mr-4" :checked="options.fancy" @change="updateFancy">Fancy Groupings</check-option>
           </div>
         </div>
 
-        <div class="flex w-full items-center content-center justify-center flex-col hidden md:block">
+        <div class="hidden md:flex w-full mx-2 items-center content-center justify-center flex-col">
           <h3 class="mb-2 font-bold m-2 text-center">Artifact Ordering</h3>
-          <drag-orderer item-classes="w-60 max-h-10 mb-1 items-center" group="artifacts" :layout-order="artifacts" direction="vert" @update-order="updateArtifactsLayout">
+          <drag-orderer item-classes="w-60 max-h-10 mb-0.5 items-center" group="artifacts" :layout-order="artifacts" direction="vert" @update-order="updateArtifactsLayout">
             <template #listItem="{element}">
-              <div class="h-7 w-7 relative rounded-full isolate">
+              <div class="h-6 w-6 mx-0.5 relative rounded-full isolate">
                 <img class="absolute top-0 left-0 h-full w-full z-10" :src="element.img" />
               </div>
-              <span class="m-1 ml-1.5">{{ element?.name }}</span>
+              <span class="ml-1">{{ element?.name }}</span>
             </template>
           </drag-orderer>
           <reset-button @click="() => resetAxis('artifacts')">Reset Artifacts</reset-button>
         </div>
 
-        <div class="flex w-full items-center justify-center flex-col hidden md:block">
-
+        <div class="hidden md:flex w-full items-center justify-center flex-col">
           <h3 class="mb-2 font-bold m-2 text-center">Stones Ordering</h3>
           <drag-orderer item-classes="w-60 stone" :layout-order="stones" group="stones" direction="vert" @update-order="updateStonesLayout">
             <template #listItem="{element}">
@@ -143,10 +217,12 @@
           </div>
         </div>
       </div>
+
+      <how-this-works :options="options" :artifacts="artifacts" :aspects="aspects" :selaspects="selaspects" :stones="stones" />
+
     </tab>
 
     <tab id="artifact_tab" name="Artifacts" class="p-2 mb-4 flex flex-col items-center Artifacts ordering">
-      <h3 class="mb-2 font-bold m-2 text-center">Artifact Ordering</h3>
       <drag-orderer item-classes="w-60 max-h-10 mb-1 items-center" group="artifacts" :layout-order="artifacts" direction="vert" @update-order="updateArtifactsLayout">
         <template #listItem="{element}">
           <div class="h-7 w-7 relative rounded-full isolate">
@@ -159,7 +235,6 @@
     </tab>
 
     <tab id="stone_tab" name="Stones" class="p-2 mb-4 flex flex-col items-center Stones ordering">
-      <h3 class="mb-2 font-bold m-2 text-center">Stones Ordering</h3>
       <drag-orderer item-classes="w-60 stone" :layout-order="stones" group="stones" direction="vert" @update-order="updateStonesLayout">
         <template #listItem="{element}">
           <div class="h-8 w-8 relative isolate">
@@ -172,49 +247,12 @@
         <reset-button @click="() => resetAxis('stones')">Reset Stones</reset-button>
       </div>
     </tab>
-  </tabs>
 
-  <div class="flex flex-col w-full items-center justify-center">
-    <div class="text-left mt-2 px-2 max-w-[600px] lg:max-w-[800px]">
-      <h3 class="mb-2 font-bold m-2 text-center">How this works</h3>
-      <p>
-        To organize your inventory we
-        {{ options.smushStoned ? 'first combine all items with the same stoning into a square. Then we' : '' }}
-      </p>
-      <ul class="pl-4">
-        <li class="list-disc">{{ examples[0]?.desc }};      </li>
-        <li class="list-disc">then {{ examples[1]?.desc }}, </li>
-        <li class="list-disc">then {{ examples[2]?.desc }}, </li>
-        <li class="list-disc">then {{ examples[3]?.desc }}, </li>
-        <li class="list-disc">then {{ examples[4]?.desc }}, </li>
-      </ul>
-      <p class="mb-2">
-        and so forth. You can change that in the 'Groups' tab.
-      </p>
-      <p class="mt-2 mb-2">
-        When it comes time to sort by Family, we will use the order
-        you choose in the "Artifacts" tab: the way it is now puts the
-        {{ firstArtifact }} first and the {{ lastArtifact }} last.
-        Similarly, the "Stones" widget is set to choose the
-        {{ firstStone }} first for stones and fragments
-        and when sorting by mounted stone.
-      </p>
-      <p v-if="examples.slice(4).some(({ id }) => (id === 'byStoning'))">
-        But if you, say, moved '{{ aspects.byStoning?.name }}' to the top, it would first {{ aspects.byStoning?.desc }}.
-      </p>
-      <p v-else-if="examples.slice(4).some(({ id }) => (id === 'byFamily'))">
-        But if you, say, moved '{{ aspects.byFamily?.name }}' to the top, it would first {{ aspects.byFamily?.desc }}.
-      </p>
-      <p v-else>
-        But if you, say, moved '{{ _.last(examples)?.name }}' to the top, it would first {{ _.last(examples).desc }}.
-      </p>
-      <p class="mt-2">
-        Or -- instead of reading blah blah blah, click the "I'm Feeling
-        Lucky!" buttonn and play around with what comes out. (The button
-        probably isn't a rickroll, you'll have to weigh the risks.)
-      </p>
-    </div>
-  </div>
+    <tab id="huh_tab" name="Wha? 🤔" class="p-2 mb-4 flex flex-col items-center Stones ordering">
+      <how-this-works :options="options" :artifacts="artifacts" :aspects="aspects" :selaspects="selaspects" :stones="stones" />
+    </tab>
+
+  </tabs>
 
 </template>
 
@@ -222,10 +260,12 @@
 import _ from 'lodash'
 import { defineComponent } from 'vue';
 import {
-  getLocalStorage, setLocalStorage, Inventory, requestFirstContact, UserBackupEmptyError,
+  Inventory, requestFirstContact, UserBackupEmptyError,
 } from 'lib';
 import {
-  defaultAxisOrder, Orderables, dnaStr, vivifyDNA, validateLoadableDNA,
+  defaultAxisOrder, Orderables, BOOKMARK_PROPS, DEFAULT_BOOKMARK,
+  dnaStr, vivifyDNA, resetAxis, DnaStr, Bookmarker,
+  loadSavedDNA, validateDNA, saveDNA, defaultDNA,
   VisualizerConfigAxis, LayoutAxis, PlayerDataOptions,
 } from '@/lib'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -233,10 +273,18 @@ import {
 import {Tabs, Tab} from 'vue3-tabs-component'
 
 import InventoryCanvas from '@/components/InventoryCanvas.vue';
-import DragOrderer from '@/components/DragOrderer.vue';
-import ResetButton from '@/components/ResetButton.vue';
-import CheckOption from '@/components/CheckOption.vue'
-import CopyButton  from '@/components/CopyButton.vue'
+import DragOrderer     from '@/components/DragOrderer.vue';
+import ResetButton     from '@/components/ResetButton.vue';
+import CheckOption     from '@/components/CheckOption.vue'
+import CopyButton      from '@/components/CopyButton.vue'
+import HowThisWorks    from '@/components/HowThisWorks.vue'
+import DnaBox          from '@/components/DnaBox.vue'
+import IconButton      from '@/components/IconButton.vue'
+import {
+  SaveIcon, InformationCircleIcon as HelpIcon,
+  ArrowCircleRightIcon as ReplaceIcon,
+  BookmarkIcon,
+} from "@heroicons/vue/outline"
 
 async function fetchArtifactsDb(playerId: string) {
   const userinfo = await requestFirstContact(playerId);
@@ -254,100 +302,11 @@ async function fetchArtifactsDb(playerId: string) {
   return artifactsDb
 }
 
-const LOCALSTORAGE_KEYS = {
-  aspects:   'layoutOrderAspects',
-  artifacts: 'layoutOrderArtifacts',
-  stones:    'layoutOrderStones',
-  options:   'optionsBag'
-}
-type StorageKeyName = keyof (typeof LOCALSTORAGE_KEYS);
-
-const DEFAULT_OPTIONS = {
-  transpose:    false,
-  sillySizes:   false,
-  showTicks:    false,
-  smushStoned:  false,
-  fancy:        false,
-}
-
 const ALWAYS_GRAIN = 2
 const FANCY_GRAIN  = 3
 
-const BOOKMARK_PROPS = {
-  BkA: { id: "BkA", label: 'Bookmark A' },
-  BkB: { id: "BkB", label: 'Bookmark B' },
-  BkC: { id: "BkC", label: 'Bookmark C' },
-}
-type Bookmarker = keyof (typeof BOOKMARK_PROPS);
-const DEFAULT_BOOKMARK: Bookmarker = 'BkA'
-
-function getStorageKey(keyName: StorageKeyName, bookmark: string) {
-  return `${LOCALSTORAGE_KEYS[keyName]}${bookmark}`
-}
-
-function storeOptions(options: PlayerDataOptions, bookmark: Bookmarker) {
-  if (! bookmark) { console.error('no bookmark!', bookmark); return }
-  setLocalStorage(getStorageKey('options', bookmark), JSON.stringify(options))
-}
-
-function storeLayoutAxis(orderables: Orderables, axis: LayoutAxis, bookmark: Bookmarker) {
-  if (! bookmark) { console.error('no bookmark!', bookmark); return }
-  setLocalStorage(getStorageKey(axis, bookmark), JSON.stringify(getOrderablesDNA(orderables)))
-}
-
-function loadJson(flavor: VisualizerConfigAxis, bookmark: Bookmarker) {
-  const storageKey = getStorageKey(flavor, bookmark)
-  return getLocalStorage(storageKey) || null
-}
-
-function loadOptions(bookmark: Bookmarker): PlayerDataOptions {
-  const optionsJson = loadJson('options', bookmark)
-  if (optionsJson) {
-    try {
-      const parsed = JSON.parse(optionsJson)
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      return _.pick(_.merge({}, DEFAULT_OPTIONS, parsed), _.keys(DEFAULT_OPTIONS))
-    }  catch (err) {
-      console.warn("could not parse stored JSON", optionsJson, err)
-    }
-  }
-  // if nothing or error
-  storeOptions(DEFAULT_OPTIONS, bookmark)
-  return _.cloneDeep(DEFAULT_OPTIONS)
-}
-
-function loadLayoutAxis(axis: LayoutAxis, bookmark: Bookmarker): Orderables {
-  const fallback   = defaultAxisOrder(axis)
-  const axisJson = loadJson(axis, bookmark)
-  if (axisJson) {
-    try {
-      const parsed = getOrderablesDNA(JSON.parse(axisJson))
-      // allow the keys to change without having leftover/missing entries
-      const combined = _.pick(_.merge({}, fallback, parsed), _.keys(fallback))
-      return combined
-    } catch (err) {
-      console.warn("could not parse stored JSON", axisJson, err)
-    }
-  }
-  // if nothing or error
-  storeLayoutAxis(fallback, axis, bookmark)
-  return fallback
-}
-
-function loadLayoutAll(bookmark: Bookmarker = DEFAULT_BOOKMARK) {
-  const aspects   = loadLayoutAxis('aspects',   bookmark)
-  const artifacts = loadLayoutAxis('artifacts', bookmark)
-  const stones    = loadLayoutAxis('stones',    bookmark)
-  return { aspects, artifacts, stones }
-}
-
-function getOrderablesDNA(orderables: Orderables) {
-  return _.mapValues(orderables, (orderable) => _.pick(orderable, ['weight']))
-}
-
 interface LayoutOrderableComponent {
-  stones: Orderables, artifacts: Orderables, aspects: Orderables, bookmark: Bookmarker,
+  artifacts: Orderables, aspects: Orderables, stones: Orderables,
 }
 
 function randomizeAxis(comp: LayoutOrderableComponent, axis: LayoutAxis) {
@@ -356,25 +315,7 @@ function randomizeAxis(comp: LayoutOrderableComponent, axis: LayoutAxis) {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const newOrder = _.mapKeys(_.map(shuff2, (ob, idx) => ({ ...ob, weight: idx + 1 })), 'id')
-  storeLayoutAxis(newOrder, axis, comp.bookmark)
   comp[axis] = newOrder
-
-}
-
-function resetAxis(comp: LayoutOrderableComponent, axis: LayoutAxis) {
-  const orderables = defaultAxisOrder(axis)
-  storeLayoutAxis(orderables, axis, comp.bookmark)
-  comp[axis] = orderables
-}
-
-function resetAll(comp: LayoutOrderableComponent) {
-  resetAxis(comp, 'aspects')
-  resetAxis(comp, 'stones')
-  resetAxis(comp, 'artifacts')
-  storeOptions(DEFAULT_OPTIONS, comp.bookmark)
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  comp.options = DEFAULT_OPTIONS
 }
 
 function selectAspects(aspects: Orderables, options: PlayerDataOptions) {
@@ -387,90 +328,82 @@ function selectAspects(aspects: Orderables, options: PlayerDataOptions) {
 
 export default defineComponent({
   components: {
-    DragOrderer, InventoryCanvas, ResetButton, Tabs, Tab, CheckOption, CopyButton,
+    BookmarkIcon, CheckOption, CopyButton, DnaBox, DragOrderer,
+    HowThisWorks, IconButton, InventoryCanvas, ReplaceIcon,
+    ResetButton, SaveIcon, Tab, Tabs,
   },
   props: {
-    playerId: { type: String, required: true },
-    urldna: { type: String, required: false, default: '' },
+    playerId:   { type: String, required: true },
+    urldna:     { type: String, required: false, default: '' },
+    bookmark:   { type: String, required: false, default: DEFAULT_BOOKMARK },
   },
-  emits: ['dnaChange'],
-
+  emits: ['dnaChange', 'adoptNewDNA', 'bookmarkChange'],
   data() {
-    if (this.urldna) {
-      console.log('born with this', this.urldna)
-    }
-    const bookmark: Bookmarker = DEFAULT_BOOKMARK
     // I don't know how to make ts happy most of the time
     const inventory: any = null // eslint-disable-line @typescript-eslint/no-explicit-any
-    const options: PlayerDataOptions = loadOptions(bookmark)
-    const aspects   = loadLayoutAxis('aspects',   bookmark)
-    const artifacts = loadLayoutAxis('artifacts', bookmark)
-    const stones    = loadLayoutAxis('stones',    bookmark)
+    const savedDNA  = loadSavedDNA()
+    const res       = vivifyDNA(this.urldna)
+    const artifacts = res.artifacts
+    const aspects   = res.aspects
+    const stones    = res.stones
+    const options   = res.options
+    const vivified  = res
+    const injectableDNA = '' // this.dnaStr()
+
     return {
+      inventory,
       loaded:           false,
       artifacts,
-      stones,
       aspects,
+      stones,
       options,
-      bookmark,
-      inventory,
       console,
       bookmarkProps:    BOOKMARK_PROPS,
-      loadableDNA:      '',
+      injectableDNA,
       vivified:          {},
-      canLoadDNA:       false,
       dnaLoadMsg:       '',
+      savedDNA,
+      imageURL:         '',
+      loading:          true,
       _, // eslint-disable-line vue/no-reserved-keys
     }
   },
 
   computed: {
-    examples() {
-      return _.sortBy(selectAspects(this.aspects, this.options), 'weight')
-    },
-    firstArtifact() { return _.first(_.sortBy(this.artifacts, 'weight'))?.name },
-    lastArtifact()  { return _.last(_.sortBy(this.artifacts, 'weight'))?.name },
-    firstStone()    { return _.first(_.sortBy(this.stones, 'weight'))?.name },
     selaspects()    { return selectAspects(this.aspects, this.options) },
     dna() {
       return this.dnaStr()
     },
+    clampedPerCol() {
+      const clampedPerCol = Number(this.options.perCol)
+      if (clampedPerCol > 0) {
+        if (this.options.sillySizes) { return String(clampedPerCol) }
+        return String(_.clamp(clampedPerCol, 1, 100))
+      }
+      return ''
+    }
   },
 
-  mounted() {
-    this.fetchArtifactsDb()
+  async mounted() {
+    await this.fetchArtifactsDb()
   },
 
   methods: {
     updateShowTicks(event: Event) {
       this.options.showTicks = (<HTMLInputElement>event.target)?.checked || false
-      storeOptions(this.options, this.bookmark)
     },
     updateSillySizes(event: Event) {
       this.options.sillySizes = (<HTMLInputElement>event.target)?.checked || false
-      storeOptions(this.options, this.bookmark)
     },
     updateTranspose(event: Event) {
       this.options.transpose = (<HTMLInputElement>event.target)?.checked || false
-      storeOptions(this.options, this.bookmark)
     },
     updateSmushStoned(event: Event) {
       this.options.smushStoned = (<HTMLInputElement>event.target)?.checked || false
-      storeOptions(this.options, this.bookmark)
     },
     updateFancy(event: Event) {
       this.options.fancy = (<HTMLInputElement>event.target)?.checked || false
-      storeOptions(this.options, this.bookmark)
       this.aspects = { ...this.aspects }
-    },
-    updateArtifactsLayout(orderables: Orderables) {
-      storeLayoutAxis(orderables, 'artifacts', this.bookmark)
-      this.artifacts = orderables
-    },
-    //
-    updateStonesLayout(orderables: Orderables) {
-      storeLayoutAxis(orderables, 'stones', this.bookmark)
-      this.stones = orderables
     },
     updateAspectsLayout(orderables: Orderables) {
       const full = defaultAxisOrder('aspects')
@@ -478,44 +411,51 @@ export default defineComponent({
         const weight = orderables[aspect.id]?.weight || (100 + aspect.weight)
         return { ...aspect, weight }
       })
-      storeLayoutAxis(aspects, 'aspects', this.bookmark)
       this.aspects = aspects
+    },
+    updateArtifactsLayout(orderables: Orderables) {
+      this.artifacts = orderables
+    },
+    //
+    updateStonesLayout(orderables: Orderables) {
+      this.stones = orderables
     },
     //
     resetAllMaybe() {
       if (confirm('are you sure?')) {
-        resetAll(this)
+        this.adoptNewDNA({ dna: defaultDNA() })
       }
     },
     randomizeAxis(axis: LayoutAxis) { randomizeAxis(this, axis) },
     resetAxis(axis: LayoutAxis) { resetAxis(this, axis) },
     handleBookmarkChange(ev: Event) {
       const bookmark: Bookmarker = ((<HTMLInputElement>ev?.target)?.value || DEFAULT_BOOKMARK) as Bookmarker
-      const { artifacts, aspects, stones } = loadLayoutAll(bookmark)
-      this.options    = loadOptions(bookmark)
-      this.artifacts  = artifacts
-      this.aspects    = aspects
-      this.stones     = stones
+      this.$emit('bookmarkChange', bookmark)
     },
     async fetchArtifactsDb() {
       const artifactsDb = await fetchArtifactsDb(this.playerId)
       this.inventory    = new Inventory(artifactsDb) // eslint-disable-line @typescript-eslint/no-explicit-any
       this.loaded       = true
     },
-    updateLoadableDNA(valIn: string) {
+    updateInjectableDNA(valIn: string) {
       const val = String(valIn).replace(/\W+/g, '').slice(0, 80)
-      this.loadableDNA = val
-      this.canLoadDNA = (val !== this.dna) && validateLoadableDNA(val)
+      this.injectableDNA = val
     },
-    loadDNA(loadableDNA: string) {
+    canLoadDNA(val: DnaStr) {
+      return (val !== this.dna) && validateDNA(val)
+    },
+    adoptNewDNA(info: { dna: DnaStr }) {
+      this.$emit('adoptNewDNA', info)
+    },
+    injectDNA(injectableDNA: string) {
       try {
-        const res      = vivifyDNA(loadableDNA)
+        const res      = vivifyDNA(injectableDNA)
         this.options   = res.options
-        this.aspects   = res.aspects
         this.artifacts = res.artifacts
+        this.aspects   = res.aspects
         this.stones    = res.stones
         this.vivified  = res
-        this.loadableDNA = '' // this.dnaStr()
+        this.injectableDNA = '' // this.dnaStr()
         this.dnaLoadMsg = "New DNA loaded!"
       } catch (err) {
         console.error(err)
@@ -524,30 +464,30 @@ export default defineComponent({
         setTimeout(() => { this.dnaLoadMsg = '' }, 5000)
       }
     },
-    dnaStr() {
-      return dnaStr(
-        this.bookmark,
-        this.options,
-        { aspects: this.aspects, artifacts: this.artifacts, stones: this.stones },
-      )
+    saveCurrDNA(toBookmark: Bookmarker | string, old: DnaStr) {
+      const effYouTS = toBookmark as Bookmarker // it isn't tracing the type through the v-for
+      this.injectableDNA = old
+      const result = saveDNA(this.dna, effYouTS)
+      this.savedDNA[effYouTS] = this.dna
     },
-    // async dnaStrSmol() { lzma.compress(this.dna).then((smol) => { this.smol = { smol, len: smol.length } }) },
+    dnaStr() {
+      return dnaStr(this.options, { artifacts: this.artifacts, aspects: this.aspects, stones: this.stones })
+    },
   },
 
   watch: {
-    dna() {
-      console.warn('watch', this.dna)
+    dna(val, old) {
       this.$emit('dnaChange', { dna: this.dna })
     },
-    urldna(val) {
-      console.log('born with this', this.urldna, val)
-      if (validateLoadableDNA(val)) {
-        this.loadDNA(val)
+    urldna(val, old) {
+      if (validateDNA(val) && (val !== this.dna)) {
+        this.injectDNA(val)
       }
     },
   },
 })
-
+// Axoemfqstklrynibgzadpv_Gerlciagnzvsfxuyot_Sdcplsqxthu_Otf_P12
+// Atoemfqscklrynibguadpv_Gerlciagnzvsfxuyot_Sdcplsqxthu_Otf_P
 </script>
 <style>
   .DragOrderer li.byLegendary  { background: #FFFFC4; }

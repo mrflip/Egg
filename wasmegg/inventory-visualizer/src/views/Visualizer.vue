@@ -3,9 +3,6 @@
     Inventory visualizer
   </h1>
 
-  <code>{{ params }}</code>
-  <code>urldna {{ urldna }}</code>
-
   <div v-if="!assetsLoaded && assetLoadingError === null" class="app-loading">
     Loading requisite assets...
   </div>
@@ -35,8 +32,11 @@
         <template #default>
           <player-data
             :player-id="playerId"
-            @dna-change="updateURL"
             :urldna="urldna"
+            @dna-change="updateURL"
+            @adoptNewDNA="adoptDNA"
+            :bookmark="bookmark"
+            @bookmarkChange="updateBookmark"
           />
         </template>
         <template #fallback>
@@ -52,16 +52,17 @@
       </div>
     </template>
   </div>
-  <div class="h-[200px] flex flex-col items-center justify-end"><span class="flex">v:2022-6-04-b</span></div>
+  <div class="h-[200px] flex flex-col items-center justify-end"><span class="flex">v:2022-06-05-c</span></div>
 </template>
 
 <script lang="ts">
+import _ from 'lodash'
 import { defineComponent, PropType, ref, toRefs, watch } from 'vue';
 import { onBeforeRouteUpdate, useRouter, RouteLocationNormalized } from 'vue-router';
 import CryptoJS from 'crypto-js'
 
 import { getSavedPlayerID, savePlayerID } from 'lib';
-import { loadAllIcons } from '@/lib';
+import { loadAllIcons, DEFAULT_BOOKMARK, defaultDNA, Bookmarker, DnaStr } from '@/lib';
 
 import BaseErrorBoundary from 'ui/components/BaseErrorBoundary.vue';
 import BaseLoading from 'ui/components/BaseLoading.vue';
@@ -73,16 +74,22 @@ import PlayerData from '@/components/PlayerData.vue';
 //     const b64 = str.replaceAll(/-/g, '+').replaceAll(/_/g, '/')
 //     return CryptoJS.enc.Base64.parse(b64)
 //   },
-//   stringify(wordarr: any) {
+  //   stringify(wordarr: any) {
 //     const b64 = CryptoJS.enc.Base64.stringify(wordarr)
 //     return b64.replace(/=+$/, '').replaceAll(/\+/g, '-').replaceAll(/\//g, '_')
 //   },
-// }
+  // }
+
+interface VisualizerParams {
+  bookmark: Bookmarker
+  urldna:      DnaStr
+}
 
 export default defineComponent({
   components: { BaseErrorBoundary, BaseLoading, ThePlayerIdForm, PlayerData },
   props: {
-    urldna: { type: String as PropType<string | undefined>,  default: undefined },
+    urldna:     { type: String as PropType<string | undefined>,     default: undefined },
+    bookmark:   { type: String as PropType<Bookmarker | undefined>, required: false, default: DEFAULT_BOOKMARK },
   },
   data() {
     const assetLoadingError: (Error | null) = null as (Error | null)
@@ -102,7 +109,7 @@ export default defineComponent({
     //          this.params = { newParams, oldParams }
     // this.params = { newParams: newRoute.params, old: oldRoute.params }
     const { urldna } = newRoute.params
-    console.log(urldna, this.urldna)
+    console.log(urldna, this.urldna, 'urldna updated')
     return true
   },
 
@@ -130,11 +137,24 @@ export default defineComponent({
       this.refreshId = Date.now();
       savePlayerID(id);
     },
+    updateBookmark(bookmark: Bookmarker) {
+      if (! bookmark) { return }
+      // @ts-ignore
+      this.$router.replace({ name: 'visualizer', params: this.completeParams({ bookmark }) })
+    },
     updateURL(ev: { dna: string }) {
       if (! ev.dna) { return }
       // @ts-ignore
-      this.$router.replace({ name: 'visualizer', params: { urldna: ev.dna } })
-
+      this.$router.replace({ name: 'visualizer', params: this.completeParams({ urldna: ev.dna }) })
+    },
+    adoptDNA(ev: { dna: string }) {
+      if (! ev.dna) { return }
+      // @ts-ignore
+      this.$router.push({ name: 'visualizer', params: this.completeParams({ urldna: ev.dna }) })
+    },
+    completeParams(overrides: Partial<VisualizerParams>) {
+      // @ts-ignore
+      return _.merge({}, { bookmark: DEFAULT_BOOKMARK, urldna: defaultDNA() }, this.$route.params, overrides)
     },
   },
 
