@@ -10,7 +10,7 @@
     @end="dragging = false"
     >
     <template #item="{ element }">
-      <li :key="element.name" class="border rounded-md mb-2 px-2 py-1.5 flex orderable-item" :class="`${element.id} ${itemClasses}`">
+      <li :key="element.name" class="border rounded-md mb-2 px-2 py-1 flex orderable-item" :class="`${element.id} ${itemClasses}`">
         <slot name="listItem" :element="element">{{ element.name }}</slot>
       </li>
     </template>

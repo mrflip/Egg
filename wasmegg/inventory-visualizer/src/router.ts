@@ -1,6 +1,7 @@
 import {
   createRouter, createWebHistory, createWebHashHistory, RouteRecordRaw
 } from 'vue-router';
+import { defaultDNA, DEFAULT_BOOKMARK } from './lib/dna'
 
 import Visualizer from '@/views/Visualizer.vue';
 
@@ -11,13 +12,13 @@ const BASE_ROUTE = '/v/'
 const routes: RouteRecordRaw[] = [
   {
     name: 'visualizer',
-    path: BASE_ROUTE + ':urldna?',
+    path: BASE_ROUTE + ':urldna?/:bookmark?',
     component: Visualizer,
     props: true,
   },
   {
     path: '/:catchAll(.*)',
-    redirect: BASE_ROUTE,
+    redirect: BASE_ROUTE + defaultDNA() + '/' + DEFAULT_BOOKMARK + '/',
   },
 ];
 

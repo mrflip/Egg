@@ -40,50 +40,18 @@
 
     <tickety-boo v-if="showTicks" :grid-info="gridInfo" />
 
-    <div class="flex flex-col 2xl:px-24 mt-4 xs:flex-row max-w-[1024px] m-auto items-center justify-around" :class="loading ? 'opacity-50' : null">
-      <div class="flex w-full justify-center order-last xs:order-first">
-        <slot></slot>
-      </div>
-
-      <div class="flex w-full flex-row items-center justify-center">
-          <input
-            id="itemsPerCol"
-            :value.number="itemsPerColNum"
-            name="itemsPerCol"
-            type="number"
-            :disabled="loading"
-            class="w-16 md:w-20 max-h-32 self-center"
-            @input="itemsPerCol = ($event.target as any).value"
-          />
-          <div class="ml-2 w-32 xs:w-20 sm:w-32 text-sm">
-            <label for="itemsPerCol" class="text-gray-600">
-              Items per {{ transpose ? 'row' : 'column' }}<br />
-              (blank for squarish)</label>
-          </div>
-      </div>
-
-      <div class="flex w-full min-w-[150px] my-2 flex-col xs:flex-row items-center justify-center order-first xs:order-last">
-        <a
-          :href="imageURL"
-          download="inventory.png"
-          class="inline-flex text-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-        >
-          Download Image
-        </a>
-      </div>
-
-    </div>
-
   </template>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, PropType, ref, toRefs, watch, Ref } from 'vue';
+import { computed, onMounted, PropType, ref, toRefs, watch, Ref, defineEmits } from 'vue';
 import * as _ from "lodash";
 
 import { getLocalStorage, Inventory, setLocalStorage } from 'lib';
 import { drawInventory, generateInventoryGrid, Orderables } from '@/lib';
 import TicketyBoo  from '@/components/TicketyBoo.vue'
+
+const emit = defineEmits(['imageURLChange', 'loadingChange'])
 
 const props = defineProps({
   inventory: {
@@ -93,43 +61,16 @@ const props = defineProps({
   aspects:     { type: Object as PropType<Orderables>, required: true },
   artifacts:   { type: Object as PropType<Orderables>, required: true },
   stones:      { type: Object as PropType<Orderables>, required: true },
-  bookmark:    { type: String,  required: true },
   showTicks:   { type: Boolean, required: true },
   sillySizes:  { type: Boolean, required: true },
   smushStoned: { type: Boolean, required: true },
   transpose:   { type: Boolean, required: true },
+  perCol:      { type: String,  required: true },
 });
- const {
-   bookmark, inventory, aspects, artifacts, stones, showTicks, sillySizes, smushStoned, transpose,
- } = toRefs(props);
 
-const LOCALSTORAGE_KEYS = {
-  itemsPerCol: 'itemsPerColStorageKey',
-}
-type StorableType = keyof (typeof LOCALSTORAGE_KEYS);
-
-function getStorageKey(base: StorableType): string {
-  return `${LOCALSTORAGE_KEYS[base]}${bookmark.value}`
-}
-
-function loadVal(base: StorableType): string | undefined {
-  const key = getStorageKey(base)
-  return getLocalStorage(key)
-}
-
-function storeVal(base: StorableType, val: string) {
-  const key = getStorageKey(base)
-  setLocalStorage(key, val)
-}
-
-const loadItemsPerCol = (): string => (loadVal('itemsPerCol') ?? '')
-const itemsPerCol: Ref<string> = ref(loadItemsPerCol());
-watch(itemsPerCol, () => storeVal('itemsPerCol', String(limitItemsPerCol(itemsPerCol.value))))
-const itemsPerColNum = computed(() => limitItemsPerCol(itemsPerCol.value));
-
-watch(bookmark, () => {
-  itemsPerCol.value = loadItemsPerCol()
-})
+const {
+  inventory, aspects, artifacts, stones, showTicks, sillySizes, smushStoned, transpose, perCol,
+} = toRefs(props);
 
 const grid = computed(() => generateInventoryGrid(
   inventory.value as Inventory, {
@@ -141,22 +82,13 @@ const grid = computed(() => generateInventoryGrid(
 watch(sillySizes, () => {
   const { actualPerCol = 100, actualPerRow = 100 } = gridInfo.value
   const squarish = Math.sqrt(grid.value?.length || 20)
-  if ((! sillySizes.value) && (
-    ((actualPerRow > 2 * squarish) || (actualPerCol > 2 * squarish)))) {
-    itemsPerCol.value = ''
-  }
+  // if ((! sillySizes.value) && (
+  // ((actualPerRow > 2 * squarish) || (actualPerCol > 2 * squarish)))) {
+  // itemsPerCol.value = ''
+  // }
 })
 
 const inventoryIsEmpty = computed(() => grid.value.length === 0);
-
-const limitItemsPerCol = (val: number | string) => {
-   const numIPC = Number(val)
-  if (numIPC > 0) {
-    if (sillySizes.value) { return numIPC }
-    return _.clamp(numIPC, 1, 100)
-  }
-  return ''
-}
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 const loading = ref(false);
@@ -169,6 +101,7 @@ const error = ref<Error | null>(null);
 
 const regenerate = async () => {
   loading.value = true;
+  emit('loadingChange', true)
   imageURL.value = '';
   blockedByFirefoxPrivacyResistFingerprinting.value = true;
   error.value = null;
@@ -176,7 +109,7 @@ const regenerate = async () => {
     const result = await drawInventory(
       canvasRef.value! as HTMLCanvasElement,
       grid.value.slice(0, 30000),
-      Number(itemsPerCol.value),
+      Number(perCol.value),
       transpose.value,
       sillySizes.value,
     );
@@ -189,16 +122,18 @@ const regenerate = async () => {
     if (await imageIsEmpty(imageURL.value)) {
       error.value = new Error('unknown error occurred, generated canvas is empty');
     }
+    emit('imageURLChange', imageURL.value)
   } catch (err) {
     error.value = err instanceof Error ? err : new Error(`${err}`);
   }
   loading.value = false;
+  emit('loadingChange', false)
 };
 
 onMounted(regenerate);
 const regenerateDebounced = _.debounce(regenerate, 1000)
 watch(grid, regenerateDebounced, { deep: true })
-watch(itemsPerCol, regenerateDebounced, { deep: true })
+watch(perCol, regenerateDebounced, { deep: true })
 
 async function imageIsEmpty(url: string): Promise<boolean> {
   const image = new Image();

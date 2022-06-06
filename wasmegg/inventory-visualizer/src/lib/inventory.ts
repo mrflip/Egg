@@ -69,149 +69,6 @@ const stoneIdOrder = [
   Name.SHELL_STONE,
 ]
 
-const ORDERABLES_ABBRS: { [axis in VisualizerConfigAxis]: { [key: string]: string } } = {
-  artifacts: _.fromPairs([
-    [Name.LIGHT_OF_EGGENDIL,    'e'],
-    [Name.BOOK_OF_BASAN,        'o'],
-    [Name.TACHYON_DEFLECTOR,    't'],
-    [Name.SHIP_IN_A_BOTTLE,     's'],
-    [Name.TITANIUM_ACTUATOR,    'y'],
-    [Name.DILITHIUM_MONOCLE,    'm'],
-    [Name.QUANTUM_METRONOME,    'q'],
-    [Name.PHOENIX_FEATHER,      'f'],
-    [Name.THE_CHALICE,          'c'],
-    [Name.INTERSTELLAR_COMPASS, 'i'],
-    [Name.CARVED_RAINSTICK,     'r'],
-    [Name.BEAK_OF_MIDAS,        'k'],
-    [Name.MERCURYS_LENS,        'l'],
-    [Name.NEODYMIUM_MEDALLION,  'n'],
-    [Name.ORNATE_GUSSET,        'g'],
-    [Name.TUNGSTEN_ANKH,        'a'],
-    [Name.AURELIAN_BROOCH,      'b'],
-    [Name.VIAL_MARTIAN_DUST,    'v'],
-    [Name.DEMETERS_NECKLACE,    'd'],
-    [Name.LUNAR_TOTEM,          'u'],
-    [Name.PUZZLE_CUBE,          'p'],
-  ]),
-  //
-  stones: _.fromPairs([
-    [Name.PROPHECY_STONE,       'p'],
-    [Name.CLARITY_STONE,        'c'],
-    [Name.DILITHIUM_STONE,      'd'],
-    [Name.LIFE_STONE,           'l'],
-    [Name.QUANTUM_STONE,        'q'],
-    [Name.SOUL_STONE,           's'],
-    [Name.TERRA_STONE,          't'],
-    [Name.TACHYON_STONE,        'x'],
-    [Name.LUNAR_STONE,          'u'],
-    [Name.SHELL_STONE,          'h'],
-  ]),
-  //
-  options: { transpose: 'x', sillySizes: 'z', showTicks: 't', smushStoned: 'm', fancy: 'f' },
-  //
-  aspects: {
-    byRarity:     'o',
-    byType:       't',
-    byFamily:     'g',
-    byLevel:      'v',
-    byStoning:    'n',
-    byStoningLvl: 'z',
-    //
-    byStone:      's',
-    byAnyStone:   'a',
-    byIngredient: 'i',
-    byFragment:   'f',
-    byArtifact:   'x',
-    //
-    byLegendary:  'l',
-    byEpic:       'e',
-    byRare:       'r',
-    byCommonArt:  'c',
-    byUncommon:   'u',
-    byNonLegend:  'y',
-  },
-  //
-}
-
-const UNABBR_ORDERABLES: { [key in VisualizerConfigAxis]: { [key: string]: string } } = _.mapValues(ORDERABLES_ABBRS, _.invert)
-
-const DNA_AXIS_ABBRS: { [key in VisualizerConfigAxis]: string } = {
-  options: 'O', aspects: 'G', artifacts: 'A', stones: 'S',
-}
-// @ts-ignore
-const DNA_AXIS_UNABBRS: { [key in 'O' | 'G' | 'A' | 'S']: VisualizerConfigAxis } = _.invert(DNA_AXIS_ABBRS)
-
-// _.each(ORDERABLES_ABBRS, (abbrs, kk: VisualizerConfigAxis) => {
-//   const vals = _.values(abbrs).sort()
-//   if (! (_.uniq(vals).length == vals.length)) {
-//     throw new Error(`Duplicate key in ${kk}: ${vals.join()}`)
-//   }
-//   if (! (_.every(abbrs, (abbr, abkey) => UNABBR_ORDERABLES[kk][abbr] === abkey))) {
-//     console.error('bad lookup table', abbrs, UNABBR_ORDERABLES[kk])
-//   }
-// })
-
-function abbrOpts(val: any, name: keyof PlayerDataOptions): string {
-  return val ? ORDERABLES_ABBRS.options[name] : ''
-}
-
-function dnaStrForOrderable(orderables: Orderables, key: LayoutAxis) {
-  const abbrs = ORDERABLES_ABBRS[key]
-  const ordIds = _.map(_.sortBy(orderables, 'weight'), 'id')
-  return _.map(ordIds, (id) => abbrs[id]).join('')
-}
-
-function dnaStrForAxis(str: string, axis: LayoutAxis) {
-  return `${DNA_AXIS_ABBRS[axis]}${str}`
-}
-
-export function dnaStr(bookmark: string, options: PlayerDataOptions, layoutOrder: LayoutOrderables) {
-  // @ts-ignore
-  const opts = _.map(options, abbrOpts).join('')
-  const wts = _.mapValues(layoutOrder, dnaStrForOrderable)
-  const dna = _.map({ ...wts, options: opts }, dnaStrForAxis).join('_')
-  return dna
-}
-
-export function vivifyOrderables(axis: LayoutAxis, dnaseg: string): Orderables {
-  try {
-    const abbrs = ORDERABLES_ABBRS[axis]
-    const orderables = defaultAxisOrder(axis)
-    if (! dnaseg) { return orderables }
-    _.each(orderables, (bag) => {
-      const abbr = abbrs[bag.id]
-      if (! dnaseg.includes(abbr)) { bag.weight += 50; return }
-      bag.weight = dnaseg.indexOf(abbr) + 1
-    })
-    return orderables
-  } catch (err) {
-    console.error(err)
-    return defaultAxisOrder(axis)
-  }
-}
-
-export function vivifyDNA(dna: string): VisualizerConfig {
-  const { options = '', ...obSegs } = dnaToBag(dna)
-  const newConfig: VisualizerConfig = {
-    aspects:   vivifyOrderables('aspects',   obSegs.aspects),
-    artifacts: vivifyOrderables('artifacts', obSegs.artifacts),
-    stones:    vivifyOrderables('stones',    obSegs.stones),
-  } as VisualizerConfig
-  newConfig.options = _.mapValues(ORDERABLES_ABBRS.options, (kk: string) => options.includes(kk)) as PlayerDataOptions
-  return newConfig
-}
-
-function dnaToBag(dna: string) {
-  const abbrBag = _.fromPairs(dna.split(/_/g).map((str) => ([_.first(str), str.slice(1)])))
-  const ret = _.mapKeys(abbrBag, (_vv, abbr: keyof typeof DNA_AXIS_UNABBRS) => (DNA_AXIS_UNABBRS[abbr] || 'NOPE'))
-  delete ret.NOPE
-  return ret
-}
-
-export function validateLoadableDNA(dna: string): boolean {
-  return (!! dna) && _.isString(dna) && /^(?:[AGOS][a-z]*_?)+$/.test(dna)
-}
-
 const fragmentToStone: { [key: string]: Name } = {
   [Name.PROPHECY_STONE_FRAGMENT]:   Name.PROPHECY_STONE,
   [Name.CLARITY_STONE_FRAGMENT]:    Name.CLARITY_STONE,
@@ -293,8 +150,8 @@ _.each(DEFAULT_ASPECTS_ORDER, (bag: Orderable) => { bag.desc = ASPECT_DESCRIPTIO
 
 const AxisOrders: LayoutOrderables = {
   artifacts:    DEFAULT_ARTIFACTS_ORDER,
-  stones:       DEFAULT_STONES_ORDER,
   aspects:      DEFAULT_ASPECTS_ORDER,
+  stones:       DEFAULT_STONES_ORDER,
 }
 
 export function defaultAxisOrder(axis: LayoutAxis): Orderables {

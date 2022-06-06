@@ -28,6 +28,7 @@ export interface PlayerDataOptions {
   showTicks:    boolean
   smushStoned:  boolean
   fancy:        boolean
+  perCol:       string
 }
 
 export interface VisualizerConfig extends LayoutOrderables {
@@ -35,3 +36,9 @@ export interface VisualizerConfig extends LayoutOrderables {
 }
 
 export type VisualizerConfigAxis = keyof VisualizerConfig
+
+export interface LayoutOrderableComponent {
+  artifacts:    Orderables
+  aspects:      Orderables
+  stones:       Orderables
+}
