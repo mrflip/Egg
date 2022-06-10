@@ -123,14 +123,18 @@ export interface BookmarkDnas {
 
 export const DEFAULT_BOOKMARK: Bookmarker = 'Bk1'
 
-const LOCALSTORAGE_KEYS: { [key in Bookmarker | 'wasMigrated']: string } = {
+const LOCALSTORAGE_KEYS: { [key in Bookmarker | 'wasMigrated' | 'slotNames']: string } = {
   Bk1:          'Sg1Sto',
   Bk2:          'Sg2Sto',
   Bk3:          'Sg3Sto',
   Bk4:          'Sg4Sto',
   wasMigrated:  'wasMigratedSto',
+  slotNames:    'slotNamesSto',
 }
 export type StorageKeyName = keyof (typeof LOCALSTORAGE_KEYS);
+
+export const DEFAULT_SLOT_NAMES = _.mapValues(BOOKMARK_PROPS, 'label')
+export type SlotProps = { [key: string]: string }
 
 export type DnaStr = string
 
@@ -159,9 +163,33 @@ export function loadSavedDNA(): BookmarkDnas {
   return arrangements
 }
 
+type JsonLoadable = Orderables | PlayerDataOptions | SlotProps
+function mergeLoaded<T extends JsonLoadable>(fallback: T, parsed: Partial<T>): T {
+  return _.pick(_.merge({}, fallback, parsed), _.keys(fallback)) as T
+}
+
 export function saveDNA(dna: DnaStr, bookmark: Bookmarker) {
   if (! validateDNA(dna)) { console.warn('invalid dna, not saving', dna); return }
   setLocalStorage(storageKeyFor(bookmark), dna)
+}
+
+export function loadSlotNames(): SlotProps {
+  const fallback = _.cloneDeep(DEFAULT_SLOT_NAMES)
+  const rawJson  = getLocalStorage(storageKeyFor('slotNames'))
+  if (rawJson) {
+    try {
+      const slots = mergeLoaded<SlotProps>(fallback, JSON.parse(rawJson))
+      return slots
+    } catch (err) {
+      console.error('Could not parse json', rawJson, fallback)
+      return fallback
+    }
+  }
+  return fallback
+}
+
+export function storeSlotNames(bag: SlotProps) {
+  setLocalStorage(storageKeyFor('slotNames'), JSON.stringify(bag))
 }
 
 function getWasMigrated() {
@@ -172,7 +200,7 @@ function setWasMigrated() {
   setLocalStorage(storageKeyFor('wasMigrated'), 'true')
 }
 
-function storageKeyFor(concern: Bookmarker | 'wasMigrated') {
+function storageKeyFor(concern: Bookmarker | 'wasMigrated' | 'slotNames') {
   return LOCALSTORAGE_KEYS[concern]
 }
 
@@ -180,7 +208,6 @@ function loadSavedFor(bookmarkInfo: BookmarkInfo) {
   const dna = getLocalStorage(storageKeyFor(bookmarkInfo.id)) || ''
   if (dna) { return dna }
   const migrated = migrateOldBk(bookmarkInfo.oldbk)
-  console.log(migrated, dna, 'got migrated', bookmarkInfo.id)
   if (migrated) { return migrated }
   return DEFAULT_DNA
 }
@@ -273,10 +300,6 @@ function getOnlyWeights(orderables: Orderables) {
   return _.mapValues(orderables, (orderable) => _.pick(orderable, ['weight']))
 }
 
-function mergeLoaded(fallback: Orderables | PlayerDataOptions, parsed: Partial<Orderables> | Partial<PlayerDataOptions>) {
-  return _.pick(_.merge({}, fallback, parsed), _.keys(fallback))
-}
-
 function loadOldOptions(oldbk: OldBookKey): PlayerDataOptions | null {
   const optionsJson = getLocalStorage(`optionsBag${oldbk}`)
   if (optionsJson) {
@@ -293,7 +316,7 @@ function loadOldLayoutAxis(axis: LayoutAxis, storageKey: string): Orderables | n
   if (axisJson) {
     try {
       const parsed = getOnlyWeights(JSON.parse(axisJson))
-      const merged = mergeLoaded(defaultAxisOrder(axis), parsed)
+      const merged = mergeLoaded<Orderables>(defaultAxisOrder(axis), parsed as Partial<Orderables>)
       return merged as Orderables
     } catch (err) { console.warn("could not parse stored JSON", axis, axisJson, err) }
   }

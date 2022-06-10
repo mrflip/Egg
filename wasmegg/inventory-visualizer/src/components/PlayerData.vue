@@ -132,23 +132,32 @@
           </div>
 
           <template v-for="[id, dnaN] of Object.entries(savedDNA)" :key="id">
-            <div class="flex md:flex-nowrap flex-wrap-reverse md:flex-row items-center justify-center contents-around py-2">
-              <icon-button
-                class="w-24 order-first mr-4 md:mr-2 md:order-first"
-                @click="() => adoptNewDNA({ dna: dnaN })"
-                :disabled="(! canLoadDNA(dnaN)) || (dnaN === dna)"
-              >
+            <div class="flex py-2 md:flex-nowrap flex-wrap md:flex-row items-center justify-center contents-between">
+              <input
+                :id="`${id}-name`"
+                :name="id"
+                class="p-2 text-sm w-[16rem] xs:w-[24rem] sm:w-64 md:w-40 order-3 md:order-first bg-violet-50"
+                :value="slotNames[id]"
+                @input="updateSlotName(id, ($event.target as any).value)"
+              />
+              <dna-box class="bg-amber-50 order-2">{{ dnaN }}</dna-box>
+              <div class="flex order-5 mt-2 sm:mt-0">
+                <icon-button
+                  class="w-24 md:w-20 mx-4 xs:mx-8 sm:mx-4 md:mx-2"
+                  @click="() => adoptNewDNA({ dna: dnaN })"
+                  :disabled="(! canLoadDNA(dnaN)) || (dnaN === dna)"
+                >
                 <replace-icon class="w-6 h-6 mr-1" />
                 <span v-if="dnaN === dna">Current</span>
                 <span v-else>Load</span>
               </icon-button>
-              <dna-box class="bg-amber-50 order-5">{{ dnaN }}</dna-box>
-              <icon-button class="w-24 ml-4 md:ml-2 order-4 md:order-7"
+              <icon-button class="w-24 md:w-20 mx-4 xs:mx-8 sm:mx-0"
                 :disabled="dnaN === dna"
                 @click="() => saveCurrDNA(id, dnaN)">
                 <bookmark-icon class="w-6 h-6 mr-1" />
                 <span>Save</span>
               </icon-button>
+              </div>
             </div>
           </template>
         </div>
@@ -266,6 +275,7 @@ import {
   defaultAxisOrder, Orderables, BOOKMARK_PROPS, DEFAULT_BOOKMARK,
   dnaStr, vivifyDNA, resetAxis, DnaStr, Bookmarker,
   loadSavedDNA, validateDNA, saveDNA, defaultDNA,
+  storeSlotNames, loadSlotNames, SlotProps,
   VisualizerConfigAxis, LayoutAxis, PlayerDataOptions,
 } from '@/lib'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -349,7 +359,7 @@ export default defineComponent({
     const options   = res.options
     const vivified  = res
     const injectableDNA = '' // this.dnaStr()
-
+    const slotNames = loadSlotNames()
     return {
       inventory,
       loaded:           false,
@@ -359,6 +369,7 @@ export default defineComponent({
       options,
       console,
       bookmarkProps:    BOOKMARK_PROPS,
+      slotNames,
       injectableDNA,
       vivified:          {},
       dnaLoadMsg:       '',
@@ -436,6 +447,10 @@ export default defineComponent({
       const artifactsDb = await fetchArtifactsDb(this.playerId)
       this.inventory    = new Inventory(artifactsDb) // eslint-disable-line @typescript-eslint/no-explicit-any
       this.loaded       = true
+    },
+    updateSlotName(id: string, name: string) {
+      this.slotNames[id as Bookmarker] = name
+      storeSlotNames(this.slotNames)
     },
     updateInjectableDNA(valIn: string) {
       const val = String(valIn).replace(/\W+/g, '').slice(0, 80)
