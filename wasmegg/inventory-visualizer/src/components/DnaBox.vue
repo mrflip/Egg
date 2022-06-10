@@ -1,5 +1,5 @@
 <template>
-  <code class="text-xs p-2 pl-3 my-2 md:ml-2 w-[16rem] xs:w-[24rem] sm:w-[30rem] overflow-clip">
+  <code class="text-xs p-2 pl-3 my-2 md:ml-2 w-[16rem] xs:w-[24rem] sm:w-[30rem] md:w-[26rem] lg:w-[30rem] overflow-clip">
     <slot></slot>
   </code>
 </template>
