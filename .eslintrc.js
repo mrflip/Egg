@@ -18,9 +18,15 @@ module.exports = {
     'no-constant-condition': ['error', { checkLoops: false }],
     'no-undef': 'off',
     '@typescript-eslint/no-non-null-assertion': 'off',
-    '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+    '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', destructuredArrayIgnorePattern: '^_' }],
     'vue/html-closing-bracket-newline': 'off',
-    'vue/html-indent': 'off',
+    'vue/html-indent':                  'off',
+    'vue/attributes-order':             'off',
+    'vue/order-in-components':          'off',
+    'vue/no-multi-spaces':              'off',
+    'vue/attribute-hyphenation':        'off',
+    'vue/v-on-event-hyphenation':       'off',
+    'vue/multi-word-component-names' :  'off',
     'vue/html-self-closing': [
       'error',
       {
