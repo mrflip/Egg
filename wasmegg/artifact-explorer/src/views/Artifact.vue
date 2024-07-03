@@ -216,7 +216,7 @@
           What do I get from consuming this item?
         </span>
         <a
-          :href="`https://wasmegg-carpet.netlify.app/consumption-sheet/#${artifactId}`"
+          :href="`https://mrflipeggfork.netlify.app/consumption-sheet/#${artifactId}`"
           target="_blank"
           class="inline-flex items-center border-dashed border-b border-gray-700 text-sm whitespace-nowrap leading-tight space-x-0.5"
         >
@@ -237,7 +237,7 @@
           {{ artifact.afx_type === Type.STONE ? 'stone' : 'stone fragment' }}?
         </span>
         <a
-          :href="`https://wasmegg-carpet.netlify.app/consumption-sheet/#${artifact.id}-sources`"
+          :href="`https://mrflipeggfork.netlify.app/consumption-sheet/#${artifact.id}-sources`"
           target="_blank"
           class="inline-flex items-center border-dashed border-b border-gray-700 text-sm whitespace-nowrap leading-tight space-x-0.5"
         >

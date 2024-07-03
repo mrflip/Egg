@@ -7,7 +7,7 @@
       <p class="text-sm">
         Reports for the
         <a
-          href="https://wasmegg-carpet.netlify.app/rockets-tracker/"
+          href="https://mrflipeggfork.netlify.app/rockets-tracker/"
           target="_blank"
           class="text-blue-500 hover:text-blue-600"
           >rockets tracker</a
@@ -20,10 +20,10 @@
       <p class="text-sm mt-1">
         You can opt into the study yourself at
         <a
-          href="https://wasmegg-carpet.netlify.app/rockets-tracker/"
+          href="https://mrflipeggfork.netlify.app/rockets-tracker/"
           target="_blank"
           class="text-blue-500 hover:text-blue-600"
-          >wasmegg-carpet.netlify.app/rockets-tracker</a
+          >mrflipeggfork.netlify.app/rockets-tracker</a
         >, in which case a hash of your ID and your current backup will be
         collected.
       </p>

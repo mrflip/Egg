@@ -1,4 +1,4 @@
-const baseRedirectURL = 'https://wasmegg-carpet.netlify.app/artifact-explorer';
+const baseRedirectURL = 'https://mrflipeggfork.netlify.app/artifact-explorer';
 
 const artifactIds = [
   'aurelian-brooch-1',
@@ -178,14 +178,14 @@ async function handleRequest(request) {
   if (code === 'discord') {
     redirectURL = 'https://discord.gg/e3bNQeaC8k';
   } else if (code === 'sandbox') {
-    redirectURL = 'https://wasmegg-carpet.netlify.app/artifact-sandbox/';
+    redirectURL = 'https://mrflipeggfork.netlify.app/artifact-sandbox/';
   } else if (code === 'config-changelog') {
     redirectURL =
       'https://gist.github.com/carpetsage/373992bc6c5e00f8abd39dfb752845c0';
   } else if (code === 'tips') {
     redirectURL = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
   } else if (code === 'smart-assistant-beta') {
-    redirectURL = 'https://wasmegg-carpet.netlify.app/smart-assistant/';
+    redirectURL = 'https://mrflipeggfork.netlify.app/smart-assistant/';
   } else if (code === 'ledger') {
     redirectURL = 'https://github.com/DavidArthurCole/EggLedger#readme';
   } else if (artifactIds.includes(code)) {

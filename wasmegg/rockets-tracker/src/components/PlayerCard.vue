@@ -223,7 +223,7 @@
             <dt class="text-right text-sm font-medium whitespace-nowrap">Contracts</dt>
             <dd class="flex items-center text-left text-sm text-gray-900">
               <a
-                :href="`https://wasmegg-carpet.netlify.app/past-contracts/?playerId=${userId}`"
+                :href="`https://mrflipeggfork.netlify.app/past-contracts/?playerId=${userId}`"
                 target="_blank"
                 class="flex items-center"
               >
@@ -416,7 +416,7 @@
           <div class="text-sm font-medium">Inventory items</div>
 
           <a
-            :href="`https://wasmegg-carpet.netlify.app/inventory-visualizer/?playerId=${userId}`"
+            :href="`https://mrflipeggfork.netlify.app/inventory-visualizer/?playerId=${userId}`"
             target="_blank"
             class="flex items-center justify-center space-x-0.5 text-xs"
             :class="
@@ -584,7 +584,7 @@
               record&nbsp;
               <img :src="medalZLCRecord" class="inline h-4 w-4 mr-0.5" />
               <a
-                href="https://wasmegg-carpet.netlify.app/legendary-study"
+                href="https://mrflipeggfork.netlify.app/legendary-study"
                 target="_blank"
                 class="hover:text-yellow-900"
               >
@@ -607,7 +607,7 @@
           </div>
 
           <a
-            href="https://wasmegg-carpet.netlify.app/legendary-study"
+            href="https://mrflipeggfork.netlify.app/legendary-study"
             target="_blank"
             class="flex items-center justify-center space-x-0.5 text-xs text-gray-500 hover:text-gray-600 mt-1"
           >
@@ -720,7 +720,7 @@
           </div>
 
           <a
-            :href="`https://wasmegg-carpet.netlify.app/shell-company/?playerId=${userId}`"
+            :href="`https://mrflipeggfork.netlify.app/shell-company/?playerId=${userId}`"
             target="_blank"
             class="flex items-center justify-center space-x-0.5 text-xs text-gray-500 hover:text-gray-600 mt-1"
           >

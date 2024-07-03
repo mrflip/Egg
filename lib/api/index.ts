@@ -18,7 +18,7 @@ export * from "./version";
 
 const API_ROOT = import.meta.env.DEV && import.meta.env.VITE_APP_MOCK
   ? "/api"
-  : "https://egg-forwarder.carpet.workers.dev/?url=https://ctx-dot-auxbrainhome.appspot.com";
+  : "https://mrflipeggfork-piddle.mrflip.workers.dev/?url=https://ctx-dot-auxbrainhome.appspot.com";
 
 const CONFIG_GIST_URL =
   "https://gist.githubusercontent.com/carpetsage/373992bc6c5e00f8abd39dfb752845c0/raw/config.json";

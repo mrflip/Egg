@@ -15,7 +15,7 @@ async function handleRequest(request) {
     <meta name="robots" content="noindex">
   </head>
   <body>
-    <p>This is a supporting domain to <a href="https://wasmegg-carpet.netlify.app/">wasmegg-carpet.netlify.app</a>.</p>
+    <p>This is a supporting domain to <a href="https://mrflipeggfork-dev.netlify.app/">mrflipeggfork.netlify.app</a>.</p>
   </body>
 </html>`,
       {
@@ -30,6 +30,7 @@ async function handleRequest(request) {
   if (
     proxiedOrigin !== 'http://www.auxbrain.com' &&
     proxiedOrigin !== 'https://www.auxbrain.com' &&
+    proxiedOrigin !== 'https://ctx-dot-auxbrainhome.appspot.com' &&
     proxiedOrigin !== 'http://afx-2-dot-auxbrainhome.appspot.com' &&
     proxiedOrigin !== 'https://afx-2-dot-auxbrainhome.appspot.com'
   ) {
@@ -81,11 +82,13 @@ function handleOptions(request) {
 }
 
 function accessControlAllowOriginHeader(origin) {
-  return isAllowedOrigin(origin) ? origin : 'https://wasmegg-carpet.netlify.app';
+  return isAllowedOrigin(origin) ? origin : 'https://mrflipeggfork-dev.netlify.app';
 }
 
 function isAllowedOrigin(origin) {
   return (
+    origin?.match(/^https:\/\/([\w-]+--)?mrflipeggfork-dev.netlify.app$/) ||
+    origin?.match(/^https:\/\/([\w-]+--)?mrflipeggfork.netlify.app$/) ||
     origin?.match(/^https:\/\/([\w-]+--)?wasmegg-carpet.netlify.app$/) ||
     origin?.match(/^https:\/\/([\w-]+--)?eicoop-carpet.netlify.app$/) ||
     origin?.match(/^https:\/\/([\w-]+--)?eicowop.netlify.app$/) ||

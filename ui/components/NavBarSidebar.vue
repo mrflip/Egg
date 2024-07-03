@@ -115,7 +115,7 @@
                   :class="useCoolGray ? 'text-cool-gray-300' : 'text-gray-300'"
                 />
                 Copyright &copy; 2021&nbsp;<a
-                  href="https://wasmegg-carpet.netlify.app/"
+                  href="https://mrflipeggfork.netlify.app/"
                   class="text-blue-400 hover:text-blue-500"
                   target="_blank"
                   >@mk2</a
@@ -265,7 +265,7 @@ export default defineComponent({
 });
 
 function toAbsoluteUrl(url: string): string {
-  return new URL(url, 'https://wasmegg-carpet.netlify.app/').toString();
+  return new URL(url, 'https://mrflipeggfork.netlify.app/').toString();
 }
 </script>
 

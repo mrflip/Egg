@@ -191,7 +191,7 @@ export default defineComponent({
       setLocalStorageNoPrefix(EASTER_EGG_SHOWN_AT_LOCALSTORAGE_KEY, Date.now());
       if (easterEggShownForTheFirstTime) {
         goatcounter?.count({
-          path: 'https://wasmegg-carpet.netlify.app/#/',
+          path: 'https://mrflipeggfork.netlify.app/#/',
           title: 'Easter egg (visit streak)',
           event: true,
         });

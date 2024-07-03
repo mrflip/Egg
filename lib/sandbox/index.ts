@@ -98,5 +98,5 @@ export function farmToSandboxURL(farm: Farm, override?: FarmToSandboxConfigOverr
   const relURL = `/artifact-sandbox/#/b/${encodeURIComponent(encoded)}`;
   // Use the canonical deployed URL during development since there wouldn't be a
   // sandbox instance served from the same origin durating development.
-  return import.meta.env.PROD ? relURL : 'https://wasmegg-carpet.netlify.app' + relURL;
+  return import.meta.env.PROD ? relURL : 'https://mrflipeggfork.netlify.app' + relURL;
 }
