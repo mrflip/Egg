@@ -14,15 +14,24 @@ const ICON_DISPLAY_SIZE = 128;
 const COUNT_BOX_COLOR = '#5e5e5e';
 const FONT_FAMILY = 'Always Together';
 const FONT_SIZE = 27;
+const MAX_DIM = 1024
 
 export async function drawInventory(
   el: HTMLCanvasElement,
-  grid: InventoryGrid
+  grid: InventoryGrid,
+  forceItemsPerCol: number,
+  transpose = true,
+  sillySizes = false,
 ): Promise<{
   url: string;
   width: number;
   height: number;
   blockedByFirefoxPrivacyResistFingerprinting: boolean;
+  scale: number,
+  actualPerRow: number,
+  actualPerCol: number,
+  totalWidthPx: number,
+  totalHeightPx: number,
 }> {
   // This scaling factor can be adjusted in case the canvas exceeds browser
   // limits (e.g. on Safari, a canvas cannot take up more than 16777216=16M
@@ -32,11 +41,18 @@ export async function drawInventory(
   const ctx = el.getContext('2d')!;
 
   const numItems = grid.length;
-  const numItemsPerRow = Math.ceil(Math.sqrt(numItems));
-  const numItemsPerCol = Math.ceil(numItems / numItemsPerRow);
-  const targetWidth = GRID_SQUARE_SIZE * numItemsPerRow + GRID_SQUARE_GAP * (numItemsPerRow + 1);
+  let numItemsPerCol = Math.ceil(Math.sqrt(numItems))
+  if (Number(forceItemsPerCol) > 0) {
+    numItemsPerCol = Math.min(Number(forceItemsPerCol), numItems)
+    if (! sillySizes) {
+      numItemsPerCol = Math.min(Math.max(numItemsPerCol, Math.ceil(numItems/50)), 100)
+    }
+  }
+  const numItemsPerRow = Math.ceil(numItems / numItemsPerCol);
+  let targetWidth = GRID_SQUARE_SIZE * numItemsPerRow + GRID_SQUARE_GAP * (numItemsPerRow + 1);
+  let targetHeight = GRID_SQUARE_SIZE * numItemsPerCol + GRID_SQUARE_GAP * (numItemsPerCol + 1);
+  if (transpose) { [targetWidth, targetHeight] = [targetHeight, targetWidth] }
   const width = targetWidth * scale;
-  const targetHeight = GRID_SQUARE_SIZE * numItemsPerCol + GRID_SQUARE_GAP * (numItemsPerCol + 1);
   const height = targetHeight * scale;
   el.width = width;
   el.height = height;
@@ -55,8 +71,10 @@ export async function drawInventory(
   for (let i = 0; i < numItems; i++) {
     const gridItem = grid[i];
 
-    const row = Math.floor(i / numItemsPerCol);
-    const col = i % numItemsPerCol;
+    let row = Math.floor(i / numItemsPerCol);
+    let col = i % numItemsPerCol;
+    if (transpose) { [row, col] = [col, row] }
+
     const left = (row * GRID_SQUARE_SIZE + (row + 1) * GRID_SQUARE_GAP) * scale;
     const top = (col * GRID_SQUARE_SIZE + (col + 1) * GRID_SQUARE_GAP) * scale;
     const right = left + GRID_SQUARE_SIZE * scale;
@@ -168,10 +186,24 @@ export async function drawInventory(
   const numColors = new Set(pixels).size;
   const blockedByFirefoxPrivacyResistFingerprinting = numColors < 10;
 
+  const actualPerRow = (transpose ? numItemsPerCol : numItemsPerRow)
+  const actualPerCol = (transpose ? numItemsPerRow : numItemsPerCol)
+  const totalWidthPx = scale * Math.min(MAX_DIM, (
+    ((GRID_SQUARE_SIZE * actualPerRow) / 2) + (GRID_SQUARE_GAP * (actualPerRow + 1) / 2)
+  ))
+  const totalHeightPx = scale * Math.min(MAX_DIM, (
+    ((GRID_SQUARE_SIZE * actualPerCol) / 2) + (GRID_SQUARE_GAP * (actualPerCol + 1) / 2)
+  ))
+
   return {
     url: await getObjectURLForCanvas(el),
     width: targetWidth,
     height: targetHeight,
+    scale,
+    actualPerRow,
+    actualPerCol,
+    totalWidthPx,
+    totalHeightPx,
     blockedByFirefoxPrivacyResistFingerprinting,
   };
 }

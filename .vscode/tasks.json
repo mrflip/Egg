@@ -1,0 +1,17 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "build",
+			"path": "wasmegg/inventory-visualizer",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": [],
+			"label": "npm: build - wasmegg/inventory-visualizer",
+			"detail": "vue-tsc --noEmit && vite build"
+		}
+	]
+}
