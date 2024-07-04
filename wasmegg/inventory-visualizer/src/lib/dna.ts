@@ -40,31 +40,33 @@ export const ORDERABLES_ABBRS: { [axis in VisualizerConfigAxis]: { [key: string]
   //
   aspects: {
     // d w z remaining
-    byRarity:     'o',
-    byType:       't',
-    byFamily:     'g',
-    byLevel:      'v',
-    byStoningF1:  'm',
-    byStoningF2:  'n',
-    byStoningT1:  'p',
-    byStoningT2:  'q',
+    byRarity:      'o',
+    byType:        't',
+    byFamily:      'g',
+    byLevel:       'v',
+    byStoningFam:  'd',
+    byStoningTier: 'w',
+    byStoningF1:   'm',
+    // byStoningF2:   'n',
+    byStoningT1:   'p',
+    // byStoningT2:   'q',
     //
-    byStone:      's',
-    byAnyStone:   'a',
-    byStFrIn:     'b',
-    byIngredient: 'i',
-    byFragment:   'f',
-    byArtifact:   'x',
+    byStone:       's',
+    byAnyStone:    'a',
+    byStFrIn:      'b',
+    byIngredient:  'i',
+    byFragment:    'f',
+    byArtifact:    'x',
     //
-    byRare:       'r',   //     R
-    byEpic:       'e',   //   E
-    byEpicRare:   'h',   //   E R
-    byLegendary:  'l',   // L
-    byLegRare:    'j',   // L   R
-    byLegEpic:    'k',   // L E
-    byUncommon:   'u',   // L E R
-    byNonLegend:  'y',   //   E R C
-    byCommonArt:  'c',   //       C
+    byRare:        'r',   //     R
+    byEpic:        'e',   //   E
+    byEpicRare:    'h',   //   E R
+    byLegendary:   'l',   // L
+    byLegRare:     'j',   // L   R
+    byLegEpic:     'k',   // L E
+    byUncommon:    'u',   // L E R
+    byNonLegend:   'y',   //   E R C
+    byCommonArt:   'c',   //       C
   },
   //
   stones: _.fromPairs([

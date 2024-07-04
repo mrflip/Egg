@@ -57,12 +57,11 @@
 
 <script lang="ts">
 import _ from 'lodash'
-import { defineComponent, PropType, ref, toRefs, watch } from 'vue';
-import { onBeforeRouteUpdate, useRouter, RouteLocationNormalized } from 'vue-router';
-import CryptoJS from 'crypto-js'
+import { defineComponent, PropType } from 'vue';
+import { RouteLocationNormalized } from 'vue-router';
 
 import { getSavedPlayerID, savePlayerID } from 'lib';
-import { loadAllIcons, DEFAULT_BOOKMARK, defaultDNA, Bookmarker, DnaStr } from '@/lib';
+import { loadAllIcons, DEFAULT_BOOKMARK, Bookmarker, DnaStr } from '@/lib';
 
 import BaseErrorBoundary from 'ui/components/BaseErrorBoundary.vue';
 import BaseLoading from 'ui/components/BaseLoading.vue';
@@ -100,16 +99,15 @@ export default defineComponent({
       assetLoadingError,
       playerId,
       refreshId,
-      // @ts-ignore
       params:   this.$route.params,
     }
   },
 
-  async beforeRouteUpdate(newRoute: RouteLocationNormalized) {
+  async beforeRouteUpdate(_newRoute: RouteLocationNormalized) {
     //          this.params = { newParams, oldParams }
     // this.params = { newParams: newRoute.params, old: oldRoute.params }
-    const { urldna } = newRoute.params
-    console.log(urldna, this.urldna, 'urldna updated')
+    // const { urldna } = newRoute.params
+    // console.log(urldna, this.urldna, 'urldna updated')
     return true
   },
 
@@ -139,21 +137,17 @@ export default defineComponent({
     },
     updateBookmark(bookmark: Bookmarker) {
       if (! bookmark) { return }
-      // @ts-ignore
       this.$router.replace({ name: 'visualizer', params: this.completeParams({ bookmark }) })
     },
     updateURL(ev: { dna: string }) {
       if (! ev.dna) { return }
-      // @ts-ignore
       this.$router.replace({ name: 'visualizer', params: this.completeParams({ urldna: ev.dna }) })
     },
     adoptDNA(ev: { dna: string }) {
       if (! ev.dna) { return }
-      // @ts-ignore
       this.$router.push({ name: 'visualizer', params: this.completeParams({ urldna: ev.dna }) })
     },
     completeParams(overrides: Partial<VisualizerParams>) {
-      // @ts-ignore
       return _.merge({}, { bookmark: DEFAULT_BOOKMARK }, this.$route.params, overrides)
     },
   },

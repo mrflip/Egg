@@ -527,33 +527,35 @@ export default defineComponent({
 // Atoemfqscklrynibguadpv_Gerlciagnzvsfxuyot_Sdcplsqxthu_Otf_P
 </script>
 <style>
-  .DragOrderer li.byLegendary  { background: #FFFFC4; }
-  .DragOrderer li.byEpic       { background: #F7DAF7; }
-  .DragOrderer li.byRare       { background: #C0FFFF; }
-  .DragOrderer li.byRarity     { background: #E3FCF8; }
-  .DragOrderer li.byNonLegend  { background: #E3FCF8; }
-  .DragOrderer li.byUncommon   { background: #E3FCF8; }
-  .DragOrderer li.byCommonArt  { background: #E9E9E9; }
-  .DragOrderer li.byArtifact   { background: #E3FCF8; }
-  .DragOrderer li.byFamily     { background: #EAF7D9; }
-  .DragOrderer li.byType       { background: #E9E9E9; }
-  .DragOrderer li.byLevel      { background: #F7F7D9; }
-  .DragOrderer li.byStoningF1  { background: #F3ECE8; }
-  .DragOrderer li.byStoningF2  { background: #F3ECE8; }
-  .DragOrderer li.byStoningF3  { background: #F3ECE8; }
-  .DragOrderer li.byStoningT1  { background: #F3ECE8; }
-  .DragOrderer li.byStoningT2  { background: #F3ECE8; }
-  .DragOrderer li.byStoningT3  { background: #F3ECE8; }
-  .DragOrderer li.byStone      { background: #F2F7ED; }
-  .DragOrderer li.byFragment   { background: #F2F7ED; }
-  .DragOrderer li.byAnyStone   { background: #F2F7ED; }
-  .DragOrderer li.byIngredient { background: #F2F7ED; }
-  .DragOrderer li.byEpicRare   { background: #F7EAF7; }
-  .DragOrderer li.byLegEpic    { background: #F7F7EA; }
-  .DragOrderer li.byLegRare    { background: #EAF7F7; }
-  .DragOrderer .stone          { background: #F2F7ED; }
-  .Artifacts li                { background: #E9E9E9; }
-  .ordering  h4                { margin-bottom: 0.25rem; }
+  .DragOrderer li.byLegendary   { background: #FFFFC4; }
+  .DragOrderer li.byEpic        { background: #F7DAF7; }
+  .DragOrderer li.byRare        { background: #C0FFFF; }
+  .DragOrderer li.byRarity      { background: #E3FCF8; }
+  .DragOrderer li.byNonLegend   { background: #E3FCF8; }
+  .DragOrderer li.byUncommon    { background: #E3FCF8; }
+  .DragOrderer li.byCommonArt   { background: #E9E9E9; }
+  .DragOrderer li.byArtifact    { background: #E3FCF8; }
+  .DragOrderer li.byFamily      { background: #EAF7D9; }
+  .DragOrderer li.byType        { background: #E9E9E9; }
+  .DragOrderer li.byLevel       { background: #F7F7D9; }
+  .DragOrderer li.byStoningFam  { background: #F3ECE8; }
+  .DragOrderer li.byStoningTier { background: #F3ECE8; }
+  .DragOrderer li.byStoningF1   { background: #F3ECE8; }
+  .DragOrderer li.byStoningF2   { background: #F3ECE8; }
+  .DragOrderer li.byStoningF3   { background: #F3ECE8; }
+  .DragOrderer li.byStoningT1   { background: #F3ECE8; }
+  .DragOrderer li.byStoningT2   { background: #F3ECE8; }
+  .DragOrderer li.byStoningT3   { background: #F3ECE8; }
+  .DragOrderer li.byStone       { background: #F2F7ED; }
+  .DragOrderer li.byFragment    { background: #F2F7ED; }
+  .DragOrderer li.byAnyStone    { background: #F2F7ED; }
+  .DragOrderer li.byIngredient  { background: #F2F7ED; }
+  .DragOrderer li.byEpicRare    { background: #F7EAF7; }
+  .DragOrderer li.byLegEpic     { background: #F7F7EA; }
+  .DragOrderer li.byLegRare     { background: #EAF7F7; }
+  .DragOrderer .stone           { background: #F2F7ED; }
+  .Artifacts li                 { background: #E9E9E9; }
+  .ordering  h4                 { margin-bottom: 0.25rem; }
 
   img.GlowingEffect {
     height: 140%;
